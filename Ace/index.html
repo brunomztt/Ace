@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link href="https://fonts.cdnfonts.com/css/valorant" rel="stylesheet">
+    <style>
+        @import url('https://fonts.cdnfonts.com/css/valorant');
+    </style>
+                
+
+    <!-- CDN do GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+
+    <!-- CDN do CustomEase -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/CustomEase.min.js"></script>
+</head>
+<body>
+    <div class="hero">
+        <div class="progress-bar">
+            <p>loading</p>
+            <p>/<span id="counter">0</span></p>
+        </div>
+        <div class="video-container">
+            <video autoplay loop muted playsinline>
+            <source src="/video.mp4" type="video/mp4" />
+            </video>
+        </div>
+        <nav>
+            <p>&#9679;</p>
+            <p>&#9679;</p>
+        </nav>
+
+        <footer>
+            <p>Profile</p>
+            <p>Agents</p>
+            <p>weapons</p>
+            <p>ranking</p>
+            <p>news</p>
+        </footer>
+
+        <div class="header">
+            <h1><span>Combat enemies</span></h1>
+            <h1><span>in</span></h1>
+            <h1><span id="valorant">valorant</span></h1>
+            <p><span id="start">( play the tutorial )</span></p>
+        </div>
+    </div>
+
+    <div class="logo">
+        <div class="char"><img src="logo.png" alt="Logo" class="logo-image"></div>
+        <div class="char-container">
+            <div class="char anim-out"><h1>A</h1></div>
+            <div class="char anim-out"><h1>c</h1></div>
+            <div class="char anim-out"><h1>e</h1></div>
+        </div>
+    </div>
+    
+
+    <!-- Incluindo o script JS -->
+    <script src="script.js"></script>
+</body>
+</html>
