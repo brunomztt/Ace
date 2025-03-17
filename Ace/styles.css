@@ -5,17 +5,17 @@
 }
 
 html, body {
-    height: 100%; /* Garantir que o body e o html tenham altura 100% */
-    overflow-x: hidden; /* Evita rolagem horizontal */
-    overflow-y: hidden; /* Evita rolagem vertical */
+    height: 100%; 
+    overflow-x: hidden; 
+    overflow-y: hidden; 
 }
 
 body {
-    font-family: "Saans TRIAL", sans-serif; /* Fonte padrão caso "Saans TRIAL" não carregue */
+    font-family: 'Rajdhani', sans-serif; 
     background-color: #000000ee;
 }
 #valorant {
-    font-family: 'Valorant', sans-serif; /* Aplique a fonte do Valorant aqui */
+    font-family: 'Valorant', sans-serif; 
 }
 
 p {
@@ -26,15 +26,16 @@ p {
     -moz-osx-font-smoothing: grayscale;
 }
 .header h1:not(#valorant) {
-    font-size: 3vw;  /* Ajuste o tamanho da fonte para "Combat enemies" e "in" */
+    font-size: 3.3vw; 
     color: #fff;
+    text-shadow: 10px 2px 8px rgba(0, 0, 0, 0.5); 
 }
 
-/* Para a palavra "valorant" */
+
 #valorant {
     font-size: 7vw;
-    color: #df4c4c; /* Vermelho */
-    text-shadow: 10px 10px 10px rgba(0, 0, 0, 0.5); /* Sombra preta para dar contraste */
+    color: #df4c4c; 
+    text-shadow: 10px 10px 10px rgba(0, 0, 0, 0.5); 
 }
 
 .hero {
@@ -44,12 +45,12 @@ p {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    clip-path: polygon(0% 45%, 0% 45%, 0% 55%, 0% 55%); /* Valor inicial */
+    clip-path: polygon(0% 45%, 0% 45%, 0% 55%, 0% 55%); 
     will-change: clip-path;
 }
 
 .hero, .video-container {
-    height: 100vh; /* Usando 100vh ao invés de 100svh */
+    height: 100vh; 
 }
 
 .progress-bar {
@@ -88,12 +89,12 @@ p {
     min-width: 100%;
     min-height: 100%;
     object-fit: cover;
-    opacity: 0.85;
+    opacity: 0.70;
 }
 
 nav, footer {
     width: 100vw;
-    padding: 1.5em;
+    padding: 1em;
     justify-content: space-between;
     color: #fff;
 }
@@ -101,16 +102,32 @@ nav{
     display: flex;
 }
 footer p {
-    font-size: 1.1em; /* Aumentando a fonte para o texto do footer */
-    line-height: 1.2;  /* Ajustando a altura da linha para melhor espaçamento */
+    opacity: 0;
+    transform: translateY(50px);
+    font-size: 1.7em; 
+    line-height: 1.2;  
+    text-shadow: 10px 2px 8px rgba(0, 0, 0, 0.5); 
+    cursor: pointer;
+    position: relative; 
+    transition: color 0.3s ease; 
+    max-width: 4em;
 }
-
+footer p::after {
+    content: ''; 
+    position: absolute;
+    left: 0;
+    bottom: 1px; 
+    width: 0; 
+    height: 2.5px; 
+    background-color: #df4c4c; 
+    transition: width 0.3s ease; 
+}
+footer p:hover::after {
+    width: 100%;
+}
 footer {
     justify-content: center;
-    gap: 2em;
-    text-shadow: 
-        -1px -1px 2px rgba(0, 0, 0, 0.6), /* Sombra preta suave em direção oposta */
-        0 0 20px rgba(0, 0, 0, 0.8); /* Brilho difuso e suave ao redor */
+    font-family: 'Rajdhani', sans-serif;
         
 }
 
@@ -130,27 +147,14 @@ footer {
     width: 100%;
     text-align: center;
     text-transform: uppercase;
-    font-weight: bold; /* Engrossa a fonte */
+    font-weight: bold; 
 }
 
-.header p {
-    margin-top: 1em;
-    color: #ffbb00;
+.header button {
+    color: #ffffff;
     line-height: 0.85;
+    opacity: 0;
     
-}
-
-.coordinates {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    transform: translateY(-50%);
-    width: 100vw;
-    padding: 1.5em;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: #ffbb00;
 }
 
 .logo {
@@ -161,22 +165,22 @@ footer {
     transform: translate(-50%, -50%);
     color: #fff;
     z-index: 9999;
-    align-items: center; /* Centraliza horizontalmente */
+    align-items: center;
 
 }
 .char.anim-out{
-    margin-top: 10px; /* Dá um pequeno espaço entre a logo e a palavra "Ace" */
+    margin-top: 10px; 
 }
 .char-container {
-    display: flex; /* Faz com que as letras fiquem lado a lado */
-    margin-left: -50%; /* Ajuste para centralizar a palavra ACE */
+    display: flex; 
+    margin-left: -50%; 
     margin-top: -60%;
-    transform: translateX(50%); /* Garantir que a palavra "ACE" fique centralizada */
+    transform: translateX(50%); 
     
 }
 .logo-image {
-    height: auto; /* Mantém a proporção da imagem */
-    object-fit: contain; /* Garante que a imagem se ajuste bem sem distorções */
+    height: auto; 
+    object-fit: contain; 
 
 }
 
@@ -186,15 +190,15 @@ footer {
     margin-bottom: 200px;
     color: white;
     display: block;
-    height: auto; /* Mantém a proporção da imagem */
-    width: 3.5em; /* Define um tamanho fixo ou ajustável */
+    height: auto; 
+    width: 3.5em; 
 }
 
-.header h1, .header p, .coordinates p, .char.anim-out {
+.header h1, .header p, .char.anim-out {
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
 }
 
-.header span, .coordinates p span {
+.header span, button{
     position: relative;
     display: block;
     transform: translateY(100%);
@@ -211,8 +215,93 @@ footer {
     .progress-bar p:nth-child(1) {
         display: none;
     }
-
-    .header h1 {
-        font-size: 10vw;
+    #valorant{ 
+    font-size: 14vw;
+    }
+    .header h1:not(#valorant){
+    font-size: 9vw;
     }
 }
+#unsupported-message {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: black;
+    color: white;
+    font-size: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    opacity: 0;
+}
+
+@media (max-width: 118px) {
+    body > *:not(#unsupported-message) { 
+        display: none;
+    }
+    
+    #unsupported-message {
+        display: flex;
+        opacity: 1; 
+    }
+}
+@media (max-height: 437px) {
+    body > *:not(#unsupported-message) { 
+        display: none;
+    }
+    
+    #unsupported-message {
+        display: flex;
+        opacity: 1; 
+    }
+}
+
+button {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px;
+    text-transform: uppercase;
+    color: #ff4655; 
+    background: transparent;
+    border: 1px solid #ffffff;
+    padding: 13px 30px;
+    border-radius: 3.3px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    letter-spacing: 2px;
+    text-shadow: 10px 2px 8px rgba(0, 0, 0, 0.5); 
+
+}
+button .icon {
+    margin-right: -0.50em;
+    width: 8px;
+    display: flex;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    will-change: transform; 
+}
+button:hover span {  
+    opacity: 0;  
+    transition: opacity 0.3s ease;  
+}
+
+button:hover {
+    background: #df4c4c;
+    border-color: #df4c4c;
+}
+button {
+    display: flex; 
+    align-items: center;
+
+}
+button .icon svg {
+    transition: transform 0.3s;
+    color: #ffffff;
+  }
+  button:hover .icon svg {
+    transform: translateX(-1.5em) scale(4);
+  }

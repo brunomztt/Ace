@@ -3,35 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Acet</title>
     <link rel="stylesheet" href="/styles.css">
     <link href="https://fonts.cdnfonts.com/css/valorant" rel="stylesheet">
     <style>
         @import url('https://fonts.cdnfonts.com/css/valorant');
-    </style>
-                
-
-    <!-- CDN do GSAP -->
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap');
+    </style>             
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
-
-    <!-- CDN do CustomEase -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/CustomEase.min.js"></script>
 </head>
+
 <body>
+    <div id="unsupported-message">
+        <p>Seu dispositivo não é suportado.</p>
+    </div>
+
     <div class="hero">
         <div class="progress-bar">
             <p>loading</p>
             <p>/<span id="counter">0</span></p>
         </div>
+
+
         <div class="video-container">
             <video autoplay loop muted playsinline>
             <source src="/video.mp4" type="video/mp4" />
             </video>
         </div>
+
+
         <nav>
             <p>&#9679;</p>
             <p>&#9679;</p>
         </nav>
+
 
         <footer>
             <p>Profile</p>
@@ -41,11 +47,26 @@
             <p>news</p>
         </footer>
 
+
         <div class="header">
             <h1><span>Combat enemies</span></h1>
             <h1><span>in</span></h1>
             <h1><span id="valorant">valorant</span></h1>
-            <p><span id="start">( play the tutorial )</span></p>
+            <button id="start"><span>PLAY</span>
+                <div class="icon"> 
+                    <svg
+                      height="10"
+                      width="14"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path d="M0 0h24v24H0z" fill="none"></path>
+                      <path
+                        d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z"
+                        fill="currentColor"
+                      ></path>
+                    </svg>
+            </button>
         </div>
     </div>
 
@@ -57,9 +78,7 @@
             <div class="char anim-out"><h1>e</h1></div>
         </div>
     </div>
-    
 
-    <!-- Incluindo o script JS -->
-    <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>

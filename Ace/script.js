@@ -1,14 +1,7 @@
-
-// Registrando o plugin CustomEase
 gsap.registerPlugin(CustomEase);
-
-// Criando o 'CustomEase'
 const customEase = CustomEase.create("custom", ".87,0,.13,1");
-
-// Contador
 const counter = document.getElementById("counter");
 
-// Animando o vídeo
 gsap.set(".video-container", {
     scale: 0,
     rotation: -20,
@@ -20,6 +13,7 @@ gsap.to(".hero", {
     ease: customEase,
     delay: 1,
 });
+
 gsap.to(".hero", {
     clipPath: "polygon(0% 45%, 100% 45%, 100% 55%, 0% 55%)",
     duration: 2,
@@ -27,10 +21,9 @@ gsap.to(".hero", {
     delay: 3,
 
     onStart: () => {
-        // Animação da barra de progresso
         gsap.to(".progress-bar", {
-            width: "100vw",  // Isso faz a largura da barra de progresso aumentar para 100% da largura da tela
-            duration: 2,     // A animação dura 2 segundos
+            width: "100vw",
+            duration: 2,     
             ease: customEase
         });
         gsap.to(counter, {
@@ -64,11 +57,11 @@ gsap.to(".hero", {
         });
 
         gsap.to(".logo", {
-            top: "0%", // Mover a logo até o topo da página
-            left: "50%", // Manter a centralização horizontal
-            transform: "translate(-50%, 0%)", // Certifique-se de centralizar verticalmente
-            opacity: 1, // Tornar a logo visível
-            scale: 1, // Garantir que o tamanho não mude
+            top: "0%", 
+            left: "50%", 
+            transform: "translate(-50%, 0%)", 
+            opacity: 1, 
+            scale: 1, 
             duration: 1.25,
             ease: customEase,
 
@@ -90,13 +83,50 @@ gsap.to(".header span:not(#start)", {
     stagger: 0.070,
     ease: "power3.out",
     delay: 5.75,
-
 });
 
-gsap.to("#start", {
+gsap.to("button", {
+    opacity: 1,
+    duration: 2,
+    ease: "power3.out",
+    delay: 6.20, 
+});
+
+document.getElementById("start").addEventListener("click", function() {
+    gsap.to([".header", "footer", "#start"], { 
+        duration: 1,
+        opacity: 0,
+        y: -50, 
+        ease: "power2.out",
+        onComplete: function() {
+            document.querySelector(".header").style.visibility = "hidden";
+            document.querySelector("footer").style.visibility = "hidden"; 
+            document.querySelector("#start").style.visibility = "hidden";
+        }
+    });
+});
+
+gsap.to("footer p", {
+    opacity: 1,
     y: "0%",
     duration: 1,
     ease: "power3.out",
-    delay: 7.75,
+    delay: 5.75,
+});
+document.querySelectorAll("footer p").forEach(p => {
+    p.addEventListener("mouseenter", () => {
+        gsap.to(p, {
+            scale: 1.1,
+            color: "#df4c4c",
+            duration: 0.1,
+        });
+    });
 
+    p.addEventListener("mouseleave", () => {
+        gsap.to(p, {
+            scale: 1,
+            color: "#fff",
+            duration: 0.3,
+        });
+    });
 });
