@@ -93,8 +93,6 @@ gsap.to("button", {
 });
 
 document.getElementById("start").addEventListener("click", function() {
-    console.log("Botão PLAY clicado!"); 
-
     gsap.to([".header", "footer", "#start"], { 
         duration: 1,
         opacity: 0,
@@ -115,6 +113,12 @@ gsap.to(".container-login", {
     visibility: "visible",
     ease: "power2.out",
 });
+
+if (window.innerWidth < 650) {
+    document.querySelector(".logo-image").style.display = "none";
+    document.querySelector(".logo").style.display = "none";
+
+}
 
 });
 

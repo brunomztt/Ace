@@ -5,16 +5,21 @@
 }
 
 html, body {
-    height: 100%; 
+    height: 100%;
+    min-height: 100vh; 
     overflow-x: hidden; 
-    overflow-y: hidden;
-     
+    overflow-y: hidden; 
+}
+
+.video-container video {
+    pointer-events: none;
 }
 
 body {
     font-family: 'Rajdhani', sans-serif; 
     background-color: #000000ee;
 }
+
 #valorant {
     font-family: 'Valorant', sans-serif; 
 }
@@ -102,6 +107,7 @@ nav, footer {
 nav{
     display: flex;
 }
+
 footer p {
     opacity: 0;
     transform: translateY(50px);
@@ -114,7 +120,6 @@ footer p {
     max-width: 4em;
 }
 
-
 footer p::after {
     content: ''; 
     position: absolute;
@@ -125,13 +130,14 @@ footer p::after {
     background-color: #df4c4c; 
     transition: width 0.3s ease; 
 }
+
 footer p:hover::after {
     width: 100%;
 }
+
 footer {
     justify-content: center;
-    font-family: 'Rajdhani', sans-serif;
-        
+    font-family: 'Rajdhani', sans-serif;      
 }
 
 .header {
@@ -171,9 +177,11 @@ footer {
     align-items: center;
 
 }
+
 .char.anim-out{
     margin-top: 10px; 
 }
+
 .char-container {
     display: flex; 
     margin-left: -50%; 
@@ -181,6 +189,7 @@ footer {
     transform: translateX(50%); 
     
 }
+
 .logo-image {
     height: auto; 
     object-fit: contain; 
@@ -209,12 +218,9 @@ footer {
 }
 
 @media(max-width: 900px) {
-
-
     .progress-bar {
         justify-content: flex-end;
     }
-
     .progress-bar p:nth-child(1) {
         display: none;
     }
@@ -225,6 +231,7 @@ footer {
     font-size: 9vw;
     }
 }
+
 #unsupported-message {
     display: none;
     position: fixed;
@@ -309,13 +316,15 @@ footer {
     transform: translateX(-1.5em) scale(4);
   }
 
+/* Formulário de Login */
+
 .container-login{
     position: absolute;
-    width: 60vw;
-    height: 35vw;
+    max-width: 90vw;
+    width: 100vh;
+    height: 60vh;
     background-color: white;
-    border-radius: 30px;
-    box-shadow: 0 0 30px rgba(0, 0, 0, .2);
+    border-radius: 35px;
     overflow: hidden;
     opacity: 0;
     top: 50%;
@@ -348,14 +357,17 @@ form{
     width: 100%;
 
 }
+
 .container-login h1{
     font-size: 36px;
     margin: -10px 0;
 }
+
 .input-box{
     position: relative;
     margin: 30px;
 }
+
 .input-box input{
     width: 100%;
     padding: 13px 50px 13px 20px;
@@ -393,8 +405,8 @@ form{
 }
 
 .btn {
-    width: 100%;
-    height: 48px;
+    width: 85%;
+    height: 50px;
     background: #000000;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, .1);
@@ -502,11 +514,15 @@ form{
 }
 
 @media screen and (max-width: 650px){
+    .logo-image, .logo{
+        opacity: 0;
+        display: none;
+        pointer-events: none;
+    }
+
     .container-login{
-        height: 150vw;
-        width: 90vw;
-        
-        
+        width: calc(95vw); 
+        height: calc(90vh); 
     }
     .form-box{
        width: 100%; 
@@ -514,13 +530,11 @@ form{
        bottom: 0;
 
     }
-
     .container-login.active .form-box{
         right: 0;
-        bottom: 50%;
+        bottom: 30%;
 
     }
-
     .toggle-box::before{
         width: 100%;
         height: 300%;
@@ -528,44 +542,43 @@ form{
         top: -270%;
         border-radius: 20vw;
     }
-
     .container-login.active .toggle-box::before{
         top: 70%;
         left: 0;
     }
-
     .toggle-painel.toggle-left{
         top: 0;
     }
-
     .container-login.active .toggle-painel.toggle-left{
         left: 0;
         top: -30%;
     }
-
     .toggle-painel{
         width: 100%;
         height: 30%;
     }
     .toggle-painel.toggle-right{
         right: 0;
-        bottom: -30%;
-        
+        bottom: -30%;    
     }
-
     .container-login.active .toggle-painel.toggle-right{
         bottom: 0;
-
     }
 }
 
 @media screen and (max-width: 400px) {
-    .form-box{
-        padding: 20px;
+    .form-box.login, .form-box.register{
+        padding: 10px;
     }
 
     .toggle-painel h1{
         font-size: 30px;
+    }
+    .social-icons{
+        margin-top: -10px;
+    }
+    .input-box input{
+        margin-bottom: -25px;
     }
     
     
