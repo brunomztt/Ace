@@ -93,18 +93,31 @@ gsap.to("button", {
 });
 
 document.getElementById("start").addEventListener("click", function() {
+    console.log("Botão PLAY clicado!"); 
+
     gsap.to([".header", "footer", "#start"], { 
         duration: 1,
         opacity: 0,
         y: -50, 
         ease: "power2.out",
         onComplete: function() {
-            document.querySelector(".header").style.visibility = "hidden";
-            document.querySelector("footer").style.visibility = "hidden"; 
-            document.querySelector("#start").style.visibility = "hidden";
+            document.querySelector(".header").style.display = "none";
+            document.querySelector("footer").style.display = "none"; 
+            document.querySelector("#start").style.display = "none";
         }
     });
+
+document.querySelector(".container-login").style.display = "block";
+
+gsap.to(".container-login", { 
+    duration: 3,
+    opacity: 1, 
+    visibility: "visible",
+    ease: "power2.out",
 });
+
+});
+
 
 gsap.to("footer p", {
     opacity: 1,
@@ -129,4 +142,16 @@ document.querySelectorAll("footer p").forEach(p => {
             duration: 0.3,
         });
     });
+});
+
+const container = document.querySelector('.container-login');
+const registerBtn = document.querySelector('.register-btn');
+const loginBtn = document.querySelector('.login-btn');
+
+registerBtn.addEventListener('click', () => {
+    container.classList.add('active');
+});
+
+loginBtn.addEventListener('click', () => {
+    container.classList.remove('active'); 
 });

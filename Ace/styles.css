@@ -7,7 +7,8 @@
 html, body {
     height: 100%; 
     overflow-x: hidden; 
-    overflow-y: hidden; 
+    overflow-y: hidden;
+     
 }
 
 body {
@@ -112,6 +113,8 @@ footer p {
     transition: color 0.3s ease; 
     max-width: 4em;
 }
+
+
 footer p::after {
     content: ''; 
     position: absolute;
@@ -198,7 +201,7 @@ footer {
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
 }
 
-.header span, button{
+.header span, .header button{
     position: relative;
     display: block;
     transform: translateY(100%);
@@ -260,11 +263,11 @@ footer {
     }
 }
 
-button {
+.header button {
     font-family: 'Rajdhani', sans-serif;
     font-size: 18px;
     text-transform: uppercase;
-    color: #ff4655; 
+    color: #ffffff; 
     background: transparent;
     border: 1px solid #ffffff;
     padding: 13px 30px;
@@ -275,7 +278,7 @@ button {
     text-shadow: 10px 2px 8px rgba(0, 0, 0, 0.5); 
 
 }
-button .icon {
+.header button .icon {
     margin-right: -0.50em;
     width: 8px;
     display: flex;
@@ -284,24 +287,286 @@ button .icon {
     align-items: center;
     will-change: transform; 
 }
-button:hover span {  
+.header button:hover span {  
     opacity: 0;  
     transition: opacity 0.3s ease;  
 }
 
-button:hover {
+.header button:hover {
     background: #df4c4c;
     border-color: #df4c4c;
 }
-button {
+.header button {
     display: flex; 
     align-items: center;
 
 }
-button .icon svg {
+.header button .icon svg {
     transition: transform 0.3s;
     color: #ffffff;
   }
-  button:hover .icon svg {
+  .header button:hover .icon svg {
     transform: translateX(-1.5em) scale(4);
   }
+
+.container-login{
+    position: absolute;
+    width: 60vw;
+    height: 35vw;
+    background-color: white;
+    border-radius: 30px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, .2);
+    overflow: hidden;
+    opacity: 0;
+    top: 50%;
+    left: 50%;
+    display: none;
+    transform: translate(-50%, -50%);
+}
+
+.form-box{
+    position: absolute;
+    right: 0;
+    width: 50%;
+    height: 100%;
+    background-color: rgb(255, 255, 255);
+    display: flex;
+    align-items: center;
+    color: #333;
+    text-align: center;
+    padding: 40px;
+    z-index: 1;
+    transition: .6s ease-in-out 1.2s, visibility 0s 1s;
+}
+
+.container-login.active .form-box{
+    right: 50%;
+
+}
+
+form{
+    width: 100%;
+
+}
+.container-login h1{
+    font-size: 36px;
+    margin: -10px 0;
+}
+.input-box{
+    position: relative;
+    margin: 30px;
+}
+.input-box input{
+    width: 100%;
+    padding: 13px 50px 13px 20px;
+    background-color: #eee;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    color: #333;
+    font-weight: 500;
+}
+
+.input-box input::placeholder{
+    color: #888;
+    font-weight: 400;
+}
+
+.input-box i {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: #888;
+}
+
+.forgot-link{
+    margin: -15px 0 15px;
+}
+
+.forgot-link a{
+    font-size: 14.5px;
+    color: #333;
+    text-decoration: none;
+}
+
+.btn {
+    width: 100%;
+    height: 48px;
+    background: #000000;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, .1);
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: #fff;
+    font-weight: 600;
+}
+
+.container-login p{
+    font-size: 14.5px;
+    margin: 15px 0;
+
+}
+.social-icons{
+    display: flex;
+    justify-content: center;
+
+}
+.social-icons a{
+    display: inline-flex;
+    padding: 10px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    font-size: 24px;
+    color: #333;
+    text-decoration: none;
+    margin: 0 8px;
+}
+.form-box.register{
+    visibility: hidden;
+
+}
+
+.container-login.active .form-box.register {
+    visibility: visible;
+}
+
+.toggle-box {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.toggle-box::before{
+    content: '';
+    position: absolute;
+    width: 300%;
+    height: 100%;
+    left: -250%;
+    border-radius: 150px;
+    background: #000000;
+    z-index: 2;
+    transition: 1.8s ease-in-out;
+}
+
+.container-login.active .toggle-box::before{
+    left: 50%;
+
+}
+
+.toggle-painel.toggle-left{
+    left: 0;
+    transition-delay: 1.2s;
+}
+
+.container-login.active .toggle-painel.toggle-left{
+    left: -50%;
+    transition-delay: .6s;
+}
+
+.toggle-painel{
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #e6e6e6;
+    transition: .6s ease-in-out;
+}
+.toggle-painel.toggle-right{
+    right: -50%;
+    transition-delay: .6s;
+}
+
+.container-login.active .toggle-painel.toggle-right{
+    right: 0;
+    transition-delay: 1.2s;
+}
+
+.toggle-painel p{
+    margin-bottom: 20px;
+}
+
+.toggle-painel .btn{
+    width: 160px;
+    height: 46px;
+    background: transparent;
+    border: 2px solid #fff;
+    box-shadow: none;
+}
+
+@media screen and (max-width: 650px){
+    .container-login{
+        height: 150vw;
+        width: 90vw;
+        
+        
+    }
+    .form-box{
+       width: 100%; 
+       height: 70%;
+       bottom: 0;
+
+    }
+
+    .container-login.active .form-box{
+        right: 0;
+        bottom: 50%;
+
+    }
+
+    .toggle-box::before{
+        width: 100%;
+        height: 300%;
+        left: 0;
+        top: -270%;
+        border-radius: 20vw;
+    }
+
+    .container-login.active .toggle-box::before{
+        top: 70%;
+        left: 0;
+    }
+
+    .toggle-painel.toggle-left{
+        top: 0;
+    }
+
+    .container-login.active .toggle-painel.toggle-left{
+        left: 0;
+        top: -30%;
+    }
+
+    .toggle-painel{
+        width: 100%;
+        height: 30%;
+    }
+    .toggle-painel.toggle-right{
+        right: 0;
+        bottom: -30%;
+        
+    }
+
+    .container-login.active .toggle-painel.toggle-right{
+        bottom: 0;
+
+    }
+}
+
+@media screen and (max-width: 400px) {
+    .form-box{
+        padding: 20px;
+    }
+
+    .toggle-painel h1{
+        font-size: 30px;
+    }
+    
+    
+}
