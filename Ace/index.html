@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ace</title>
-    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.cdnfonts.com/css/valorant" rel="stylesheet">
     <style>
         @import url('https://fonts.cdnfonts.com/css/valorant');
@@ -109,11 +109,23 @@
                     <i class='bx bxs-envelope'></i>
                 </div>
                 <div class="input-box">
-                    <input type="text" placeholder="CPF" required>
+                    <input
+                     type="text" 
+                     placeholder="CPF" 
+                     required
+                     pattern="\d{3}\.\d{3}\.\d{3}-\d{2}"
+                     maxlength="14"
+                     title="O CPF deve estar no formato XXX.XXX.XXX-XX, onde X é um número.">
                     <i class='bx bx-body'></i>
                 </div>
                 <div class="input-box">
-                    <input type="password" placeholder="Senha" required>
+                    <input
+                     type="password"
+                     placeholder="Senha"
+                     pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}" 
+                     title="A senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma letra minúscula, um número e um caractere especial."
+                     required
+                     >
                     <i class='bx bxs-lock-alt'></i>
                 </div>
                 <div class="input-box">
