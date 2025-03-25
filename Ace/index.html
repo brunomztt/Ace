@@ -74,44 +74,46 @@
 
     <div class="container-login">
         <div class="form-box login">
-            <form action="">
+            <form action="" id="login-form">
                 <h1>Login</h1>
                 <div class="input-box">
-                    <input type="text" placeholder="Nome de usuário" required>
+                    <input type="text" class="username-field" placeholder="Nome de usuário" required>
                     <i class='bx bxs-user'></i>
                 </div>
                 <div class="input-box">
-                    <input type="password" placeholder="Senha" required>
+                    <input type="password" class="pwd-field" placeholder="Senha" required>
                     <i class='bx bxs-lock-alt'></i>
                 </div>
                 <div class="forgot-link">
-                <a href="#">Esqueceu a senha?</a>
+                    <a href="#">Esqueceu a senha?</a>
                 </div>
-                <button type="submit" class="btn">Login</button>
+                <button type="submit" class="btn btn-submit">Login</button>
                 <p>ou logue-se com</p>
                 <div class="social-icons">
-                    <a href="#"><i class='bx bxl-google-plus' ></i></a>
-                    <a href="#"><i class='bx bxl-facebook' ></i></a>
-                    <a href="#"><i class='bx bxl-github' ></i></a>
-                    <a href="#"><i class='bx bxl-linkedin-square' ></i></a>
+                    <a href="#"><i class='bx bxl-google-plus'></i></a>
+                    <a href="#"><i class='bx bxl-facebook'></i></a>
+                    <a href="#"><i class='bx bxl-github'></i></a>
+                    <a href="#"><i class='bx bxl-linkedin-square'></i></a>
                 </div>
             </form>
         </div>
         <div class="form-box register">
-            <form action="">
+            <form action="" id="register-form">
                 <h1>Cadastro</h1>
                 <div class="input-box">
-                    <input type="text" placeholder="Nome de usuário" required>
+                    <input type="text" class="username-field" id="reg-username" placeholder="Nome de usuário" required>
                     <i class='bx bxs-user'></i>
                 </div>
                 <div class="input-box">
-                    <input type="email" placeholder="Email" required>
+                    <input type="email" class="email-field" id="reg-email" placeholder="Email" required>
                     <i class='bx bxs-envelope'></i>
                 </div>
                 <div class="input-box">
                     <input
                      type="text" 
-                     placeholder="CPF" 
+                     class="cpf-field"
+                     id="reg-cpf"
+                     placeholder="CPF"
                      required
                      pattern="\d{3}\.\d{3}\.\d{3}-\d{2}"
                      maxlength="14"
@@ -121,6 +123,8 @@
                 <div class="input-box">
                     <input
                      type="password"
+                     class="pwd-field"
+                     id="reg-pwd"
                      placeholder="Senha"
                      pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}" 
                      title="A senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma letra minúscula, um número e um caractere especial."
@@ -129,19 +133,19 @@
                     <i class='bx bxs-lock-alt'></i>
                 </div>
                 <div class="input-box">
-                    <input type="password" placeholder="Confirme sua senha" required>
+                    <input type="password" class="pwd-confirm" id="reg-pwd-confirm" placeholder="Confirme sua senha" required>
                     <i class='bx bxs-lock-alt'></i>
                 </div>
                 <div class="forgot-link">
-                <a href="#">Esqueceu a senha?</a>
+                    <a href="#">Esqueceu a senha?</a>
                 </div>
-                <button type="submit" class="btn">Cadastrar</button>
+                <button type="submit" class="btn btn-submit">Cadastrar</button>
                 <p>ou cadastre-se com</p>
                 <div class="social-icons">
-                    <a href="#"><i class='bx bxl-google-plus' ></i></a>
-                    <a href="#"><i class='bx bxl-facebook' ></i></a>
-                    <a href="#"><i class='bx bxl-github' ></i></a>
-                    <a href="#"><i class='bx bxl-linkedin-square' ></i></a>
+                    <a href="#"><i class='bx bxl-google-plus'></i></a>
+                    <a href="#"><i class='bx bxl-facebook'></i></a>
+                    <a href="#"><i class='bx bxl-github'></i></a>
+                    <a href="#"><i class='bx bxl-linkedin-square'></i></a>
                 </div>
             </form>
         </div>
