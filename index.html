@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ace</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.cdnfonts.com/css/valorant" rel="stylesheet">
+    <style>
+        @import url('https://fonts.cdnfonts.com/css/valorant');
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap');
+    </style>             
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/CustomEase.min.js"></script>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+
+<body>
+    <div id="unsupported-message">
+        <p>Seu dispositivo não é suportado.</p>
+    </div>
+
+    <div class="hero">
+        <div class="progress-bar">
+            <p>loading</p>
+            <p>/<span id="counter">0</span></p>
+        </div>
+
+
+        <div class="video-container">
+            <video autoplay loop muted playsinline disablePictureInPicture
+                controlsList="nodownload nofullscreen noplaybackrate">
+                <source src="/video.mp4" type="video/mp4" />
+            </video>
+        
+        </div>
+
+
+        <nav>
+            <p>&#9679;</p>
+            <p>&#9679;</p>
+        </nav>
+
+
+        <footer>
+            <p>Profile</p>
+            <p>Agents</p>
+            <p>weapons</p>
+            <p>ranking</p>
+            <p>news</p>
+        </footer>
+
+        <div class="header">
+            <h1><span>Combat enemies</span></h1>
+            <h1><span>in</span></h1>
+            <h1><span id="valorant">valorant</span></h1>
+            <button id="start"><span>PLAY</span>
+                <div class="icon"> 
+                    <svg
+                      height="10"
+                      width="14"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path d="M0 0h24v24H0z" fill="none"></path>
+                      <path
+                        d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z"
+                        fill="currentColor"
+                      ></path>
+                    </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="container-login">
+        <div class="form-box login">
+            <form action="" id="login-form">
+                <h1>Login</h1>
+                <div class="input-box">
+                    <input type="text" class="username-field" placeholder="Nome de usuário" required>
+                    <i class='bx bxs-user'></i>
+                </div>
+                <div class="input-box">
+                    <input type="password" class="pwd-field" placeholder="Senha" required>
+                    <i class='bx bxs-lock-alt'></i>
+                </div>
+                <div class="forgot-link">
+                    <a href="#">Esqueceu a senha?</a>
+                </div>
+                <button type="submit" class="btn btn-submit">Login</button>
+                <p>ou logue-se com</p>
+                <div class="social-icons">
+                    <a href="#"><i class='bx bxl-google-plus'></i></a>
+                    <a href="#"><i class='bx bxl-facebook'></i></a>
+                    <a href="#"><i class='bx bxl-github'></i></a>
+                    <a href="#"><i class='bx bxl-linkedin-square'></i></a>
+                </div>
+            </form>
+        </div>
+        <div class="form-box register">
+            <form action="" id="register-form">
+                <h1>Cadastro</h1>
+                <div class="input-box">
+                    <input type="text" class="username-field" id="reg-username" placeholder="Nome de usuário" required>
+                    <i class='bx bxs-user'></i>
+                </div>
+                <div class="input-box">
+                    <input type="email" class="email-field" id="reg-email" placeholder="Email" required>
+                    <i class='bx bxs-envelope'></i>
+                </div>
+                <div class="input-box">
+                    <input
+                     type="text" 
+                     class="cpf-field"
+                     id="reg-cpf"
+                     placeholder="CPF"
+                     required
+                     pattern="\d{3}\.\d{3}\.\d{3}-\d{2}"
+                     maxlength="14"
+                     title="O CPF deve estar no formato XXX.XXX.XXX-XX, onde X é um número.">
+                    <i class='bx bx-body'></i>
+                </div>
+                <div class="input-box">
+                    <input
+                     type="password"
+                     class="pwd-field"
+                     id="reg-pwd"
+                     placeholder="Senha"
+                     pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}" 
+                     title="A senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma letra minúscula, um número e um caractere especial."
+                     required
+                     >
+                    <i class='bx bxs-lock-alt'></i>
+                </div>
+                <div class="input-box">
+                    <input type="password" class="pwd-confirm" id="reg-pwd-confirm" placeholder="Confirme sua senha" required>
+                    <i class='bx bxs-lock-alt'></i>
+                </div>
+                <div class="forgot-link">
+                    <a href="#">Esqueceu a senha?</a>
+                </div>
+                <button type="submit" class="btn btn-submit">Cadastrar</button>
+                <p>ou cadastre-se com</p>
+                <div class="social-icons">
+                    <a href="#"><i class='bx bxl-google-plus'></i></a>
+                    <a href="#"><i class='bx bxl-facebook'></i></a>
+                    <a href="#"><i class='bx bxl-github'></i></a>
+                    <a href="#"><i class='bx bxl-linkedin-square'></i></a>
+                </div>
+            </form>
+        </div>
+        <div class="toggle-box">
+            <div class="toggle-painel toggle-left">
+                <h1>Olá, bem-vindo</h1>
+                <p>Não tem uma conta ainda?</p>
+                <button class="btn register-btn">Cadastrar</button>
+            </div>
+            <div class="toggle-painel toggle-right">
+                <h1>Bem-vindo de volta</h1>
+                <p>Já tem uma conta?</p>
+                <button class="btn login-btn">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="logo">
+        <div class="char"><img src="logo.png" alt="Logo" class="logo-image"></div>
+        <div class="char-container">
+            <div class="char anim-out"><h1>A</h1></div>
+            <div class="char anim-out"><h1>c</h1></div>
+            <div class="char anim-out"><h1>e</h1></div>
+        </div>
+    </div>
+
+<script src="script.js"></script>
+</body>
+</html>
