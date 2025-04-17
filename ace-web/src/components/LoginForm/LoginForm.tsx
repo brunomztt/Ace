@@ -60,28 +60,104 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
 
             const passwordInput = document.getElementById('reg-pwd') as HTMLInputElement;
             if (passwordInput) {
-                if (!passwordInput.parentNode?.querySelector('.strength-bar')) {
+                if (!passwordInput.parentNode?.querySelector('.password-feedback')) {
+                    let passwordFeedback = document.createElement('div');
+                    passwordFeedback.className = 'password-feedback';
+                    passwordFeedback.style.marginTop = '5px';
+
                     let strengthBar = document.createElement('div');
                     strengthBar.className = 'strength-bar';
                     strengthBar.innerHTML = `
-            <div style="height:3px; background:#ddd; margin:5px 0">
-              <div style="height:100%; width:0; background:#f00"></div>
-            </div>
-            <div style="font-size:11px; color:#888">Digite uma senha</div>
-          `;
-                    passwordInput.parentNode?.appendChild(strengthBar);
+                        <div style="height:3px; background:#ddd; margin:5px 0">
+                            <div style="height:100%; width:0; background:#f00"></div>
+                        </div>
+                        <div style="font-size:11px; color:#888; margin-bottom:5px">Digite uma senha</div>
+                    `;
+                    passwordFeedback.appendChild(strengthBar);
+
+                    let rulesList = document.createElement('div');
+                    rulesList.className = 'rules-list';
+                    rulesList.style.fontSize = '11px';
+                    rulesList.style.marginTop = '5px';
+                    rulesList.style.display = 'flex';
+                    rulesList.style.flexWrap = 'wrap';
+                    rulesList.style.gap = '5px';
+
+                    const rules = [
+                        { id: 'length', text: 'Mínimo de 8 caracteres' },
+                        { id: 'lowercase', text: 'Pelo menos 1 letra minúscula' },
+                        { id: 'uppercase', text: 'Pelo menos 1 letra maiúscula' },
+                        { id: 'number', text: 'Pelo menos 1 número' },
+                        { id: 'special', text: 'Pelo menos 1 caractere especial' },
+                    ];
+
+                    const leftColumn = document.createElement('div');
+                    leftColumn.style.flex = '1';
+                    leftColumn.style.minWidth = '45%';
+
+                    const rightColumn = document.createElement('div');
+                    rightColumn.style.flex = '1';
+                    rightColumn.style.minWidth = '45%';
+
+                    rules.forEach((rule, index) => {
+                        const ruleElement = document.createElement('div');
+                        ruleElement.className = `rule ${rule.id}`;
+                        ruleElement.style.display = 'flex';
+                        ruleElement.style.alignItems = 'center';
+                        ruleElement.style.marginBottom = '3px';
+                        ruleElement.innerHTML = `
+                            <span class="rule-status" style="font-weight:bold; margin-right:5px; color:#f55;">✕</span>
+                            <span class="rule-text">${rule.text}</span>
+                        `;
+
+                        if (index < 3) {
+                            leftColumn.appendChild(ruleElement);
+                        } else {
+                            rightColumn.appendChild(ruleElement);
+                        }
+                    });
+
+                    rulesList.appendChild(leftColumn);
+                    rulesList.appendChild(rightColumn);
+
+                    passwordFeedback.appendChild(rulesList);
+                    passwordInput.parentNode?.appendChild(passwordFeedback);
 
                     const evaluatePassword = () => {
                         const password = passwordInput.value;
                         const bar = strengthBar.querySelector('div > div') as HTMLDivElement;
                         const text = strengthBar.querySelector('div + div') as HTMLDivElement;
 
+                        const hasLength = password.length >= 8;
+                        const hasLowercase = /[a-z]/.test(password);
+                        const hasUppercase = /[A-Z]/.test(password);
+                        const hasNumber = /\d/.test(password);
+                        const hasSpecial = /[^a-zA-Z0-9]/.test(password);
+
+                        const updateRule = (ruleId: string, passed: boolean) => {
+                            const ruleElement = rulesList.querySelector(
+                                `.rule.${ruleId} .rule-status`
+                            );
+                            if (ruleElement) {
+                                ruleElement.textContent = passed ? '✓' : '✕';
+                                ruleElement.style.color = passed ? '#5c3' : '#f55';
+                            }
+                        };
+
+                        updateRule('length', hasLength);
+                        updateRule('lowercase', hasLowercase);
+                        updateRule('uppercase', hasUppercase);
+                        updateRule('number', hasNumber);
+                        updateRule('special', hasSpecial);
+
+                        rulesList.style.display = 'flex';
+
                         let points = 0;
-                        if (password.length >= 8) points++;
-                        if (/[a-z]/.test(password)) points++;
-                        if (/[A-Z]/.test(password)) points++;
-                        if (/\d/.test(password)) points++;
-                        if (/[^a-zA-Z0-9]/.test(password)) points++;
+                        if (hasLength) points++;
+                        if (hasLowercase) points++;
+                        if (hasUppercase) points++;
+                        if (hasNumber) points++;
+                        if (hasSpecial) points++;
 
                         let percentage = points * 20;
                         let color, message;
