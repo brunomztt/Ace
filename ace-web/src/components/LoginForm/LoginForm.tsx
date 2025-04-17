@@ -3,7 +3,6 @@ import './LoginForm.scss';
 
 const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
     const [isActive, setIsActive] = useState(false);
-
     const setupDone = useRef(false);
 
     const addPasswordToggle = (passwordField: HTMLInputElement) => {
@@ -19,7 +18,7 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
         eyeIcon.style.cursor = 'pointer';
         eyeIcon.style.color = '#888';
         eyeIcon.style.fontSize = '20px';
-        eyeIcon.style.zIndex = '10';
+        eyeIcon.style.zIndex = '20';
 
         passwordField.parentNode?.appendChild(eyeIcon);
 
@@ -31,6 +30,41 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                 passwordField.type = 'password';
                 eyeIcon.className = 'bx bx-hide';
             }
+        });
+    };
+
+    const resetFormValidations = () => {
+        const lengthMsgs = document.querySelectorAll('.length-msg');
+        lengthMsgs.forEach((msg) => {
+            (msg as HTMLElement).style.visibility = 'hidden';
+        });
+
+        const charCounters = document.querySelectorAll('.char-counter');
+        charCounters.forEach((counter) => {
+            (counter as HTMLElement).style.color = '#888';
+        });
+
+        const validationMsgs = document.querySelectorAll('.email-msg, .confirm-msg');
+        validationMsgs.forEach((msg) => {
+            (msg as HTMLElement).style.display = 'none';
+        });
+
+        const strengthBars = document.querySelectorAll('.strength-bar div > div');
+        strengthBars.forEach((bar) => {
+            (bar as HTMLElement).style.width = '0';
+            (bar as HTMLElement).style.background = '#ddd';
+        });
+
+        const strengthTexts = document.querySelectorAll('.strength-bar div + div');
+        strengthTexts.forEach((text) => {
+            (text as HTMLElement).textContent = 'Digite uma senha';
+            (text as HTMLElement).style.color = '#888';
+        });
+
+        const ruleStatuses = document.querySelectorAll('.rule-status');
+        ruleStatuses.forEach((status) => {
+            status.textContent = '✕';
+            (status as HTMLElement).style.color = '#f55';
         });
     };
 
@@ -61,9 +95,13 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
             const passwordInput = document.getElementById('reg-pwd') as HTMLInputElement;
             if (passwordInput) {
                 if (!passwordInput.parentNode?.querySelector('.password-feedback')) {
+                    const inputBox = passwordInput.closest('.input-box');
+
                     let passwordFeedback = document.createElement('div');
                     passwordFeedback.className = 'password-feedback';
-                    passwordFeedback.style.marginTop = '5px';
+                    passwordFeedback.style.position = 'relative';
+                    passwordFeedback.style.zIndex = '10';
+                    passwordFeedback.style.clear = 'both';
 
                     let strengthBar = document.createElement('div');
                     strengthBar.className = 'strength-bar';
@@ -119,9 +157,13 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
 
                     rulesList.appendChild(leftColumn);
                     rulesList.appendChild(rightColumn);
-
                     passwordFeedback.appendChild(rulesList);
-                    passwordInput.parentNode?.appendChild(passwordFeedback);
+
+                    if (inputBox && inputBox.nextSibling) {
+                        inputBox.parentNode?.insertBefore(passwordFeedback, inputBox.nextSibling);
+                    } else {
+                        passwordInput.parentNode?.parentNode?.appendChild(passwordFeedback);
+                    }
 
                     const evaluatePassword = () => {
                         const password = passwordInput.value;
@@ -140,7 +182,7 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                             );
                             if (ruleElement) {
                                 ruleElement.textContent = passed ? '✓' : '✕';
-                                ruleElement.style.color = passed ? '#5c3' : '#f55';
+                                (ruleElement as HTMLElement).style.color = passed ? '#5c3' : '#f55';
                             }
                         };
 
@@ -200,7 +242,13 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                     confirmMsg.style.fontSize = '11px';
                     confirmMsg.style.marginTop = '4px';
                     confirmMsg.style.display = 'none';
-                    confirmPasswordInput.parentNode?.appendChild(confirmMsg);
+
+                    const inputBox = confirmPasswordInput.closest('.input-box');
+                    if (inputBox && inputBox.nextSibling) {
+                        inputBox.parentNode?.insertBefore(confirmMsg, inputBox.nextSibling);
+                    } else {
+                        confirmPasswordInput.parentNode?.appendChild(confirmMsg);
+                    }
 
                     const checkPasswords = () => {
                         const original = passwordInput.value;
@@ -230,7 +278,13 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                     emailMsg.style.fontSize = '11px';
                     emailMsg.style.marginTop = '4px';
                     emailMsg.style.display = 'none';
-                    emailInput.parentNode?.appendChild(emailMsg);
+
+                    const inputBox = emailInput.closest('.input-box');
+                    if (inputBox && inputBox.nextSibling) {
+                        inputBox.parentNode?.insertBefore(emailMsg, inputBox.nextSibling);
+                    } else {
+                        emailInput.parentNode?.appendChild(emailMsg);
+                    }
 
                     const validateEmail = () => {
                         const email = emailInput.value;
@@ -339,43 +393,54 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                 inputField.maxLength = 20;
                 inputField.minLength = 3;
 
-                if (!field.parentNode?.querySelector('.char-counter')) {
+                if (!field.parentNode?.querySelector('.status-container')) {
                     let statusContainer = document.createElement('div');
                     statusContainer.className = 'status-container';
                     statusContainer.style.display = 'flex';
                     statusContainer.style.justifyContent = 'space-between';
                     statusContainer.style.alignItems = 'center';
+                    statusContainer.style.padding = '0 10px';
+                    statusContainer.style.width = '100%';
 
                     let counter = document.createElement('div');
                     counter.className = 'char-counter';
                     counter.style.fontSize = '11px';
                     counter.style.textAlign = 'right';
                     counter.style.color = '#888';
+                    counter.style.position = 'relative';
                     statusContainer.appendChild(counter);
 
                     let lengthMsg = document.createElement('div');
                     lengthMsg.className = 'length-msg';
                     lengthMsg.style.fontSize = '11px';
                     lengthMsg.style.textAlign = 'left';
-                    lengthMsg.style.display = 'none';
+                    lengthMsg.style.visibility = 'hidden';
+                    lengthMsg.style.flexGrow = '1';
+                    lengthMsg.style.paddingLeft = '10px';
+                    statusContainer.style.position = 'relative';
                     statusContainer.appendChild(lengthMsg);
 
-                    field.parentNode?.appendChild(statusContainer);
+                    const inputBox = field.closest('.input-box');
+                    if (inputBox && inputBox.nextSibling) {
+                        inputBox.parentNode?.insertBefore(statusContainer, inputBox.nextSibling);
+                    } else {
+                        field.parentNode?.appendChild(statusContainer);
+                    }
 
                     const updateStatus = () => {
                         counter.textContent = inputField.value.length + '/20';
                         if (inputField.value.length > 0 && inputField.value.length < 3) {
-                            lengthMsg.style.display = 'block';
+                            lengthMsg.style.visibility = 'visible';
                             lengthMsg.textContent = 'Mínimo de 3 caracteres';
                             lengthMsg.style.color = '#f55';
                             counter.style.color = '#f55';
                         } else if (inputField.value.length >= 3) {
-                            lengthMsg.style.display = 'block';
+                            lengthMsg.style.visibility = 'visible';
                             lengthMsg.textContent = 'Tamanho válido';
                             lengthMsg.style.color = '#5c3';
                             counter.style.color = '#888';
                         } else {
-                            lengthMsg.style.display = 'none';
+                            lengthMsg.style.visibility = 'hidden';
                             counter.style.color = '#888';
                         }
                     };
@@ -388,6 +453,17 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
 
         setupValidations();
     }, []);
+
+    const handleToggle = (active: boolean) => {
+        resetFormValidations();
+
+        const allInputs = document.querySelectorAll('input');
+        allInputs.forEach((input) => {
+            input.value = '';
+        });
+
+        setIsActive(active);
+    };
 
     return (
         <div className={`container-login ${isActive ? 'active' : ''}`} ref={ref}>
@@ -489,14 +565,14 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                 <div className="toggle-painel toggle-left">
                     <h1>Olá, bem-vindo</h1>
                     <p>Não tem uma conta ainda?</p>
-                    <button className="btn register-btn" onClick={() => setIsActive(true)}>
+                    <button className="btn register-btn" onClick={() => handleToggle(true)}>
                         Cadastrar
                     </button>
                 </div>
                 <div className="toggle-painel toggle-right">
                     <h1>Bem-vindo de volta</h1>
                     <p>Já tem uma conta?</p>
-                    <button className="btn login-btn" onClick={() => setIsActive(false)}>
+                    <button className="btn login-btn" onClick={() => handleToggle(false)}>
                         Login
                     </button>
                 </div>
