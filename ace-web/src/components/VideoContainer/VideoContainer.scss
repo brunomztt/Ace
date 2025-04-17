@@ -1,0 +1,28 @@
+@use '../../styles/variables' as *;
+
+.video-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100vw;
+    height: 100vh;
+    background-color: black;
+    clip-path: polygon(20% 20%, 80% 80%, 20% 80%);
+    will-change: transform, clip-path;
+    overflow: hidden;
+
+    video {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: auto;
+        height: auto;
+        min-width: 100%;
+        min-height: 100%;
+        object-fit: cover;
+        opacity: 0.7;
+        pointer-events: none;
+    }
+}

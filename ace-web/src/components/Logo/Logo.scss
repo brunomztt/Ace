@@ -1,0 +1,52 @@
+@use '../../styles/variables' as *;
+
+.logo {
+    position: absolute;
+    top: 95%;
+    left: 50%;
+    display: flex;
+    transform: translate(-50%, -50%);
+    color: $light-color;
+    z-index: 9999;
+    align-items: center;
+
+    .char.anim-out {
+        margin-top: 10px;
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+
+        h1 {
+            color: $light-color;
+        }
+    }
+
+    .char-container {
+        display: flex;
+        margin-left: -50%;
+        margin-top: -60%;
+        transform: translateX(50%);
+    }
+
+    .logo-image {
+        height: auto;
+        object-fit: contain;
+    }
+
+    .char img {
+        margin-left: 50%;
+        margin-top: 20%;
+        margin-bottom: 200px;
+        color: white;
+        display: block;
+        height: auto;
+        width: 3.5em;
+    }
+
+    @media (max-width: $mobile) {
+        &,
+        .logo-image {
+            opacity: 0;
+            display: none;
+            pointer-events: none;
+        }
+    }
+}
