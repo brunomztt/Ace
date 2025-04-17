@@ -5,33 +5,11 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
     const [isActive, setIsActive] = useState(false);
     const setupDone = useRef(false);
 
-    const addPasswordToggle = (passwordField: HTMLInputElement) => {
-        const existingToggle = passwordField.parentNode?.querySelector('.bx-hide, .bx-show');
-        if (existingToggle) return;
-
-        const eyeIcon = document.createElement('i');
-        eyeIcon.className = 'bx bx-hide';
-        eyeIcon.style.position = 'absolute';
-        eyeIcon.style.right = '50px';
-        eyeIcon.style.top = '50%';
-        eyeIcon.style.transform = 'translateY(-50%)';
-        eyeIcon.style.cursor = 'pointer';
-        eyeIcon.style.color = '#888';
-        eyeIcon.style.fontSize = '20px';
-        eyeIcon.style.zIndex = '20';
-
-        passwordField.parentNode?.appendChild(eyeIcon);
-
-        eyeIcon.addEventListener('click', () => {
-            if (passwordField.type === 'password') {
-                passwordField.type = 'text';
-                eyeIcon.className = 'bx bx-show';
-            } else {
-                passwordField.type = 'password';
-                eyeIcon.className = 'bx bx-hide';
-            }
-        });
-    };
+    const [passwordVisibility, setPasswordVisibility] = useState({
+        login: false,
+        register: false,
+        confirm: false,
+    });
 
     const resetFormValidations = () => {
         const lengthMsgs = document.querySelectorAll('.length-msg');
@@ -42,6 +20,7 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
         const charCounters = document.querySelectorAll('.char-counter');
         charCounters.forEach((counter) => {
             (counter as HTMLElement).style.color = '#888';
+            counter.textContent = '0/20';
         });
 
         const validationMsgs = document.querySelectorAll('.email-msg, .confirm-msg');
@@ -66,6 +45,13 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
             status.textContent = '✕';
             (status as HTMLElement).style.color = '#f55';
         });
+    };
+
+    const togglePasswordVisibility = (field: 'login' | 'register' | 'confirm') => {
+        setPasswordVisibility((prev) => ({
+            ...prev,
+            [field]: !prev[field],
+        }));
     };
 
     useEffect(() => {
@@ -228,8 +214,6 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                     passwordInput.addEventListener('input', evaluatePassword);
                     if (passwordInput.value) evaluatePassword();
                 }
-
-                addPasswordToggle(passwordInput);
             }
 
             const confirmPasswordInput = document.getElementById(
@@ -266,8 +250,6 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                     confirmPasswordInput.addEventListener('input', checkPasswords);
                     if (confirmPasswordInput.value) checkPasswords();
                 }
-
-                addPasswordToggle(confirmPasswordInput);
             }
 
             const emailInput = document.getElementById('reg-email') as HTMLInputElement;
@@ -331,9 +313,6 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                         alert('Login válido!');
                     });
                 }
-
-                const loginPwd = loginForm.querySelector('.pwd-field') as HTMLInputElement;
-                if (loginPwd) addPasswordToggle(loginPwd);
             }
 
             const registerForm = document.getElementById('register-form') as HTMLFormElement;
@@ -462,6 +441,12 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
             input.value = '';
         });
 
+        setPasswordVisibility({
+            login: false,
+            register: false,
+            confirm: false,
+        });
+
         setIsActive(active);
     };
 
@@ -482,8 +467,27 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                         <i className="bx bxs-user"></i>
                     </div>
                     <div className="input-box">
-                        <input type="password" className="pwd-field" placeholder="Senha" required />
+                        <input
+                            type={passwordVisibility.login ? 'text' : 'password'}
+                            className="pwd-field"
+                            placeholder="Senha"
+                            required
+                        />
                         <i className="bx bxs-lock-alt"></i>
+                        <i
+                            className={`bx ${passwordVisibility.login ? 'bx-show' : 'bx-hide'}`}
+                            style={{
+                                position: 'absolute',
+                                right: '50px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                cursor: 'pointer',
+                                color: '#888',
+                                fontSize: '20px',
+                                zIndex: '20',
+                            }}
+                            onClick={() => togglePasswordVisibility('login')}
+                        ></i>
                     </div>
                     <div className="forgot-link">
                         <a href="#">Esqueceu a senha?</a>
@@ -533,7 +537,7 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                     </div>
                     <div className="input-box">
                         <input
-                            type="password"
+                            type={passwordVisibility.register ? 'text' : 'password'}
                             className="pwd-field"
                             id="reg-pwd"
                             placeholder="Senha"
@@ -542,16 +546,44 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                             required
                         />
                         <i className="bx bxs-lock-alt"></i>
+                        <i
+                            className={`bx ${passwordVisibility.register ? 'bx-show' : 'bx-hide'}`}
+                            style={{
+                                position: 'absolute',
+                                right: '50px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                cursor: 'pointer',
+                                color: '#888',
+                                fontSize: '20px',
+                                zIndex: '20',
+                            }}
+                            onClick={() => togglePasswordVisibility('register')}
+                        ></i>
                     </div>
                     <div className="input-box">
                         <input
-                            type="password"
+                            type={passwordVisibility.confirm ? 'text' : 'password'}
                             className="pwd-confirm"
                             id="reg-pwd-confirm"
                             placeholder="Confirme sua senha"
                             required
                         />
                         <i className="bx bxs-lock-alt"></i>
+                        <i
+                            className={`bx ${passwordVisibility.confirm ? 'bx-show' : 'bx-hide'}`}
+                            style={{
+                                position: 'absolute',
+                                right: '50px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                cursor: 'pointer',
+                                color: '#888',
+                                fontSize: '20px',
+                                zIndex: '20',
+                            }}
+                            onClick={() => togglePasswordVisibility('confirm')}
+                        ></i>
                     </div>
                     <div className="forgot-link">
                         <a href="#">Esqueceu a senha?</a>
