@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { CustomEase } from 'gsap/CustomEase';
+import { DialogProvider } from './components/Dialog/DialogContext';
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
 import VideoContainer from './components/VideoContainer/VideoContainer';
@@ -152,38 +153,40 @@ const App: React.FC = () => {
     };
 
     return (
-        <div className="home-container">
-            <div id="unsupported-message">
-                <p>Seu dispositivo não é suportado.</p>
-            </div>
-
-            <div className="hero" ref={heroRef}>
-                <div className="progress-bar" ref={progressBarRef}>
-                    <p>loading</p>
-                    <p>
-                        /
-                        <span id="counter" ref={counterRef}>
-                            0
-                        </span>
-                    </p>
+        <DialogProvider>
+            <div className="home-container">
+                <div id="unsupported-message">
+                    <p>Seu dispositivo não é suportado.</p>
                 </div>
 
-                <VideoContainer ref={videoContainerRef} videoSrc="/video.mp4" />
+                <div className="hero" ref={heroRef}>
+                    <div className="progress-bar" ref={progressBarRef}>
+                        <p>loading</p>
+                        <p>
+                            /
+                            <span id="counter" ref={counterRef}>
+                                0
+                            </span>
+                        </p>
+                    </div>
 
-                <nav>
-                    <p>&#9679;</p>
-                    <p>&#9679;</p>
-                </nav>
+                    <VideoContainer ref={videoContainerRef} videoSrc="/video.mp4" />
 
-                <Footer ref={footerRef} />
+                    <nav>
+                        <p>&#9679;</p>
+                        <p>&#9679;</p>
+                    </nav>
 
-                <Header ref={headerRef} onStart={handleStart} />
+                    <Footer ref={footerRef} />
+
+                    <Header ref={headerRef} onStart={handleStart} />
+                </div>
+
+                <Logo ref={logoRef} logoSrc="logo.png" />
+
+                <LoginForm ref={loginFormRef} />
             </div>
-
-            <Logo ref={logoRef} logoSrc="logo.png" />
-
-            <LoginForm ref={loginFormRef} />
-        </div>
+        </DialogProvider>
     );
 };
 

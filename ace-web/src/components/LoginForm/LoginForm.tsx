@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef, forwardRef } from 'react';
+import { dialogService } from '../Dialog/dialogService';
 import './LoginForm.scss';
+import authApi, { UserLoginDto, UserRegistrationDto } from '../../utils/authApi';
 
 const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
     const [isActive, setIsActive] = useState(false);
     const setupDone = useRef(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const [passwordVisibility, setPasswordVisibility] = useState({
         login: false,
@@ -47,7 +50,7 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
         });
     };
 
-    const togglePasswordVisibility = (field: 'login' | 'register' | 'confirm') => {
+    const togglePasswordVisibility = (field: string) => {
         setPasswordVisibility((prev) => ({
             ...prev,
             [field]: !prev[field],
@@ -93,7 +96,7 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                     strengthBar.className = 'strength-bar';
                     strengthBar.innerHTML = `
                         <div style="height:3px; background:#ddd; margin:5px 0">
-                            <div style="height:100%; width:0; background:#f00"></div>
+                        <div style="height:100%; width:0; background:#f00"></div>
                         </div>
                         <div style="font-size:11px; color:#888; margin-bottom:5px">Digite uma senha</div>
                     `;
@@ -163,9 +166,7 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                         const hasSpecial = /[^a-zA-Z0-9]/.test(password);
 
                         const updateRule = (ruleId: string, passed: boolean) => {
-                            const ruleElement = rulesList.querySelector(
-                                `.rule.${ruleId} .rule-status`
-                            );
+                            const ruleElement = rulesList.querySelector(`.rule.${ruleId} .rule-status`);
                             if (ruleElement) {
                                 ruleElement.textContent = passed ? '✓' : '✕';
                                 (ruleElement as HTMLElement).style.color = passed ? '#5c3' : '#f55';
@@ -216,9 +217,7 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                 }
             }
 
-            const confirmPasswordInput = document.getElementById(
-                'reg-pwd-confirm'
-            ) as HTMLInputElement;
+            const confirmPasswordInput = document.getElementById('reg-pwd-confirm') as HTMLInputElement;
             if (confirmPasswordInput && passwordInput) {
                 if (!confirmPasswordInput.parentNode?.querySelector('.confirm-msg')) {
                     const confirmMsg = document.createElement('div');
@@ -242,8 +241,7 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                             return;
                         }
                         confirmMsg.style.display = 'block';
-                        confirmMsg.textContent =
-                            original === confirm ? 'Senhas iguais' : 'Senhas diferentes';
+                        confirmMsg.textContent = original === confirm ? 'Senhas iguais' : 'Senhas diferentes';
                         confirmMsg.style.color = original === confirm ? '#5c3' : '#f55';
                     };
 
@@ -293,24 +291,42 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
             if (loginForm) {
                 if (!loginForm.dataset.hasListener) {
                     loginForm.dataset.hasListener = 'true';
-                    loginForm.addEventListener('submit', (e) => {
+                    loginForm.addEventListener('submit', async (e) => {
                         e.preventDefault();
-                        const user = (
-                            loginForm.querySelector('.username-field') as HTMLInputElement
-                        ).value;
-                        const pwd = (loginForm.querySelector('.pwd-field') as HTMLInputElement)
-                            .value;
+                        const userField = loginForm.querySelector('.username-field') as HTMLInputElement;
+                        const pwdField = loginForm.querySelector('.pwd-field') as HTMLInputElement;
+                        const user = userField.value;
+                        const pwd = pwdField.value;
 
                         if (user.length < 3) {
-                            alert('Nome de usuário deve ter pelo menos 3 caracteres');
+                            dialogService.error('Nome de usuário deve ter pelo menos 3 caracteres');
                             return;
                         }
 
                         if (!user || !pwd) {
-                            alert('Preencha todos os campos!');
+                            dialogService.error('Preencha todos os campos!');
                             return;
                         }
-                        alert('Login válido!');
+
+                        setIsLoading(true);
+                        try {
+                            const loginData: UserLoginDto = {
+                                nickname: user,
+                                password: pwd,
+                            };
+
+                            const response = await authApi.login(loginData);
+
+                            if (response.success) {
+                                dialogService.success('Login realizado com sucesso!');
+                            } else {
+                                dialogService.error(response.message);
+                            }
+                        } catch (error: any) {
+                            dialogService.error(error.message || 'Erro ao realizar login');
+                        } finally {
+                            setIsLoading(false);
+                        }
                     });
                 }
             }
@@ -319,17 +335,13 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
             if (registerForm) {
                 if (!registerForm.dataset.hasListener) {
                     registerForm.dataset.hasListener = 'true';
-                    registerForm.addEventListener('submit', (e) => {
+                    registerForm.addEventListener('submit', async (e) => {
                         e.preventDefault();
-                        const user = (document.getElementById('reg-username') as HTMLInputElement)
-                            .value;
-                        const email = (document.getElementById('reg-email') as HTMLInputElement)
-                            .value;
+                        const user = (document.getElementById('reg-username') as HTMLInputElement).value;
+                        const email = (document.getElementById('reg-email') as HTMLInputElement).value;
                         const cpf = (document.getElementById('reg-cpf') as HTMLInputElement).value;
                         const pwd = (document.getElementById('reg-pwd') as HTMLInputElement).value;
-                        const confirmPwd = (
-                            document.getElementById('reg-pwd-confirm') as HTMLInputElement
-                        ).value;
+                        const confirmPwd = (document.getElementById('reg-pwd-confirm') as HTMLInputElement).value;
                         const errors: string[] = [];
 
                         if (user.length < 3) {
@@ -344,24 +356,42 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                         if (pwd.length < 8) {
                             errors.push('Senha deve ter pelo menos 8 caracteres');
                         }
-                        if (
-                            !(
-                                /[a-z]/.test(pwd) &&
-                                /[A-Z]/.test(pwd) &&
-                                /\d/.test(pwd) &&
-                                /[^a-zA-Z0-9]/.test(pwd)
-                            )
-                        ) {
+                        if (!(/[a-z]/.test(pwd) && /[A-Z]/.test(pwd) && /\d/.test(pwd) && /[^a-zA-Z0-9]/.test(pwd))) {
                             errors.push('Senha deve ser forte');
                         }
                         if (pwd !== confirmPwd) {
                             errors.push('As senhas não coincidem');
                         }
                         if (errors.length > 0) {
-                            alert(errors.join('\n'));
+                            dialogService.error(errors.join('\n'));
                             return;
                         }
-                        alert('Cadastro realizado com sucesso!');
+
+                        setIsLoading(true);
+                        try {
+                            const registrationData: UserRegistrationDto = {
+                                fullName: user,
+                                nickname: user,
+                                cpf: cpf.replace(/\D/g, ''),
+                                email: email,
+                                password: pwd,
+                            };
+
+                            const response = await authApi.register(registrationData);
+
+                            if (response.success) {
+                                dialogService.success('Cadastro realizado com sucesso! Você já pode fazer login.');
+                                registerForm.reset();
+                                setIsActive(false);
+                            } else {
+                                dialogService.error(response.message);
+                            }
+                        } catch (error: any) {
+                            const errorMessage = error.message || 'Erro ao realizar cadastro';
+                            dialogService.error(errorMessage);
+                        } finally {
+                            setIsLoading(false);
+                        }
                     });
                 }
             }
@@ -456,23 +486,11 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                 <form id="login-form">
                     <h1>Login</h1>
                     <div className="input-box">
-                        <input
-                            type="text"
-                            className="username-field"
-                            placeholder="Nome de usuário"
-                            required
-                            minLength={3}
-                            maxLength={20}
-                        />
+                        <input type="text" className="username-field" placeholder="Nome de usuário" required minLength={3} maxLength={20} />
                         <i className="bx bxs-user"></i>
                     </div>
                     <div className="input-box">
-                        <input
-                            type={passwordVisibility.login ? 'text' : 'password'}
-                            className="pwd-field"
-                            placeholder="Senha"
-                            required
-                        />
+                        <input type={passwordVisibility.login ? 'text' : 'password'} className="pwd-field" placeholder="Senha" required />
                         <i className="bx bxs-lock-alt"></i>
                         <i
                             className={`bx ${passwordVisibility.login ? 'bx-show' : 'bx-hide'}`}
@@ -492,8 +510,8 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                     <div className="forgot-link">
                         <a href="#">Esqueceu a senha?</a>
                     </div>
-                    <button type="submit" className="btn btn-submit">
-                        Login
+                    <button type="submit" className="btn btn-submit" disabled={isLoading}>
+                        {isLoading ? 'Carregando...' : 'Login'}
                     </button>
                 </form>
             </div>
@@ -513,26 +531,11 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                         <i className="bx bxs-user"></i>
                     </div>
                     <div className="input-box">
-                        <input
-                            type="email"
-                            className="email-field"
-                            id="reg-email"
-                            placeholder="Email"
-                            required
-                        />
+                        <input type="email" className="email-field" id="reg-email" placeholder="Email" required />
                         <i className="bx bxs-envelope"></i>
                     </div>
                     <div className="input-box">
-                        <input
-                            type="text"
-                            className="cpf-field"
-                            id="reg-cpf"
-                            placeholder="CPF"
-                            required
-                            pattern="\d{3}\.\d{3}\.\d{3}-\d{2}"
-                            maxLength={14}
-                            title="O CPF deve estar no formato XXX.XXX.XXX-XX, onde X é um número."
-                        />
+                        <input type="text" className="cpf-field" id="reg-cpf" placeholder="CPF" required maxLength={14} />
                         <i className="bx bx-body"></i>
                     </div>
                     <div className="input-box">
@@ -541,8 +544,6 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                             className="pwd-field"
                             id="reg-pwd"
                             placeholder="Senha"
-                            pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}"
-                            title="A senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma letra minúscula, um número e um caractere especial."
                             required
                         />
                         <i className="bx bxs-lock-alt"></i>
@@ -588,8 +589,8 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                     <div className="forgot-link">
                         <a href="#">Esqueceu a senha?</a>
                     </div>
-                    <button type="submit" className="btn btn-submit">
-                        Cadastrar
+                    <button type="submit" className="btn btn-submit" disabled={isLoading}>
+                        {isLoading ? 'Carregando...' : 'Cadastrar'}
                     </button>
                 </form>
             </div>

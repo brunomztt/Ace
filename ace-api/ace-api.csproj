@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>ace_api</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.19"/>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0"/>
+        <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.15" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.15" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.15">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.15" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.15">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="MySql.EntityFrameworkCore" Version="7.0.5" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include=".idea\.idea.ace-api\.idea\.gitignore" />
+      <Content Include=".idea\.idea.ace-api\.idea\encodings.xml" />
+      <Content Include=".idea\.idea.ace-api\.idea\indexLayout.xml" />
+      <Content Include=".idea\.idea.ace-api\.idea\projectSettingsUpdater.xml" />
+      <Content Include=".idea\.idea.ace-api\.idea\vcs.xml" />
+      <Content Include=".idea\.idea.ace-api\.idea\workspace.xml" />
+      <Content Include="bin\Debug\net7.0\ace-api" />
+      <Content Include="bin\Debug\net7.0\ace-api.deps.json" />
+      <Content Include="bin\Debug\net7.0\ace-api.dll" />
+      <Content Include="bin\Debug\net7.0\ace-api.pdb" />
+      <Content Include="bin\Debug\net7.0\ace-api.runtimeconfig.json" />
+      <Content Include="bin\Debug\net7.0\appsettings.Development.json" />
+      <Content Include="bin\Debug\net7.0\appsettings.json" />
+      <Content Include="bin\Debug\net7.0\global.json" />
+      <Content Include="bin\Debug\net7.0\Microsoft.AspNetCore.OpenApi.dll" />
+      <Content Include="bin\Debug\net7.0\Microsoft.OpenApi.dll" />
+      <Content Include="bin\Debug\net7.0\Swashbuckle.AspNetCore.Swagger.dll" />
+      <Content Include="bin\Debug\net7.0\Swashbuckle.AspNetCore.SwaggerGen.dll" />
+      <Content Include="bin\Debug\net7.0\Swashbuckle.AspNetCore.SwaggerUI.dll" />
+    </ItemGroup>
+
+</Project>
