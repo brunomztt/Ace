@@ -47,10 +47,10 @@ public class User
     public string Password { get; set; } = null!;
 
     [Column("profile_pic")]
-    public byte[]? ProfilePic { get; set; }
+    public string? ProfilePic { get; set; }
 
     [Column("banner_img")]
-    public byte[]? BannerImg { get; set; }
+    public string? BannerImg { get; set; }
 
     [Column("address_id")] public int? AddressId { get; set; }
 

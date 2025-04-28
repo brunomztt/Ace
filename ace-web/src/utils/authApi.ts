@@ -9,7 +9,6 @@ export const authApi = {
 
     login: async (credentials: UserLoginDto): Promise<ApiResponse<LoginResponseDto>> => {
         const response = await api.post<ApiResponse<LoginResponseDto>>('/auth/login', credentials);
-
         if (response.success && response.data) {
             localStorage.setItem('token', response.data.token);
             localStorage.setItem(
@@ -25,7 +24,6 @@ export const authApi = {
                 })
             );
         }
-
         return response;
     },
 
@@ -41,6 +39,36 @@ export const authApi = {
 
     isAuthenticated: () => {
         return !!localStorage.getItem('token');
+    },
+
+    updateUserData: (userData: Partial<UserDto>) => {
+        const currentUserStr = localStorage.getItem('user');
+        if (currentUserStr) {
+            const currentUser = JSON.parse(currentUserStr);
+            const updatedUser = { ...currentUser, ...userData };
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            window.dispatchEvent(new CustomEvent('userDataUpdated'));
+        }
+    },
+
+    updateProfileImage: (profilePic: string | null) => {
+        const currentUserStr = localStorage.getItem('user');
+        if (currentUserStr) {
+            const currentUser = JSON.parse(currentUserStr);
+            currentUser.profilePic = profilePic === undefined ? null : profilePic;
+            localStorage.setItem('user', JSON.stringify(currentUser));
+            window.dispatchEvent(new CustomEvent('userDataUpdated'));
+        }
+    },
+
+    updateBannerImage: (bannerImg: string | null) => {
+        const currentUserStr = localStorage.getItem('user');
+        if (currentUserStr) {
+            const currentUser = JSON.parse(currentUserStr);
+            currentUser.bannerImg = bannerImg;
+            localStorage.setItem('user', JSON.stringify(currentUser));
+            window.dispatchEvent(new CustomEvent('userDataUpdated'));
+        }
     },
 };
 

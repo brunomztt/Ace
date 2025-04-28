@@ -23,7 +23,9 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
         confirmPassword: '',
         birthDate: '',
         profilePic: null as File | null,
+        profilePicBase64: null as string | null,
         bannerImg: null as File | null,
+        bannerImgBase64: null as string | null,
         street: '',
         district: '',
         zipCode: '',
@@ -59,6 +61,21 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
         }));
     };
 
+    const fileToBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                if (typeof reader.result === 'string') {
+                    resolve(reader.result);
+                } else {
+                    reject(new Error('Failed to convert file to base64'));
+                }
+            };
+            reader.onerror = (error) => reject(error);
+        });
+    };
+
     useEffect(() => {
         const fetchUser = async () => {
             setIsLoading(true);
@@ -80,6 +97,8 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                         houseNumber: user.address?.houseNumber || '',
                         complement: user.address?.complement || '',
                         addressId: user.address?.addressId || null,
+                        profilePicBase64: user.profilePic || null,
+                        bannerImgBase64: user.bannerImg || null,
                     }));
                 }
             } catch (error: any) {
@@ -157,12 +176,20 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
         setActiveTab(tabId);
     }, []);
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, fileType: 'profilePic' | 'bannerImg') => {
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>, fileType: 'profilePic' | 'bannerImg') => {
         if (event.target.files && event.target.files[0]) {
-            setFormData({
-                ...formData,
-                [fileType]: event.target.files[0],
-            });
+            const file = event.target.files[0];
+            try {
+                const dataUrl = await fileToBase64(file);
+                setFormData({
+                    ...formData,
+                    [fileType]: file,
+                    [`${fileType}Base64`]: dataUrl,
+                });
+            } catch (error) {
+                console.error('Error converting file to base64:', error);
+                dialogService.error('Erro ao processar a imagem');
+            }
         }
     };
 
@@ -208,6 +235,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
         setFormData({
             ...formData,
             [fileType]: null,
+            [`${fileType}Base64`]: null,
         });
     };
 
@@ -232,15 +260,8 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                     };
                 }
 
-                if (formData.profilePic || formData.bannerImg) {
-                    const formDataFiles = new FormData();
-                    if (formData.profilePic) {
-                        formDataFiles.append('profilePic', formData.profilePic);
-                    }
-                    if (formData.bannerImg) {
-                        formDataFiles.append('bannerImg', formData.bannerImg);
-                    }
-                }
+                updateData.profilePic = formData.profilePicBase64 || null;
+                updateData.bannerImg = formData.bannerImgBase64 || null;
             } else if (activeTab === 'account-change-password') {
                 if (formData.newPassword !== formData.confirmPassword) {
                     dialogService.error('As senhas não coincidem');
@@ -274,6 +295,16 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
             const response = await userApi.updateUser(userId, updateData);
 
             if (response.success) {
+                if (activeTab === 'account-general') {
+                    authApi.updateProfileImage(updateData.profilePic ?? null);
+                    authApi.updateBannerImage(updateData.bannerImg ?? null);
+                    authApi.updateUserData({
+                        firstName: updateData.firstName,
+                        lastName: updateData.lastName,
+                        phoneNumber: updateData.phoneNumber,
+                    });
+                }
+
                 dialogService.success('Informações atualizadas com sucesso!');
                 if (response.data?.address?.addressId) {
                     setFormData((prev) => ({
@@ -360,7 +391,11 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                             <div className={`tab-pane fade ${activeTab === 'account-general' ? 'active show' : ''}`}>
                                 <div className="card-body media align-items-center">
                                     <img
-                                        src={formData.profilePic ? URL.createObjectURL(formData.profilePic) : 'https://placehold.co/150x150'}
+                                        src={
+                                            formData.profilePic
+                                                ? URL.createObjectURL(formData.profilePic)
+                                                : formData.profilePicBase64 || 'https://placehold.co/150x150'
+                                        }
                                         alt="Profile"
                                         className="d-block ui-w-80"
                                     />
@@ -385,10 +420,14 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                                 <hr className="border-light m-0" />
                                 <div className="card-body media align-items-center">
                                     <img
-                                        src={formData.bannerImg ? URL.createObjectURL(formData.bannerImg) : 'https://placehold.co/300x200'}
+                                        src={
+                                            formData.bannerImg
+                                                ? URL.createObjectURL(formData.bannerImg)
+                                                : formData.bannerImgBase64 || 'https://placehold.co/300x200'
+                                        }
                                         alt="Banner"
                                         className="d-block w-100 ui-banner-preview"
-                                        style={{ maxHeight: '200px', objectFit: 'cover' }}
+                                        style={{ maxHeight: '200px', maxWidth: '300px', objectFit: 'cover' }}
                                     />
                                     <div className="media-body ml-4 mt-3">
                                         <label className="btn btn-outline-primary">

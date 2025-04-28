@@ -163,7 +163,7 @@ const AppLayout: React.FC = () => {
                 <p>Seu dispositivo não é suportado.</p>
             </div>
 
-            {isLoggedIn && animationsComplete && <Sidebar onLogout={handleLogout} />}
+            {isLoggedIn && (animationsComplete || location.pathname !== '/') && <Sidebar onLogout={handleLogout} />}
 
             <div className="hero" ref={heroRef}>
                 <div className="progress-bar" ref={progressBarRef}>

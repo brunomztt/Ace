@@ -39,11 +39,14 @@ const BUTTON_ICONS = {
     [NavigationButton.LOGOUT]: 'logout',
 };
 
+const DEFAULT_PROFILE_IMAGE = '/logo.png';
+
 const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [activeButton, setActiveButton] = useState<NavigationButton>(NavigationButton.HOME);
     const [userData, setUserData] = useState<IUser | null>(null);
+    const [profileImage, setProfileImage] = useState<string>(DEFAULT_PROFILE_IMAGE);
 
     const menuRef = useRef<HTMLElement>(null);
     const logoRef = useRef<HTMLDivElement>(null);
@@ -80,7 +83,29 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
         const user = authApi.getCurrentUser();
         if (user) {
             setUserData(user);
+            if (user.profilePic) {
+                setProfileImage(user.profilePic);
+            }
         }
+    }, []);
+
+    useEffect(() => {
+        const handleStorageChange = () => {
+            const user = authApi.getCurrentUser();
+            if (user) {
+                setProfileImage(user.profilePic || DEFAULT_PROFILE_IMAGE);
+                setUserData(user);
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+
+        window.addEventListener('userDataUpdated', handleStorageChange);
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('userDataUpdated', handleStorageChange);
+        };
     }, []);
 
     useEffect(() => {
@@ -111,8 +136,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
 
         switch (button) {
             case NavigationButton.HOME:
-                // TODO: Navigate to Home/Dashboard
-                console.log('Home button clicked');
+                navigate(`/`);
                 break;
             case NavigationButton.AGENTS:
                 // TODO: Navigate to Agents page
@@ -192,7 +216,11 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
                                 className={activeButton === NavigationButton.PROFILE ? 'active' : ''}
                                 onClick={() => handleButtonClick(NavigationButton.PROFILE)}
                             >
-                                <img src="logo.png" alt="Profile" />
+                                <img
+                                    src={profileImage || DEFAULT_PROFILE_IMAGE}
+                                    alt="Profile"
+                                    onError={() => setProfileImage(DEFAULT_PROFILE_IMAGE)}
+                                />
                                 <p>{userData?.nickname}</p>
                             </button>
                         </div>

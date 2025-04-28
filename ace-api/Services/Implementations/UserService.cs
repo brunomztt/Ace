@@ -60,8 +60,8 @@ public class UserService : IUserService
             Password = hashedPassword,
             RoleId = 3, // Default role 'User'
             AddressId = address?.AddressId,
-            ProfilePic = registrationDto.ProfilePic != null ? Convert.FromBase64String(registrationDto.ProfilePic) : null,
-            BannerImg = registrationDto.BannerImg != null ? Convert.FromBase64String(registrationDto.BannerImg) : null,
+            ProfilePic = registrationDto.ProfilePic,
+            BannerImg = registrationDto.BannerImg,
         };
 
         _context.Users.Add(user);
@@ -92,6 +92,7 @@ public class UserService : IUserService
             LastName = user.LastName,
             Email = user.Email,
             RoleName = user.Role?.RoleName ?? "User",
+            ProfilePic = user.ProfilePic,
             Token = token
         }, "Login realizado com sucesso");
     }
@@ -154,12 +155,9 @@ public class UserService : IUserService
             user.Password = BCrypt.Net.BCrypt.HashPassword(updateDto.Password);
         }
 
-        if (updateDto.ProfilePic != null)
-            user.ProfilePic = Convert.FromBase64String(updateDto.ProfilePic);
+        user.ProfilePic = updateDto.ProfilePic;
+        user.BannerImg = updateDto.BannerImg;
         
-        if (updateDto.BannerImg != null)
-            user.BannerImg = Convert.FromBase64String(updateDto.BannerImg);
-
         if (updateDto.Address != null)
         {
             if (user.Address == null)
@@ -248,8 +246,8 @@ public class UserService : IUserService
             Email = user.Email,
             PhoneNumber = user.PhoneNumber,
             IsEnabled = user.IsEnabled,
-            ProfilePic = user.ProfilePic != null ? Convert.ToBase64String(user.ProfilePic) : null,
-            BannerImg = user.BannerImg != null ? Convert.ToBase64String(user.BannerImg) : null,
+            ProfilePic = user.ProfilePic,
+            BannerImg = user.BannerImg,
             Role = user.Role != null
                 ? new RoleDto
                 {
