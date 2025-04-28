@@ -144,7 +144,15 @@ public class UserService : IUserService
             user.PhoneNumber = updateDto.PhoneNumber;
 
         if (!string.IsNullOrEmpty(updateDto.Password))
+        {
+            if (string.IsNullOrEmpty(updateDto.CurrentPassword))
+                return ApiResponse<UserDto>.ErrorResponse("A senha atual é necessária para alterar a senha.");
+
+            if (!BCrypt.Net.BCrypt.Verify(updateDto.CurrentPassword, user.Password))
+                return ApiResponse<UserDto>.ErrorResponse("Senha atual incorreta.");
+
             user.Password = BCrypt.Net.BCrypt.HashPassword(updateDto.Password);
+        }
 
         if (updateDto.ProfilePic != null)
             user.ProfilePic = Convert.FromBase64String(updateDto.ProfilePic);

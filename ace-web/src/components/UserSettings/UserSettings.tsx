@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { dialogService } from '../Dialog/dialogService';
 import { userApi } from '../../utils/userApi';
-import { IUser, UserDto } from '../../models/User';
+import { IUser, UserDto, UserUpdateDto } from '../../models/User';
 import './UserSettings.scss';
 import authApi from '../../utils/authApi';
 
@@ -214,7 +214,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
     const handleSave = async () => {
         setIsLoading(true);
         try {
-            const updateData: Partial<IUser> = {};
+            const updateData: Partial<UserUpdateDto> = {};
 
             if (activeTab === 'account-general') {
                 updateData.firstName = formData.firstName;
@@ -268,6 +268,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                 }
 
                 updateData.password = formData.newPassword;
+                updateData.currentPassword = formData.password;
             }
 
             const response = await userApi.updateUser(userId, updateData);

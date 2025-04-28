@@ -44,6 +44,7 @@ export interface UserUpdateDto {
     email?: string;
     phoneNumber?: string;
     password?: string;
+    currentPassword?: string;
     profilePic?: string;
     bannerImg?: string;
     birthDate?: string;
