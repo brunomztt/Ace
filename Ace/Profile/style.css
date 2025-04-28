@@ -167,7 +167,7 @@ body {
     text-align: center;
     border: 1px solid var(--border-color);
     border-radius: 15px;
-    padding: 30px; /* Valor radicalmente diferente para teste */
+    padding: 30px; 
 }
 .other-data {
     display: flex;
@@ -268,25 +268,25 @@ body {
         display: block;
         width: 100%;
         order: 1;
-        min-height: calc(90vw - 60px); /* Troquei height por min-height */
+        min-height: calc(90vw - 60px); 
     }
     .post-CTA {
         margin-top: 3rem;
-        margin-left: auto; /* Centraliza horizontalmente */
-        margin-right: auto; /* Centraliza horizontalmente */
+        margin-left: auto; 
+        margin-right: auto; 
         padding: 10px 30px;
         display: flex;
-        justify-content: center; /* Centraliza o conteúdo horizontalmente dentro do CTA */
-        align-items: center; /* Centraliza o conteúdo verticalmente dentro do CTA */
-        width: auto; /* Deixe o CTA ajustar-se ao conteúdo */
+        justify-content: center; 
+        align-items: center; 
+        width: auto; 
     }
     .post-title{
-        margin-left: auto; /* Centraliza horizontalmente */
-        margin-right: auto; /* Centraliza horizontalmente */
+        margin-left: auto; 
+        margin-right: auto; 
         display: flex;
-        justify-content: center; /* Centraliza o conteúdo horizontalmente dentro do CTA */
-        align-items: center; /* Centraliza o conteúdo verticalmente dentro do CTA */
-        width: auto; /* Deixe o CTA ajustar-se ao conteúdo */
+        justify-content: center; 
+        align-items: center; 
+        width: auto;
     }
     .post-cover{
         width: 100%;
@@ -322,8 +322,8 @@ body {
         padding: 0;
     }
     .profile-body {
-        display: flex; /* <-- Adiciona ISSO */
-        flex-direction: column; /* <-- Empilhar */
+        display: flex; 
+        flex-direction: column; 
         gap: 20px;
     }
     .profile-actions {
@@ -336,18 +336,18 @@ body {
         gap: 20px;
     }
     .account-info {
-        display: flex; /* Troca grid por flex */
-        flex-direction: column; /* Empilha verticalmente */
+        display: flex; 
+        flex-direction: column; 
         gap: 20px;
     }
 
     .data, .social-media {
-        width: 100%; /* Ocupa toda a largura */
+        width: 100%; 
     }
 }
 @media screen and (max-width: 540px) {
     .last-post {
-        min-height: calc(100vw - 30px); /* Troquei height por min-height */
+        min-height: calc(100vw - 30px);
     }
      }
 @media screen and (max-width: 413px) { 
