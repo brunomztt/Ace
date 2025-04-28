@@ -1,18 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap");
 
-*{
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: "Rajdhani", sans-serif;
 }
 
-body{
+body {
   min-height: 100vh;
-  background: linear-gradient(135deg, rgb(24, 23, 23) 0%, rgb(17, 17, 17) 50%, rgb(15, 15, 15) 100%) 0% 0%;
+  background: linear-gradient(
+      135deg,
+      rgb(24, 23, 23) 0%,
+      rgb(17, 17, 17) 50%,
+      rgb(15, 15, 15) 100%
+    )
+    0% 0%;
 }
 
-.sidebar{
+.sidebar {
   width: 230px;
   position: fixed;
   margin: 16px;
@@ -22,15 +28,15 @@ body{
   transition: 0.4s ease;
 }
 
-.sidebar.collapsed{
+.sidebar.collapsed {
   width: 85px;
 }
 
-.sidebar.collapsed .sidebar-header .sidebar-toggler{
+.sidebar.collapsed .sidebar-header .sidebar-toggler {
   transform: translate(-4px, 65px);
 }
 
-.sidebar-header .toggler{
+.sidebar-header .toggler {
   height: 35px;
   width: 35px;
   background: #fff;
@@ -44,26 +50,25 @@ body{
   transition: 0.4s ease;
 }
 
-.sidebar-header .sidebar-toggler{
+.sidebar-header .sidebar-toggler {
   position: absolute;
   right: 20px;
 }
 
-
-.sidebar-header .menu-toggler{
+.sidebar-header .menu-toggler {
   display: none;
 }
 
-.sidebar-header .sidebar-toggler span{
+.sidebar-header .sidebar-toggler span {
   font-size: 1.75rem;
   transition: 0.4s ease;
 }
 
-.sidebar.collapsed .sidebar-header .sidebar-toggler span{
+.sidebar.collapsed .sidebar-header .sidebar-toggler span {
   transform: rotate(180deg);
 }
 
-.sidebar-nav .nav-list{
+.sidebar-nav .nav-list {
   list-style: none;
   display: flex;
   gap: 4px;
@@ -71,14 +76,13 @@ body{
   flex-direction: column;
   transform: translateY(15px);
   transition: 0.4s ease;
-
 }
 
 .sidebar.collapsed .sidebar-nav .primary-nav {
   transform: translateY(65px);
 }
 
-.sidebar-nav .nav-link{
+.sidebar-nav .nav-link {
   color: #fff;
   padding: 12px 15px;
   display: flex;
@@ -88,11 +92,11 @@ body{
   text-decoration: none;
   transition: 0.4s ease;
 }
-.sidebar-nav .nav-link:hover{
+.sidebar-nav .nav-link:hover {
   color: rgb(223, 76, 76);
 }
 
-.sidebar-header .header-logo img{
+.sidebar-header .header-logo img {
   width: 46px;
   height: 46px;
   object-fit: contain;
@@ -100,8 +104,7 @@ body{
   display: block;
 }
 
-
-.sidebar-header{
+.sidebar-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -109,11 +112,11 @@ body{
   position: relative;
 }
 
-.sidebar-nav .nav-link .nav-label{
+.sidebar-nav .nav-link .nav-label {
   transition: opacity 0.3s ease;
 }
 
-.sidebar.collapsed .sidebar-nav .nav-link .nav-label{
+.sidebar.collapsed .sidebar-nav .nav-link .nav-label {
   opacity: 0;
   pointer-events: none;
 }
@@ -137,23 +140,22 @@ body{
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
 }
 
-.sidebar.collapsed .sidebar-nav .nav-tooltip{
+.sidebar.collapsed .sidebar-nav .nav-tooltip {
   display: block;
 }
 
-.sidebar-nav .nav-item:hover .nav-tooltip{
+.sidebar-nav .nav-item:hover .nav-tooltip {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(50%);
   transition: 0.4s ease;
 }
 
-.sidebar-nav .secondary-nav{
+.sidebar-nav .secondary-nav {
   position: absolute;
   bottom: 30px;
   width: 100%;
 }
-
 
 .sidebar-header .header-logo {
   display: flex;
@@ -168,7 +170,6 @@ body{
   transform: translateZ(0);
 }
 
-
 .nav-item.active .nav-link::before {
   content: "";
   position: absolute;
@@ -180,7 +181,7 @@ body{
   border-radius: 4px;
   transition: 0.4s ease;
 }
-.nav-item:hover{
+.nav-item:hover {
   border-radius: 8px;
   background-color: rgba(255, 255, 255, 0.075); /* opcional: destaque leve */
 }
@@ -209,31 +210,30 @@ body{
     border-radius: 16px;
   }
 
-  .sidebar-header .header-logo img{
+  .sidebar-header .header-logo img {
     width: 40px;
     height: 40px;
   }
 
-  .sidebar-header .sidebar-toggler{
+  .sidebar-header .sidebar-toggler {
     display: none;
   }
-  
 
-  .sidebar-header .menu-toggler{
+  .sidebar-header .menu-toggler {
     display: flex;
     height: 30px;
     width: 30px;
-  }  
+  }
 
-  .sidebar-header .menu-toggler span{
+  .sidebar-header .menu-toggler span {
     font-size: 1.3rem;
   }
 
-  .sidebar-nav .nav-list{
+  .sidebar-nav .nav-list {
     padding: 0 10px;
   }
 
-  .sidebar-nav .nav-link{
+  .sidebar-nav .nav-link {
     gap: 10px;
     padding: 10px;
     font-size: 0.94rem;
@@ -243,7 +243,7 @@ body{
     font-size: 1.37rem;
   }
 
-  .sidebar-nav .secondary-nav{
+  .sidebar-nav .secondary-nav {
     position: relative;
     bottom: 0;
     margin: 40px 0 30px;

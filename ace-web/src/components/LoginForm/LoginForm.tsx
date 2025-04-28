@@ -2,8 +2,10 @@ import React, { useState, useEffect, useRef, forwardRef } from 'react';
 import { dialogService } from '../Dialog/dialogService';
 import './LoginForm.scss';
 import authApi, { UserLoginDto, UserRegistrationDto } from '../../utils/authApi';
+import { useNavigate } from 'react-router-dom';
 
 const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
+    const navigate = useNavigate();
     const [isActive, setIsActive] = useState(false);
     const setupDone = useRef(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -319,6 +321,9 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
 
                             if (response.success) {
                                 dialogService.success('Login realizado com sucesso!');
+                                window.dispatchEvent(new Event('login-success'));
+                                window.dispatchEvent(new Event('auth-change'));
+                                navigate('/');
                             } else {
                                 dialogService.error(response.message);
                             }

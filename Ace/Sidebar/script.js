@@ -15,7 +15,7 @@ window.addEventListener("load", () => {
   }
 
   // Inicializa a linha no primeiro item ativo
-  const activeItem = document.querySelector('.nav-item.active') || navItems[0];
+  const activeItem = document.querySelector(".nav-item.active") || navItems[0];
   moveActiveLine(activeItem);
 });
 
@@ -27,7 +27,7 @@ sidebarToggler.addEventListener("click", () => {
     gsap.to(logo, {
       x: isCollapsed ? 0 : 72,
       duration: 0.4,
-      ease: "power2.out"
+      ease: "power2.out",
     });
   } else {
     gsap.set(logo, { x: 0 });
@@ -68,7 +68,7 @@ function moveActiveLine(item) {
   gsap.to(activeLine, {
     y: offsetTop,
     duration: 0.4,
-    ease: "power2.out"
+    ease: "power2.out",
   });
 }
 

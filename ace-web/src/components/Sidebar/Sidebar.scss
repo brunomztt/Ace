@@ -1,0 +1,159 @@
+@use '../../styles/variables' as *;
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0');
+
+.sidebar {
+    --width-open: 200px;
+    --width-closed: 74px;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    bottom: 30px;
+    width: var(--width-closed);
+    border-radius: 16px;
+    background: $darker-bg;
+    transition:
+        width 0.3s,
+        height 0.3s;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    overflow: hidden;
+
+    &.open {
+        width: var(--width-open);
+    }
+
+    .toggle {
+        position: relative;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        font-family: $rajdhani-font;
+        margin: 12px auto;
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s;
+
+        &:hover {
+            color: $darker-bg;
+        }
+
+        span {
+            font-size: 24px;
+        }
+    }
+
+    &.open .toggle {
+        transform: rotate(180deg);
+    }
+
+    .inner {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .menu {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        padding-top: 20px;
+
+        &::before {
+            content: '';
+            position: absolute;
+            z-index: 2;
+            width: 4px;
+            height: 24px;
+            background: $primary-color;
+            transform: translateY(var(--top, 0px));
+            transition: transform 0.3s;
+            border-radius: 4px;
+        }
+    }
+
+    .menu-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .configandexit {
+        margin-top: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    button {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        height: 56px;
+        background: transparent;
+        border: none;
+        color: $light-color;
+        font-size: 16px;
+        padding: 0 16px;
+        cursor: pointer;
+        transition:
+            background 0.3s,
+            color 0.3s;
+
+        p {
+            opacity: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            transition: opacity 0.3s;
+        }
+
+        .material-symbols-outlined {
+            font-size: 20px;
+            min-width: 20px;
+        }
+
+        &:hover,
+        &.active {
+            color: $primary-color;
+        }
+    }
+
+    &.open .menu button p {
+        opacity: 1;
+    }
+
+    .profile {
+        display: flex;
+        align-items: center;
+
+        img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        p {
+            margin-left: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+}

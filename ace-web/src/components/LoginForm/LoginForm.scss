@@ -8,11 +8,12 @@
     background-color: $form-bg;
     border-radius: 35px;
     overflow: hidden;
-    opacity: 0;
     top: 50%;
     left: 50%;
-    display: none;
     transform: translate(-50%, -50%);
+    transition:
+        opacity 0.6s ease-in-out,
+        transform 0.6s ease-in-out;
 
     h1 {
         font-size: 36px;

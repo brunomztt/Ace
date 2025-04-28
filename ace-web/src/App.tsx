@@ -1,25 +1,51 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { CustomEase } from 'gsap/CustomEase';
 import { DialogProvider } from './components/Dialog/DialogContext';
 import Header from './components/Header/Header';
-import Footer from './components/Footer/Footer';
 import VideoContainer from './components/VideoContainer/VideoContainer';
 import LoginForm from './components/LoginForm/LoginForm';
 import Logo from './components/Logo/Logo';
+import Sidebar from './components/Sidebar/Sidebar';
+import authApi from './utils/authApi';
 import './App.scss';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import HomePage from './components/HomePage/HomePage';
 
 gsap.registerPlugin(CustomEase);
 
-const App: React.FC = () => {
+const AppLayout: React.FC = () => {
+    const navigate = useNavigate();
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+    const [animationsComplete, setAnimationsComplete] = useState<boolean>(false);
+
     const heroRef = useRef<HTMLDivElement>(null);
     const videoContainerRef = useRef<HTMLDivElement>(null);
     const progressBarRef = useRef<HTMLDivElement>(null);
     const counterRef = useRef<HTMLSpanElement>(null);
     const logoRef = useRef<HTMLDivElement>(null);
-    const headerRef = useRef<HTMLDivElement>(null);
-    const footerRef = useRef<HTMLElement>(null);
-    const loginFormRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const checkLoginStatus = () => {
+            const isAuthenticated = authApi.isAuthenticated();
+            setIsLoggedIn(isAuthenticated);
+        };
+
+        checkLoginStatus();
+
+        const handleStorageChange = () => {
+            checkLoginStatus();
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+
+        window.addEventListener('auth-change', handleStorageChange);
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('auth-change', handleStorageChange);
+        };
+    }, []);
 
     useEffect(() => {
         const customEase = CustomEase.create('custom', '.87,0,.13,1');
@@ -91,6 +117,9 @@ const App: React.FC = () => {
                             ease: customEase,
                         });
                     },
+                    onComplete: () => {
+                        setAnimationsComplete(true);
+                    },
                 });
             },
         });
@@ -109,47 +138,12 @@ const App: React.FC = () => {
             ease: 'power3.out',
             delay: 6.2,
         });
-
-        gsap.to('footer p', {
-            opacity: 1,
-            y: '0%',
-            duration: 1,
-            ease: 'power3.out',
-            delay: 5.75,
-        });
     }, []);
 
-    const handleStart = () => {
-        if (!headerRef.current || !footerRef.current || !loginFormRef.current) return;
-
-        gsap.to([headerRef.current, footerRef.current, '#start'], {
-            duration: 1,
-            opacity: 0,
-            y: -50,
-            ease: 'power2.out',
-            onComplete: function () {
-                if (headerRef.current) headerRef.current.style.display = 'none';
-                if (footerRef.current) footerRef.current.style.display = 'none';
-                const startButton = document.getElementById('start');
-                if (startButton) startButton.style.display = 'none';
-            },
-        });
-
-        loginFormRef.current.style.display = 'block';
-
-        gsap.to(loginFormRef.current, {
-            duration: 3,
-            opacity: 1,
-            visibility: 'visible',
-            ease: 'power2.out',
-        });
-
-        if (window.innerWidth < 650) {
-            const logoImage = document.querySelector('.logo-image');
-            const logo = document.querySelector('.logo');
-            if (logoImage) (logoImage as HTMLElement).style.display = 'none';
-            if (logo) (logo as HTMLElement).style.display = 'none';
-        }
+    const handleLogout = () => {
+        authApi.logout();
+        setIsLoggedIn(false);
+        navigate('/login');
     };
 
     return (
@@ -158,6 +152,8 @@ const App: React.FC = () => {
                 <div id="unsupported-message">
                     <p>Seu dispositivo não é suportado.</p>
                 </div>
+
+                {isLoggedIn && animationsComplete && <Sidebar onLogout={handleLogout} />}
 
                 <div className="hero" ref={heroRef}>
                     <div className="progress-bar" ref={progressBarRef}>
@@ -177,16 +173,27 @@ const App: React.FC = () => {
                         <p>&#9679;</p>
                     </nav>
 
-                    <Footer ref={footerRef} />
-
-                    <Header ref={headerRef} onStart={handleStart} />
+                    <Header onStart={() => navigate(isLoggedIn ? '/' : '/login')} />
                 </div>
 
                 <Logo ref={logoRef} logoSrc="logo.png" />
 
-                <LoginForm ref={loginFormRef} />
+                <Routes>
+                    <Route path="/login" element={<LoginForm />} />
+                    <Route path="/home" element={<HomePage />} />
+                </Routes>
             </div>
         </DialogProvider>
+    );
+};
+
+const App: React.FC = () => {
+    return (
+        <Router>
+            <DialogProvider>
+                <AppLayout />
+            </DialogProvider>
+        </Router>
     );
 };
 
