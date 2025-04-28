@@ -1,5 +1,6 @@
 USE ace;
 
+-- Primeiro removemos a tabela se ela existir
 DROP TABLE IF EXISTS address;
 CREATE TABLE address (
   address_id INT NOT NULL AUTO_INCREMENT,
@@ -23,27 +24,26 @@ CREATE TABLE user (
   user_id INT NOT NULL AUTO_INCREMENT,
   role_id INT DEFAULT NULL,
   is_enabled TINYINT(1) DEFAULT 1,
-  full_name VARCHAR(100) NOT NULL,
+  first_name VARCHAR(50) NOT NULL,
+  last_name VARCHAR(50) NOT NULL,
   nickname VARCHAR(50) NOT NULL,
   cpf CHAR(11) NOT NULL,
   phone_number VARCHAR(20) DEFAULT NULL,
   email VARCHAR(100) NOT NULL,
   password VARCHAR(100) NOT NULL,
   address_id INT DEFAULT NULL,
+  favorite_agent INT DEFAULT NULL,
+  pic_profile BLOB DEFAULT NULL,
+  pic_background BLOB DEFAULT NULL,
   PRIMARY KEY (user_id),
   UNIQUE KEY email (email),
   KEY role_id (role_id),
   KEY address_id (address_id),
+  KEY favorite_agent (favorite_agent),
   CONSTRAINT user_ibfk_1 FOREIGN KEY (role_id) REFERENCES role (role_id),
-  CONSTRAINT user_ibfk_2 FOREIGN KEY (address_id) REFERENCES address (address_id)
+  CONSTRAINT user_ibfk_2 FOREIGN KEY (address_id) REFERENCES address (address_id),
+  CONSTRAINT user_ibfk_3 FOREIGN KEY (favorite_agent) REFERENCES agent (agent_id)
 );
-
-ALTER TABLE user
-DROP COLUMN full_name,
-ADD COLUMN first_name VARCHAR(50) NOT NULL AFTER is_enabled,
-ADD COLUMN last_name VARCHAR(50) NOT NULL AFTER first_name,
-ADD COLUMN profile_pic VARCHAR(255) NULL AFTER password,
-ADD COLUMN banner_img VARCHAR(255) NULL AFTER profile_pic;
 
 DROP TABLE IF EXISTS agent;
 CREATE TABLE agent (
@@ -118,6 +118,7 @@ CREATE TABLE skin (
   PRIMARY KEY (skin_id)
 );
 
+-- Inserções de dados
 INSERT INTO role (role_name) VALUES ('Admin'), ('Moderator'), ('User'), ('Influencer');
 
 INSERT INTO address (street, district, zip_code, house_number, complement) VALUES 
@@ -127,5 +128,5 @@ INSERT INTO address (street, district, zip_code, house_number, complement) VALUE
 
 INSERT INTO user (role_id, is_enabled, first_name, last_name, nickname, cpf, phone_number, email, password, address_id) VALUES
 (1, 1, 'Bruno', 'Mazetto', 'brunomztt', '12345678901', '11999990000', 'bruno@gmail.com', '$2a$12$aMYXEqoIFtYXkIVEEPO6sO3fJ0J8J2DIY/68JyhgPQC/UCH7baPZW', 1),
-(2, 1, 'Rafael', 'Silva', 'rafasx', '98765432100', '11988887777', 'rafa@gmail.com', '$2a$12$h.nFcDDyRBJEv74Jw5.QXunXhcMZGPe.BoZ3zHd/m7/.cW8ClXOJC', 2),
+(2, 1, 'Rafael', '', 'rafasx', '98765432100', '11988887777', 'rafa@gmail.com', '$2a$12$h.nFcDDyRBJEv74Jw5.QXunXhcMZGPe.BoZ3zHd/m7/.cW8ClXOJC', 2),
 (3, 1, 'Marco', 'Capote', 'marcocapote', '19283746500', '11977776666', 'marco@gmail.com', '$2a$12$O3Z0VW4i5n3S1KfOv8QUdeVGzeVgXvWu/0eVLsrLo4qVm5VcTXvbe', 3);
