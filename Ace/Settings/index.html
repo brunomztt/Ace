@@ -11,7 +11,7 @@
 
 <body>
     <div class="container light-style flex-grow-1 container-p-y">
-        <h4 class="font-weight-bold py-3 mb-4">
+        <h4 class="font-weight-bold ">
             Configurações da conta
         </h4>
         <div class="card overflow-hidden">
@@ -59,7 +59,7 @@
                             <div class="card-body">
                                 <div class="form-group">
                                     <label class="form-label">Nome de usuário</label>
-                                    <input type="text" class="form-control mb-1" value="nmaxwell">
+                                    <input type="text" class="form-control mb-1" value="rsene">
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Nome</label>
@@ -69,6 +69,7 @@
                                     <label class="form-label">Sobrenome</label>
                                     <input type="text" class="form-control" value="Sene">
                                 </div>
+                                <button type="button" class="btn btn-primary" id="excluir-conta">Excluir conta</button>&nbsp;
                             </div>
                         </div>
                         <div class="tab-pane fade" id="account-change-password">
@@ -99,22 +100,21 @@
                                     <input type="text" class="form-control" value="Maio 19, 2003">
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">País</label>
-                                    <select class="custom-select">
-                                        <option>Estados Unidos</option>
-                                        <option selected>Canada</option>
-                                        <option>Alemanha</option>
-                                        <option>Brasil</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
                                     <label class="form-label">Estado</label>
                                     <select class="custom-select">
                                         <option>Paraná</option>
                                         <option selected>São Paulo</option>
                                         <option>Rio de Janeiro</option>
                                         <option>Bahia</option>
-                                        <option>Recife</option>
+                                        <option>Paraná</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Cidade</label>
+                                    <select class="custom-select">
+                                        <option selected>Curitiba</option>
+                                        <option>São Paulo</option>
+                                        <option>São Jose dos Pinhais</option>
                                     </select>
                                 </div>
                             </div>
@@ -144,7 +144,7 @@
                 
             </div>
             <div class="text-right mt-3">
-                <button type="button" class="btn btn-primary">Salvar</button>&nbsp;
+                <button type="button" class="btn btn-primary" id="salvar">Salvar</button>&nbsp;
                 <button type="button" class="btn btn-default">Cancelar</button>
             </div>
         </div>
