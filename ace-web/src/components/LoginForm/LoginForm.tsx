@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef, forwardRef } from 'react';
 import { dialogService } from '../Dialog/dialogService';
 import './LoginForm.scss';
-import authApi, { UserLoginDto, UserRegistrationDto } from '../../utils/authApi';
+import authApi from '../../utils/authApi';
 import { useNavigate } from 'react-router-dom';
+import { UserLoginDto, UserRegistrationDto } from '../../models/User';
 
 const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
     const navigate = useNavigate();
@@ -375,7 +376,7 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                         setIsLoading(true);
                         try {
                             const registrationData: UserRegistrationDto = {
-                                fullName: user,
+                                firstName: user,
                                 nickname: user,
                                 cpf: cpf.replace(/\D/g, ''),
                                 email: email,

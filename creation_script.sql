@@ -38,6 +38,13 @@ CREATE TABLE user (
   CONSTRAINT user_ibfk_2 FOREIGN KEY (address_id) REFERENCES address (address_id)
 );
 
+ALTER TABLE user
+DROP COLUMN full_name,
+ADD COLUMN first_name VARCHAR(50) NOT NULL AFTER is_enabled,
+ADD COLUMN last_name VARCHAR(50) NOT NULL AFTER first_name,
+ADD COLUMN profile_pic VARCHAR(255) NULL AFTER password,
+ADD COLUMN banner_img VARCHAR(255) NULL AFTER profile_pic;
+
 DROP TABLE IF EXISTS agent;
 CREATE TABLE agent (
   agent_id INT NOT NULL AUTO_INCREMENT,
@@ -118,7 +125,7 @@ INSERT INTO address (street, district, zip_code, house_number, complement) VALUE
 ('SirThomas', 'Agua verde', '87654321', '202', NULL),
 ('Brigadeiro Frango', 'Batel', '11223344', '303', 'Casa verde');
 
-INSERT INTO user (role_id, is_enabled, full_name, nickname, cpf, phone_number, email, password, address_id) VALUES
-(1, 1, 'Bruno Mazetto', 'brunomztt', '12345678901', '11999990000', 'bruno@gmail.com', '$2a$12$aMYXEqoIFtYXkIVEEPO6sO3fJ0J8J2DIY/68JyhgPQC/UCH7baPZW', 1),
-(2, 1, 'Rafael', 'rafasx', '98765432100', '11988887777', 'rafa@gmail.com', '$2a$12$h.nFcDDyRBJEv74Jw5.QXunXhcMZGPe.BoZ3zHd/m7/.cW8ClXOJC', 2),
-(3, 1, 'Marco Capote', 'marcocapote', '19283746500', '11977776666', 'marco@gmail.com', '$2a$12$O3Z0VW4i5n3S1KfOv8QUdeVGzeVgXvWu/0eVLsrLo4qVm5VcTXvbe', 3);
+INSERT INTO user (role_id, is_enabled, first_name, last_name, nickname, cpf, phone_number, email, password, address_id) VALUES
+(1, 1, 'Bruno', 'Mazetto', 'brunomztt', '12345678901', '11999990000', 'bruno@gmail.com', '$2a$12$aMYXEqoIFtYXkIVEEPO6sO3fJ0J8J2DIY/68JyhgPQC/UCH7baPZW', 1),
+(2, 1, 'Rafael', 'Silva', 'rafasx', '98765432100', '11988887777', 'rafa@gmail.com', '$2a$12$h.nFcDDyRBJEv74Jw5.QXunXhcMZGPe.BoZ3zHd/m7/.cW8ClXOJC', 2),
+(3, 1, 'Marco', 'Capote', 'marcocapote', '19283746500', '11977776666', 'marco@gmail.com', '$2a$12$O3Z0VW4i5n3S1KfOv8QUdeVGzeVgXvWu/0eVLsrLo4qVm5VcTXvbe', 3);

@@ -12,10 +12,15 @@ public class User
 
     [Column("is_enabled")] public bool IsEnabled { get; set; } = true;
 
-    [Column("full_name")]
+    [Column("first_name")]
     [Required]
-    [StringLength(100)]
-    public string FullName { get; set; } = null!;
+    [StringLength(50)]
+    public string FirstName { get; set; } = null!;
+
+    [Column("last_name")]
+    [Required]
+    [StringLength(50)]
+    public string LastName { get; set; } = null!;
 
     [Column("nickname")]
     [Required]
@@ -40,6 +45,12 @@ public class User
     [Required]
     [StringLength(100)]
     public string Password { get; set; } = null!;
+
+    [Column("profile_pic")]
+    public byte[]? ProfilePic { get; set; }
+
+    [Column("banner_img")]
+    public byte[]? BannerImg { get; set; }
 
     [Column("address_id")] public int? AddressId { get; set; }
 

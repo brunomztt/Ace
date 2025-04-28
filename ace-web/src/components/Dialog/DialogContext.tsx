@@ -4,12 +4,15 @@ import { registerDialogFunctions } from './dialogService';
 
 interface DialogState {
     isOpen: boolean;
+    title?: string;
     message: string;
     type: DialogType;
+    onConfirm?: () => void;
 }
 
 interface DialogContextType {
-    showDialog: (message: string, type: DialogType) => void;
+    showDialog: (message: string, type: DialogType, title?: string) => void;
+    showConfirmDialog: (title: string, message: string, onConfirm: () => void) => void;
     closeDialog: () => void;
 }
 
@@ -34,11 +37,22 @@ export const DialogProvider: React.FC<DialogProviderProps> = ({ children }) => {
         type: 'info',
     });
 
-    const showDialog = (message: string, type: DialogType = 'info') => {
+    const showDialog = (message: string, type: DialogType = 'info', title?: string) => {
         setDialog({
             isOpen: true,
+            title,
             message,
             type,
+        });
+    };
+
+    const showConfirmDialog = (title: string, message: string, onConfirm: () => void) => {
+        setDialog({
+            isOpen: true,
+            title,
+            message,
+            type: 'confirm',
+            onConfirm,
         });
     };
 
@@ -50,13 +64,20 @@ export const DialogProvider: React.FC<DialogProviderProps> = ({ children }) => {
     };
 
     useEffect(() => {
-        registerDialogFunctions(showDialog, closeDialog);
+        registerDialogFunctions(showDialog, closeDialog, showConfirmDialog);
     }, []);
 
     return (
-        <DialogContext.Provider value={{ showDialog, closeDialog }}>
+        <DialogContext.Provider value={{ showDialog, showConfirmDialog, closeDialog }}>
             {children}
-            <Dialog isOpen={dialog.isOpen} message={dialog.message} type={dialog.type} onClose={closeDialog} />
+            <Dialog
+                isOpen={dialog.isOpen}
+                title={dialog.title}
+                message={dialog.message}
+                type={dialog.type}
+                onClose={closeDialog}
+                onConfirm={dialog.onConfirm}
+            />
         </DialogContext.Provider>
     );
 };
@@ -74,4 +95,9 @@ export const showError = (message: string) => {
 export const showInfo = (message: string) => {
     const { showDialog } = useDialog();
     showDialog(message, 'info');
+};
+
+export const showConfirm = (title: string, message: string, onConfirm: () => void) => {
+    const { showConfirmDialog } = useDialog();
+    showConfirmDialog(title, message, onConfirm);
 };

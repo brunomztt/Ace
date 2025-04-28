@@ -9,8 +9,9 @@ import Logo from './components/Logo/Logo';
 import Sidebar from './components/Sidebar/Sidebar';
 import authApi from './utils/authApi';
 import './App.scss';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useParams, Outlet } from 'react-router-dom';
 import HomePage from './components/HomePage/HomePage';
+import UserSettings from './components/UserSettings/UserSettings';
 
 gsap.registerPlugin(CustomEase);
 
@@ -24,6 +25,16 @@ const AppLayout: React.FC = () => {
     const progressBarRef = useRef<HTMLDivElement>(null);
     const counterRef = useRef<HTMLSpanElement>(null);
     const logoRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (heroRef.current) {
+            if (location.pathname !== '/' && location.pathname !== '/home') {
+                heroRef.current.style.display = 'none';
+            } else {
+                heroRef.current.style.display = 'block';
+            }
+        }
+    }, [location.pathname]);
 
     useEffect(() => {
         const checkLoginStatus = () => {
@@ -147,51 +158,58 @@ const AppLayout: React.FC = () => {
     };
 
     return (
-        <DialogProvider>
-            <div className="home-container">
-                <div id="unsupported-message">
-                    <p>Seu dispositivo não é suportado.</p>
+        <div className="home-container">
+            <div id="unsupported-message">
+                <p>Seu dispositivo não é suportado.</p>
+            </div>
+
+            {isLoggedIn && animationsComplete && <Sidebar onLogout={handleLogout} />}
+
+            <div className="hero" ref={heroRef}>
+                <div className="progress-bar" ref={progressBarRef}>
+                    <p>loading</p>
+                    <p>
+                        /
+                        <span id="counter" ref={counterRef}>
+                            0
+                        </span>
+                    </p>
                 </div>
 
-                {isLoggedIn && animationsComplete && <Sidebar onLogout={handleLogout} />}
+                <VideoContainer ref={videoContainerRef} videoSrc="/video.mp4" />
 
-                <div className="hero" ref={heroRef}>
-                    <div className="progress-bar" ref={progressBarRef}>
-                        <p>loading</p>
-                        <p>
-                            /
-                            <span id="counter" ref={counterRef}>
-                                0
-                            </span>
-                        </p>
-                    </div>
+                <nav>
+                    <p>&#9679;</p>
+                    <p>&#9679;</p>
+                </nav>
 
-                    <VideoContainer ref={videoContainerRef} videoSrc="/video.mp4" />
-
-                    <nav>
-                        <p>&#9679;</p>
-                        <p>&#9679;</p>
-                    </nav>
-
-                    <Header onStart={() => navigate(isLoggedIn ? '/' : '/login')} />
-                </div>
+                <Header onStart={() => navigate(isLoggedIn ? '/' : '/login')} />
 
                 <Logo ref={logoRef} logoSrc="logo.png" />
-
-                <Routes>
-                    <Route path="/login" element={<LoginForm />} />
-                    <Route path="/home" element={<HomePage />} />
-                </Routes>
             </div>
-        </DialogProvider>
+
+            <Outlet />
+        </div>
     );
 };
 
 const App: React.FC = () => {
+    const UserSettingWrapper: React.FC = () => {
+        const { userid } = useParams<{ userid: string }>();
+        return <UserSettings userId={userid!} />;
+    };
+
     return (
         <Router>
             <DialogProvider>
-                <AppLayout />
+                <Routes>
+                    <Route element={<AppLayout />}>
+                        <Route path="/" element={<HomePage />} />
+                        <Route path="/home" element={<HomePage />} />
+                        <Route path="/login" element={<LoginForm />} />
+                        <Route path="/usersettings/:userid" element={<UserSettingWrapper />} />
+                    </Route>
+                </Routes>
             </DialogProvider>
         </Router>
     );

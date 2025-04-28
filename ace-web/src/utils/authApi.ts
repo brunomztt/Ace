@@ -1,59 +1,6 @@
+import { LoginResponseDto, UserDto, UserLoginDto, UserRegistrationDto } from '../models/User';
+import { ApiResponse } from '../models/ApiResponse';
 import api from './apiClient';
-
-export interface ApiResponse<T> {
-    success: boolean;
-    message: string;
-    data?: T;
-}
-
-export interface UserRegistrationDto {
-    fullName: string;
-    nickname: string;
-    cpf: string;
-    phoneNumber?: string;
-    email: string;
-    password: string;
-    address?: AddressDto;
-}
-
-export interface AddressDto {
-    street: string;
-    district: string;
-    zipCode: string;
-    houseNumber: string;
-    complement?: string;
-}
-
-export interface UserLoginDto {
-    nickname: string;
-    password: string;
-}
-
-export interface LoginResponseDto {
-    userId: number;
-    nickname: string;
-    fullName: string;
-    email: string;
-    roleName: string;
-    token: string;
-}
-
-export interface UserDto {
-    userId: number;
-    fullName: string;
-    nickname: string;
-    cpf: string;
-    email: string;
-    phoneNumber?: string;
-    isEnabled: boolean;
-    role?: RoleDto;
-    address?: AddressDto;
-}
-
-export interface RoleDto {
-    roleId: number;
-    roleName: string;
-}
 
 export const authApi = {
     register: async (userData: UserRegistrationDto): Promise<ApiResponse<UserDto>> => {
@@ -70,7 +17,9 @@ export const authApi = {
                 JSON.stringify({
                     userId: response.data.userId,
                     nickname: response.data.nickname,
-                    fullName: response.data.fullName,
+                    firstName: response.data.firstName,
+                    lastName: response.data.lastName,
+                    profilePic: response.data.profilePic,
                     email: response.data.email,
                     roleName: response.data.roleName,
                 })

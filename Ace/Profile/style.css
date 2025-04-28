@@ -260,7 +260,6 @@ body {
   cursor: pointer;
 }
 
-/* Responsividade */
 @media screen and (max-width: 1225px) {
   .last-post {
     display: none;

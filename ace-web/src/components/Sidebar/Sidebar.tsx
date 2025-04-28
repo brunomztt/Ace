@@ -3,6 +3,7 @@ import { gsap } from 'gsap';
 import './Sidebar.scss';
 import authApi from '../../utils/authApi';
 import { IUser } from '../../models/User';
+import { useNavigate } from 'react-router-dom';
 
 interface SidebarProps {
     onLogout: () => void;
@@ -39,6 +40,7 @@ const BUTTON_ICONS = {
 };
 
 const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
+    const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [activeButton, setActiveButton] = useState<NavigationButton>(NavigationButton.HOME);
     const [userData, setUserData] = useState<IUser | null>(null);
@@ -64,10 +66,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
             });
         }
     }, []);
-
-    const toggleSidebar = (): void => {
-        setIsOpen((prev) => !prev);
-    };
 
     useEffect(() => {
         if (buttonRefs.current.length > 0) {
@@ -133,8 +131,11 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
                 console.log('Profile button clicked');
                 break;
             case NavigationButton.SETTINGS:
-                // TODO: Navigate to Settings page
-                console.log('Settings button clicked');
+                if (userData) {
+                    navigate(`/usersettings/${userData.userId}`);
+                } else {
+                    console.warn('User data not loaded.');
+                }
                 break;
             case NavigationButton.LOGOUT:
                 if (onLogout && typeof onLogout === 'function') {

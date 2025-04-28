@@ -24,19 +24,13 @@ public class UserService : IUserService
     public async Task<ApiResponse<UserDto>> RegisterUserAsync(UserRegistrationDto registrationDto)
     {
         if (await _context.Users.AnyAsync(u => u.Email == registrationDto.Email))
-        {
             return ApiResponse<UserDto>.ErrorResponse("Este email já está em uso");
-        }
 
         if (await _context.Users.AnyAsync(u => u.Nickname == registrationDto.Nickname))
-        {
             return ApiResponse<UserDto>.ErrorResponse("Este nome de usuário já está em uso");
-        }
 
         if (await _context.Users.AnyAsync(u => u.Cpf == registrationDto.Cpf))
-        {
             return ApiResponse<UserDto>.ErrorResponse("Este CPF já está cadastrado");
-        }
 
         Address? address = null;
         if (registrationDto.Address != null)
@@ -57,40 +51,23 @@ public class UserService : IUserService
 
         var user = new User
         {
-            FullName = registrationDto.FullName,
+            FirstName = registrationDto.FirstName,
+            LastName = registrationDto.LastName ?? string.Empty,
             Nickname = registrationDto.Nickname,
             Cpf = registrationDto.Cpf,
             PhoneNumber = registrationDto.PhoneNumber,
             Email = registrationDto.Email,
             Password = hashedPassword,
             RoleId = 3, // Default role 'User'
-            AddressId = address?.AddressId
+            AddressId = address?.AddressId,
+            ProfilePic = registrationDto.ProfilePic != null ? Convert.FromBase64String(registrationDto.ProfilePic) : null,
+            BannerImg = registrationDto.BannerImg != null ? Convert.FromBase64String(registrationDto.BannerImg) : null,
         };
 
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
-        return ApiResponse<UserDto>.SuccessResponse(new UserDto
-        {
-            UserId = user.UserId,
-            FullName = user.FullName,
-            Nickname = user.Nickname,
-            Cpf = user.Cpf,
-            Email = user.Email,
-            PhoneNumber = user.PhoneNumber,
-            IsEnabled = user.IsEnabled,
-            Role = new RoleDto { RoleId = 3, RoleName = "User" },
-            Address = address != null
-                ? new AddressDto
-                {
-                    Street = address.Street,
-                    District = address.District,
-                    ZipCode = address.ZipCode,
-                    HouseNumber = address.HouseNumber,
-                    Complement = address.Complement
-                }
-                : null
-        }, "Usuário cadastrado com sucesso");
+        return ApiResponse<UserDto>.SuccessResponse(ToUserDto(user), "Usuário cadastrado com sucesso");
     }
 
     public async Task<ApiResponse<LoginResponseDto>> LoginAsync(UserLoginDto loginDto)
@@ -100,14 +77,10 @@ public class UserService : IUserService
             .FirstOrDefaultAsync(u => u.Nickname == loginDto.Nickname);
 
         if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password))
-        {
             return ApiResponse<LoginResponseDto>.ErrorResponse("Nome de usuário ou senha inválidos");
-        }
 
         if (!user.IsEnabled)
-        {
             return ApiResponse<LoginResponseDto>.ErrorResponse("Esta conta está desativada");
-        }
 
         var token = GenerateJwtToken(user);
 
@@ -115,7 +88,8 @@ public class UserService : IUserService
         {
             UserId = user.UserId,
             Nickname = user.Nickname,
-            FullName = user.FullName,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
             Email = user.Email,
             RoleName = user.Role?.RoleName ?? "User",
             Token = token
@@ -129,38 +103,7 @@ public class UserService : IUserService
             .Include(u => u.Address)
             .FirstOrDefaultAsync(u => u.UserId == userId);
 
-        if (user == null)
-        {
-            return ApiResponse<UserDto>.ErrorResponse("Usuário não encontrado");
-        }
-
-        return ApiResponse<UserDto>.SuccessResponse(new UserDto
-        {
-            UserId = user.UserId,
-            FullName = user.FullName,
-            Nickname = user.Nickname,
-            Cpf = user.Cpf,
-            Email = user.Email,
-            PhoneNumber = user.PhoneNumber,
-            IsEnabled = user.IsEnabled,
-            Role = user.Role != null
-                ? new RoleDto
-                {
-                    RoleId = user.Role.RoleId,
-                    RoleName = user.Role.RoleName
-                }
-                : null,
-            Address = user.Address != null
-                ? new AddressDto
-                {
-                    Street = user.Address.Street,
-                    District = user.Address.District,
-                    ZipCode = user.Address.ZipCode,
-                    HouseNumber = user.Address.HouseNumber,
-                    Complement = user.Address.Complement
-                }
-                : null
-        });
+        return user == null ? ApiResponse<UserDto>.ErrorResponse("Usuário não encontrado") : ApiResponse<UserDto>.SuccessResponse(ToUserDto(user));
     }
 
     public async Task<ApiResponse<List<UserDto>>> GetAllUsersAsync()
@@ -168,36 +111,9 @@ public class UserService : IUserService
         var users = await _context.Users
             .Include(u => u.Role)
             .Include(u => u.Address)
-            .Select(u => new UserDto
-            {
-                UserId = u.UserId,
-                FullName = u.FullName,
-                Nickname = u.Nickname,
-                Cpf = u.Cpf,
-                Email = u.Email,
-                PhoneNumber = u.PhoneNumber,
-                IsEnabled = u.IsEnabled,
-                Role = u.Role != null
-                    ? new RoleDto
-                    {
-                        RoleId = u.Role.RoleId,
-                        RoleName = u.Role.RoleName
-                    }
-                    : null,
-                Address = u.Address != null
-                    ? new AddressDto
-                    {
-                        Street = u.Address.Street,
-                        District = u.Address.District,
-                        ZipCode = u.Address.ZipCode,
-                        HouseNumber = u.Address.HouseNumber,
-                        Complement = u.Address.Complement
-                    }
-                    : null
-            })
             .ToListAsync();
 
-        return ApiResponse<List<UserDto>>.SuccessResponse(users);
+        return ApiResponse<List<UserDto>>.SuccessResponse(users.Select(ToUserDto).ToList());
     }
 
     public async Task<ApiResponse<UserDto>> UpdateUserAsync(int userId, UserUpdateDto updateDto)
@@ -208,34 +124,33 @@ public class UserService : IUserService
             .FirstOrDefaultAsync(u => u.UserId == userId);
 
         if (user == null)
-        {
             return ApiResponse<UserDto>.ErrorResponse("Usuário não encontrado");
-        }
 
         if (!string.IsNullOrEmpty(updateDto.Email) && updateDto.Email != user.Email)
         {
             if (await _context.Users.AnyAsync(u => u.Email == updateDto.Email && u.UserId != userId))
-            {
                 return ApiResponse<UserDto>.ErrorResponse("Este email já está em uso");
-            }
 
             user.Email = updateDto.Email;
         }
 
-        if (!string.IsNullOrEmpty(updateDto.FullName))
-        {
-            user.FullName = updateDto.FullName;
-        }
+        if (!string.IsNullOrEmpty(updateDto.FirstName))
+            user.FirstName = updateDto.FirstName;
+
+        if (!string.IsNullOrEmpty(updateDto.LastName))
+            user.LastName = updateDto.LastName;
 
         if (!string.IsNullOrEmpty(updateDto.PhoneNumber))
-        {
             user.PhoneNumber = updateDto.PhoneNumber;
-        }
 
         if (!string.IsNullOrEmpty(updateDto.Password))
-        {
             user.Password = BCrypt.Net.BCrypt.HashPassword(updateDto.Password);
-        }
+
+        if (updateDto.ProfilePic != null)
+            user.ProfilePic = Convert.FromBase64String(updateDto.ProfilePic);
+        
+        if (updateDto.BannerImg != null)
+            user.BannerImg = Convert.FromBase64String(updateDto.BannerImg);
 
         if (updateDto.Address != null)
         {
@@ -266,42 +181,14 @@ public class UserService : IUserService
 
         await _context.SaveChangesAsync();
 
-        return ApiResponse<UserDto>.SuccessResponse(new UserDto
-        {
-            UserId = user.UserId,
-            FullName = user.FullName,
-            Nickname = user.Nickname,
-            Cpf = user.Cpf,
-            Email = user.Email,
-            PhoneNumber = user.PhoneNumber,
-            IsEnabled = user.IsEnabled,
-            Role = user.Role != null
-                ? new RoleDto
-                {
-                    RoleId = user.Role.RoleId,
-                    RoleName = user.Role.RoleName
-                }
-                : null,
-            Address = user.Address != null
-                ? new AddressDto
-                {
-                    Street = user.Address.Street,
-                    District = user.Address.District,
-                    ZipCode = user.Address.ZipCode,
-                    HouseNumber = user.Address.HouseNumber,
-                    Complement = user.Address.Complement
-                }
-                : null
-        }, "Usuário atualizado com sucesso");
+        return ApiResponse<UserDto>.SuccessResponse(ToUserDto(user), "Usuário atualizado com sucesso");
     }
 
     public async Task<ApiResponse<bool>> DeleteUserAsync(int userId)
     {
         var user = await _context.Users.FindAsync(userId);
         if (user == null)
-        {
             return ApiResponse<bool>.ErrorResponse("Usuário não encontrado");
-        }
 
         user.IsEnabled = false;
         await _context.SaveChangesAsync();
@@ -336,5 +223,39 @@ public class UserService : IUserService
 
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
+    }
+
+    private static UserDto ToUserDto(User user)
+    {
+        return new UserDto
+        {
+            UserId = user.UserId,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Nickname = user.Nickname,
+            Cpf = user.Cpf,
+            Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+            IsEnabled = user.IsEnabled,
+            ProfilePic = user.ProfilePic != null ? Convert.ToBase64String(user.ProfilePic) : null,
+            BannerImg = user.BannerImg != null ? Convert.ToBase64String(user.BannerImg) : null,
+            Role = user.Role != null
+                ? new RoleDto
+                {
+                    RoleId = user.Role.RoleId,
+                    RoleName = user.Role.RoleName
+                }
+                : null,
+            Address = user.Address != null
+                ? new AddressDto
+                {
+                    Street = user.Address.Street,
+                    District = user.Address.District,
+                    ZipCode = user.Address.ZipCode,
+                    HouseNumber = user.Address.HouseNumber,
+                    Complement = user.Address.Complement
+                }
+                : null
+        };
     }
 }
