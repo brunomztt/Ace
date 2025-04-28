@@ -8,9 +8,39 @@ interface SidebarProps {
     onLogout: () => void;
 }
 
+enum NavigationButton {
+    HOME = 0,
+    AGENTS = 1,
+    WEAPONS = 2,
+    MAPS = 3,
+    PROFILE = 4,
+    SETTINGS = 5,
+    LOGOUT = 6,
+}
+
+const BUTTON_LABELS = {
+    [NavigationButton.HOME]: 'Início',
+    [NavigationButton.AGENTS]: 'Agentes',
+    [NavigationButton.WEAPONS]: 'Armas',
+    [NavigationButton.MAPS]: 'Mapas',
+    [NavigationButton.PROFILE]: 'Perfil',
+    [NavigationButton.SETTINGS]: 'Configurações',
+    [NavigationButton.LOGOUT]: 'Sair',
+};
+
+const BUTTON_ICONS = {
+    [NavigationButton.HOME]: 'home',
+    [NavigationButton.AGENTS]: 'groups',
+    [NavigationButton.WEAPONS]: 'local_fire_department',
+    [NavigationButton.MAPS]: 'map',
+    [NavigationButton.PROFILE]: '', // Profile uses pfp
+    [NavigationButton.SETTINGS]: 'settings',
+    [NavigationButton.LOGOUT]: 'logout',
+};
+
 const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
-    const [activeButton, setActiveButton] = useState<number>(0);
+    const [activeButton, setActiveButton] = useState<NavigationButton>(NavigationButton.HOME);
     const [userData, setUserData] = useState<IUser | null>(null);
 
     const menuRef = useRef<HTMLElement>(null);
@@ -78,41 +108,41 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
         }
     }, [isOpen, activeButton]);
 
-    const handleButtonClick = (index: number): void => {
-        setActiveButton(index);
+    const handleButtonClick = (button: NavigationButton): void => {
+        setActiveButton(button);
 
-        switch (index) {
-            case 0:
+        switch (button) {
+            case NavigationButton.HOME:
                 // TODO: Navigate to Home/Dashboard
                 console.log('Home button clicked');
                 break;
-            case 1:
+            case NavigationButton.AGENTS:
                 // TODO: Navigate to Agents page
                 console.log('Agents button clicked');
                 break;
-            case 2:
+            case NavigationButton.WEAPONS:
                 // TODO: Navigate to Weapons page
                 console.log('Weapons button clicked');
                 break;
-            case 3:
+            case NavigationButton.MAPS:
                 // TODO: Navigate to Maps page
                 console.log('Maps button clicked');
                 break;
-            case 4:
+            case NavigationButton.PROFILE:
                 // TODO: Navigate to Profile page
                 console.log('Profile button clicked');
                 break;
-            case 5:
+            case NavigationButton.SETTINGS:
                 // TODO: Navigate to Settings page
                 console.log('Settings button clicked');
                 break;
-            case 6:
+            case NavigationButton.LOGOUT:
                 if (onLogout && typeof onLogout === 'function') {
                     onLogout();
                 }
                 break;
             default:
-                console.warn(`Unhandled button index: ${index}`);
+                console.warn(`Unhandled button type: ${button}`);
         }
     };
 
@@ -120,83 +150,63 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
         buttonRefs.current[index] = el;
     };
 
+    const renderNavigationButton = (button: NavigationButton, icon: string, label: string) => (
+        <button
+            type="button"
+            ref={(el) => addButtonRef(el, button)}
+            className={activeButton === button ? 'active' : ''}
+            onClick={() => handleButtonClick(button)}
+        >
+            <span className="material-symbols-outlined">{icon}</span>
+            <p>{label}</p>
+        </button>
+    );
+
     return (
         <aside className="sidebar" ref={sidebarRef}>
-            <button className="toggle" type="button" onClick={toggleSidebar}>
+            <button className="toggle" type="button" onClick={() => setIsOpen((prev) => !prev)}>
                 <span className="material-symbols-outlined">chevron_right</span>
             </button>
             <div className="inner">
                 <nav className="menu" ref={menuRef}>
                     <div className="menu-buttons">
-                        <button
-                            type="button"
-                            ref={(el) => addButtonRef(el, 0)}
-                            className={activeButton === 0 ? 'active' : ''}
-                            onClick={() => handleButtonClick(0)}
-                        >
-                            <span className="material-symbols-outlined">home</span>
-                            <p>Início</p>
-                        </button>
-                        <button
-                            type="button"
-                            ref={(el) => addButtonRef(el, 1)}
-                            className={activeButton === 1 ? 'active' : ''}
-                            onClick={() => handleButtonClick(1)}
-                        >
-                            <span className="material-symbols-outlined">groups</span>
-                            <p>Agentes</p>
-                        </button>
-                        <button
-                            type="button"
-                            ref={(el) => addButtonRef(el, 2)}
-                            className={activeButton === 2 ? 'active' : ''}
-                            onClick={() => handleButtonClick(2)}
-                        >
-                            <span className="material-symbols-outlined">local_fire_department</span>
-                            <p>Armas</p>
-                        </button>
-                        <button
-                            type="button"
-                            ref={(el) => addButtonRef(el, 3)}
-                            className={activeButton === 3 ? 'active' : ''}
-                            onClick={() => handleButtonClick(3)}
-                        >
-                            <span className="material-symbols-outlined">map</span>
-                            <p>Mapas</p>
-                        </button>
+                        {renderNavigationButton(NavigationButton.HOME, BUTTON_ICONS[NavigationButton.HOME], BUTTON_LABELS[NavigationButton.HOME])}
+                        {renderNavigationButton(
+                            NavigationButton.AGENTS,
+                            BUTTON_ICONS[NavigationButton.AGENTS],
+                            BUTTON_LABELS[NavigationButton.AGENTS]
+                        )}
+                        {renderNavigationButton(
+                            NavigationButton.WEAPONS,
+                            BUTTON_ICONS[NavigationButton.WEAPONS],
+                            BUTTON_LABELS[NavigationButton.WEAPONS]
+                        )}
+                        {renderNavigationButton(NavigationButton.MAPS, BUTTON_ICONS[NavigationButton.MAPS], BUTTON_LABELS[NavigationButton.MAPS])}
                     </div>
                     <div className="configandexit">
                         <div className="profile">
                             <button
                                 type="button"
-                                ref={(el) => addButtonRef(el, 4)}
-                                className={activeButton === 4 ? 'active' : ''}
-                                onClick={() => handleButtonClick(4)}
+                                ref={(el) => addButtonRef(el, NavigationButton.PROFILE)}
+                                className={activeButton === NavigationButton.PROFILE ? 'active' : ''}
+                                onClick={() => handleButtonClick(NavigationButton.PROFILE)}
                             >
                                 <img src="logo.png" alt="Profile" />
                                 <p>{userData?.nickname}</p>
                             </button>
                         </div>
                         <div className="settings">
-                            <button
-                                type="button"
-                                ref={(el) => addButtonRef(el, 5)}
-                                className={activeButton === 5 ? 'active' : ''}
-                                onClick={() => handleButtonClick(5)}
-                            >
-                                <span className="nav-icon material-symbols-outlined">settings</span>
-                                <p>Configurações</p>
-                            </button>
+                            {renderNavigationButton(
+                                NavigationButton.SETTINGS,
+                                BUTTON_ICONS[NavigationButton.SETTINGS],
+                                BUTTON_LABELS[NavigationButton.SETTINGS]
+                            )}
                         </div>
-                        <button
-                            type="button"
-                            ref={(el) => addButtonRef(el, 6)}
-                            className={activeButton === 6 ? 'active' : ''}
-                            onClick={() => handleButtonClick(6)}
-                        >
-                            <span className="material-symbols-outlined">logout</span>
-                            <p>Sair</p>
-                        </button>
+                        {renderNavigationButton(
+                            NavigationButton.LOGOUT,
+                            BUTTON_ICONS[NavigationButton.LOGOUT],
+                            BUTTON_LABELS[NavigationButton.LOGOUT]
+                        )}
                     </div>
                 </nav>
             </div>
