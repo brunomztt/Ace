@@ -92,10 +92,12 @@ public class UsersController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<ApiResponse<bool>>> DeleteUser(int id)
     {
-        var response = await _userService.DeleteUserAsync(id);
+        var authenticatedUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+        var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+        var response = await _userService.DeleteUserAsync(id, authenticatedUserId, userRole);
+
         if (!response.Success)
         {
             return NotFound(response);

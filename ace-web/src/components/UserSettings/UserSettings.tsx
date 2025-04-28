@@ -3,6 +3,7 @@ import { dialogService } from '../Dialog/dialogService';
 import { userApi } from '../../utils/userApi';
 import { IUser, UserDto } from '../../models/User';
 import './UserSettings.scss';
+import authApi from '../../utils/authApi';
 
 interface UserSettingsProps {
     userId: string;
@@ -302,6 +303,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
             try {
                 const response = await userApi.deleteUser(userId);
                 if (response.success) {
+                    authApi.logout();
                     dialogService.success('Conta excluída com sucesso');
                     window.location.href = '/login';
                 } else {

@@ -184,11 +184,14 @@ public class UserService : IUserService
         return ApiResponse<UserDto>.SuccessResponse(ToUserDto(user), "Usuário atualizado com sucesso");
     }
 
-    public async Task<ApiResponse<bool>> DeleteUserAsync(int userId)
+    public async Task<ApiResponse<bool>> DeleteUserAsync(int targetUserId, int authenticatedUserId, string? authenticatedUserRole)
     {
-        var user = await _context.Users.FindAsync(userId);
+        var user = await _context.Users.FindAsync(targetUserId);
         if (user == null)
             return ApiResponse<bool>.ErrorResponse("Usuário não encontrado");
+
+        if (authenticatedUserRole != "Admin" && authenticatedUserId != targetUserId)
+            return ApiResponse<bool>.ErrorResponse("Você não tem permissão para excluir este usuário");
 
         user.IsEnabled = false;
         await _context.SaveChangesAsync();
