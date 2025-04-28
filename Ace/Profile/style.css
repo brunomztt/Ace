@@ -158,16 +158,17 @@ body {
 
 .data {
     grid-area: 1/1/2/3;
+    margin-top: 25px;
+    height: 250px;
     display: flex;
     flex-direction: column;
     justify-content: space-around;
     color: var(--secondary-color);
-    padding: 30px;
     text-align: center;
     border: 1px solid var(--border-color);
     border-radius: 15px;
+    padding: 30px; /* Valor radicalmente diferente para teste */
 }
-
 .other-data {
     display: flex;
     justify-content: space-around;
@@ -198,6 +199,8 @@ body {
     display: flex;
     align-items: center;
     gap: 15px;
+    margin-top: -6px;
+    height: 128px;
 }
 
 .media-link {
@@ -215,6 +218,8 @@ body {
     display: grid;
     grid-template-rows: 70% auto max-content;
     gap: 10px;
+    margin-top: 20px;
+    height: 400px;
 }
 
 .post-cover {
@@ -249,7 +254,7 @@ body {
 }
 
 /* Responsividade */
-@media screen and (max-width: 950px) {
+@media screen and (max-width: 1225px) {
     .last-post {
         display: none;
     }
@@ -258,9 +263,37 @@ body {
     }
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 900px) {
+    .last-post {
+        display: block;
+        width: 100%;
+        order: 1;
+        min-height: calc(90vw - 60px); /* Troquei height por min-height */
+    }
+    .post-CTA {
+        margin-top: 3rem;
+        margin-left: auto; /* Centraliza horizontalmente */
+        margin-right: auto; /* Centraliza horizontalmente */
+        padding: 10px 30px;
+        display: flex;
+        justify-content: center; /* Centraliza o conteúdo horizontalmente dentro do CTA */
+        align-items: center; /* Centraliza o conteúdo verticalmente dentro do CTA */
+        width: auto; /* Deixe o CTA ajustar-se ao conteúdo */
+    }
+    .post-title{
+        margin-left: auto; /* Centraliza horizontalmente */
+        margin-right: auto; /* Centraliza horizontalmente */
+        display: flex;
+        justify-content: center; /* Centraliza o conteúdo horizontalmente dentro do CTA */
+        align-items: center; /* Centraliza o conteúdo verticalmente dentro do CTA */
+        width: auto; /* Deixe o CTA ajustar-se ao conteúdo */
+    }
+    .post-cover{
+        width: 100%;
+        height: 55vw;
+    }
     .infos-profile {
-        width: calc(100% - 20px); 
+        width: 100%; 
     }
     
     .container {
@@ -275,6 +308,7 @@ body {
     }
     .profile-header {
         border-radius: 0;
+        margin: 0;
     }
     .main-profile {
         inset: calc(100% - 75px) auto auto 50%;
@@ -288,11 +322,11 @@ body {
         padding: 0;
     }
     .profile-body {
-        grid-template-columns: 1fr;
+        display: flex; /* <-- Adiciona ISSO */
+        flex-direction: column; /* <-- Empilhar */
         gap: 20px;
     }
     .profile-actions {
-        grid-template-columns: repeat(2, 1fr);
         margin-top: 90px;
     }
     .bio {
@@ -301,4 +335,38 @@ body {
     .data {
         gap: 20px;
     }
+    .account-info {
+        display: flex; /* Troca grid por flex */
+        flex-direction: column; /* Empilha verticalmente */
+        gap: 20px;
+    }
+
+    .data, .social-media {
+        width: 100%; /* Ocupa toda a largura */
+    }
 }
+@media screen and (max-width: 540px) {
+    .last-post {
+        min-height: calc(100vw - 30px); /* Troquei height por min-height */
+    }
+     }
+@media screen and (max-width: 413px) { 
+    .infos-profile {
+        width: calc(100% - 5px); 
+    }
+ }
+@media screen and (max-width: 360px) {
+    .infos-profile {
+        width: calc(100% - 20px); 
+    }
+    .profile-card{
+        width: 100vw;
+    }
+    .profile-header{
+        margin: 0px;
+    }
+    .profile-body{
+        margin-left: -4px;
+    }
+ }
+ 
