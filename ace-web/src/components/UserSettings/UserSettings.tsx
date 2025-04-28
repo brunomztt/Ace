@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { dialogService } from '../Dialog/dialogService';
 import { userApi } from '../../utils/userApi';
 import { IUser, UserDto } from '../../models/User';
-import { IAddress, AddressDto } from '../../models/Address';
 import './UserSettings.scss';
 
 interface UserSettingsProps {
@@ -12,7 +11,6 @@ interface UserSettingsProps {
 const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
     const [activeTab, setActiveTab] = useState<string>('account-general');
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const setupDone = useRef(false);
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -30,6 +28,21 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
         zipCode: '',
         houseNumber: '',
         complement: '',
+        addressId: null as number | null,
+    });
+
+    const [validationState, setValidationState] = useState({
+        isEmailValid: true,
+        isPasswordMatch: true,
+        passwordStrength: {
+            hasLength: false,
+            hasLowercase: false,
+            hasUppercase: false,
+            hasNumber: false,
+            hasSpecial: false,
+            score: 0,
+            message: 'Digite uma senha',
+        },
     });
 
     const [passwordVisibility, setPasswordVisibility] = useState({
@@ -43,42 +56,6 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
             ...prev,
             [field]: !prev[field],
         }));
-    };
-
-    const resetFormValidations = () => {
-        const lengthMsgs = document.querySelectorAll('.length-msg');
-        lengthMsgs.forEach((msg) => {
-            (msg as HTMLElement).style.visibility = 'hidden';
-        });
-
-        const charCounters = document.querySelectorAll('.char-counter');
-        charCounters.forEach((counter) => {
-            (counter as HTMLElement).style.color = '#888';
-            counter.textContent = '0/20';
-        });
-
-        const validationMsgs = document.querySelectorAll('.email-msg, .confirm-msg');
-        validationMsgs.forEach((msg) => {
-            (msg as HTMLElement).style.display = 'none';
-        });
-
-        const strengthBars = document.querySelectorAll('.strength-bar div > div');
-        strengthBars.forEach((bar) => {
-            (bar as HTMLElement).style.width = '0';
-            (bar as HTMLElement).style.background = '#ddd';
-        });
-
-        const strengthTexts = document.querySelectorAll('.strength-bar div + div');
-        strengthTexts.forEach((text) => {
-            (text as HTMLElement).textContent = 'Digite uma senha';
-            (text as HTMLElement).style.color = '#888';
-        });
-
-        const ruleStatuses = document.querySelectorAll('.rule-status');
-        ruleStatuses.forEach((status) => {
-            status.textContent = '✕';
-            (status as HTMLElement).style.color = '#f55';
-        });
     };
 
     useEffect(() => {
@@ -101,6 +78,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                         zipCode: user.address?.zipCode || '',
                         houseNumber: user.address?.houseNumber || '',
                         complement: user.address?.complement || '',
+                        addressId: user.address?.addressId || null,
                     }));
                 }
             } catch (error: any) {
@@ -114,324 +92,67 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
     }, [userId]);
 
     useEffect(() => {
-        if (setupDone.current) return;
-        setupDone.current = true;
+        if (formData.email) {
+            const isValid = formData.email.indexOf('@') > 0 && formData.email.indexOf('.', formData.email.indexOf('@')) > 0;
+            setValidationState((prev) => ({ ...prev, isEmailValid: isValid }));
+        }
+    }, [formData.email]);
 
-        const setupValidations = () => {
-            const zipCodeInput = document.getElementById('zipCode') as HTMLInputElement;
-            if (zipCodeInput) {
-                zipCodeInput.addEventListener('input', (e) => {
-                    const target = e.target as HTMLInputElement;
-                    let value = target.value.replace(/\D/g, '');
-                    if (value.length > 8) {
-                        value = value.substring(0, 8);
-                    }
-                    if (value.length > 5) {
-                        value = value.replace(/^(\d{5})(\d{1,3})$/, '$1-$2');
-                    }
-                    target.value = value;
-                });
+    useEffect(() => {
+        if (formData.confirmPassword) {
+            setValidationState((prev) => ({
+                ...prev,
+                isPasswordMatch: formData.newPassword === formData.confirmPassword,
+            }));
+        }
+    }, [formData.newPassword, formData.confirmPassword]);
+
+    useEffect(() => {
+        if (formData.newPassword) {
+            const hasLength = formData.newPassword.length >= 8;
+            const hasLowercase = /[a-z]/.test(formData.newPassword);
+            const hasUppercase = /[A-Z]/.test(formData.newPassword);
+            const hasNumber = /\d/.test(formData.newPassword);
+            const hasSpecial = /[^a-zA-Z0-9]/.test(formData.newPassword);
+
+            let points = 0;
+            if (hasLength) points++;
+            if (hasLowercase) points++;
+            if (hasUppercase) points++;
+            if (hasNumber) points++;
+            if (hasSpecial) points++;
+
+            let message;
+            if (formData.newPassword === '') {
+                message = 'Digite uma senha';
+            } else if (points <= 2) {
+                message = 'Senha fraca';
+            } else if (points <= 4) {
+                message = 'Senha média';
+            } else {
+                message = 'Senha forte';
             }
 
-            const phoneInput = document.getElementById('phoneNumber') as HTMLInputElement;
-            if (phoneInput) {
-                phoneInput.addEventListener('input', (e) => {
-                    const target = e.target as HTMLInputElement;
-                    let value = target.value.replace(/\D/g, '');
-                    if (value.length > 11) {
-                        value = value.substring(0, 11);
-                    }
-                    if (value.length > 7) {
-                        value = value.replace(/^(\d{2})(\d{5})(\d{1,4})$/, '($1) $2-$3');
-                    } else if (value.length > 2) {
-                        value = value.replace(/^(\d{2})(\d{1,5})$/, '($1) $2');
-                    }
-                    target.value = value;
-                });
-            }
-
-            const passwordInput = document.getElementById('newPassword') as HTMLInputElement;
-            if (passwordInput) {
-                if (!passwordInput.parentNode?.querySelector('.password-feedback')) {
-                    const inputBox = passwordInput.closest('.input-box');
-
-                    let passwordFeedback = document.createElement('div');
-                    passwordFeedback.className = 'password-feedback';
-                    passwordFeedback.style.position = 'relative';
-                    passwordFeedback.style.zIndex = '10';
-                    passwordFeedback.style.clear = 'both';
-
-                    let strengthBar = document.createElement('div');
-                    strengthBar.className = 'strength-bar';
-                    strengthBar.innerHTML = `
-                        <div style="height:3px; background:#ddd; margin:5px 0">
-                        <div style="height:100%; width:0; background:#f00"></div>
-                        </div>
-                        <div style="font-size:11px; color:#888; margin-bottom:5px">Digite uma senha</div>
-                    `;
-                    passwordFeedback.appendChild(strengthBar);
-
-                    let rulesList = document.createElement('div');
-                    rulesList.className = 'rules-list';
-                    rulesList.style.fontSize = '11px';
-                    rulesList.style.marginTop = '5px';
-                    rulesList.style.display = 'flex';
-                    rulesList.style.flexWrap = 'wrap';
-                    rulesList.style.gap = '5px';
-
-                    const rules = [
-                        { id: 'length', text: 'Mínimo de 8 caracteres' },
-                        { id: 'lowercase', text: 'Pelo menos 1 letra minúscula' },
-                        { id: 'uppercase', text: 'Pelo menos 1 letra maiúscula' },
-                        { id: 'number', text: 'Pelo menos 1 número' },
-                        { id: 'special', text: 'Pelo menos 1 caractere especial' },
-                    ];
-
-                    const leftColumn = document.createElement('div');
-                    leftColumn.style.flex = '1';
-                    leftColumn.style.minWidth = '45%';
-
-                    const rightColumn = document.createElement('div');
-                    rightColumn.style.flex = '1';
-                    rightColumn.style.minWidth = '45%';
-
-                    rules.forEach((rule, index) => {
-                        const ruleElement = document.createElement('div');
-                        ruleElement.className = `rule ${rule.id}`;
-                        ruleElement.style.display = 'flex';
-                        ruleElement.style.alignItems = 'center';
-                        ruleElement.style.marginBottom = '3px';
-                        ruleElement.innerHTML = `
-                            <span class="rule-status" style="font-weight:bold; margin-right:5px; color:#f55;">✕</span>
-                            <span class="rule-text">${rule.text}</span>
-                        `;
-
-                        if (index < 3) {
-                            leftColumn.appendChild(ruleElement);
-                        } else {
-                            rightColumn.appendChild(ruleElement);
-                        }
-                    });
-
-                    rulesList.appendChild(leftColumn);
-                    rulesList.appendChild(rightColumn);
-                    passwordFeedback.appendChild(rulesList);
-
-                    if (inputBox && inputBox.nextSibling) {
-                        inputBox.parentNode?.insertBefore(passwordFeedback, inputBox.nextSibling);
-                    } else {
-                        passwordInput.parentNode?.appendChild(passwordFeedback);
-                    }
-
-                    const evaluatePassword = () => {
-                        const password = passwordInput.value;
-                        const bar = strengthBar.querySelector('div > div') as HTMLDivElement;
-                        const text = strengthBar.querySelector('div + div') as HTMLDivElement;
-
-                        const hasLength = password.length >= 8;
-                        const hasLowercase = /[a-z]/.test(password);
-                        const hasUppercase = /[A-Z]/.test(password);
-                        const hasNumber = /\d/.test(password);
-                        const hasSpecial = /[^a-zA-Z0-9]/.test(password);
-
-                        const updateRule = (ruleId: string, passed: boolean) => {
-                            const ruleElement = rulesList.querySelector(`.rule.${ruleId} .rule-status`);
-                            if (ruleElement) {
-                                ruleElement.textContent = passed ? '✓' : '✕';
-                                (ruleElement as HTMLElement).style.color = passed ? '#5c3' : '#f55';
-                            }
-                        };
-
-                        updateRule('length', hasLength);
-                        updateRule('lowercase', hasLowercase);
-                        updateRule('uppercase', hasUppercase);
-                        updateRule('number', hasNumber);
-                        updateRule('special', hasSpecial);
-
-                        rulesList.style.display = 'flex';
-
-                        let points = 0;
-                        if (hasLength) points++;
-                        if (hasLowercase) points++;
-                        if (hasUppercase) points++;
-                        if (hasNumber) points++;
-                        if (hasSpecial) points++;
-
-                        let percentage = points * 20;
-                        let color, message;
-
-                        if (password === '') {
-                            color = '#ddd';
-                            message = 'Digite uma senha';
-                            percentage = 0;
-                        } else if (points <= 2) {
-                            color = '#f55';
-                            message = 'Senha fraca';
-                        } else if (points <= 4) {
-                            color = '#fa3';
-                            message = 'Senha média';
-                        } else {
-                            color = '#5c3';
-                            message = 'Senha forte';
-                        }
-
-                        bar.style.width = percentage + '%';
-                        bar.style.background = color;
-                        text.textContent = message;
-                        text.style.color = color;
-                    };
-
-                    passwordInput.addEventListener('input', evaluatePassword);
-                    if (passwordInput.value) evaluatePassword();
-                }
-            }
-
-            const confirmPasswordInput = document.getElementById('confirmPassword') as HTMLInputElement;
-            if (confirmPasswordInput && passwordInput) {
-                if (!confirmPasswordInput.parentNode?.querySelector('.confirm-msg')) {
-                    const confirmMsg = document.createElement('div');
-                    confirmMsg.className = 'confirm-msg';
-                    confirmMsg.style.fontSize = '11px';
-                    confirmMsg.style.marginTop = '4px';
-                    confirmMsg.style.display = 'none';
-
-                    const inputBox = confirmPasswordInput.closest('.input-box');
-                    if (inputBox && inputBox.nextSibling) {
-                        inputBox.parentNode?.insertBefore(confirmMsg, inputBox.nextSibling);
-                    } else {
-                        confirmPasswordInput.parentNode?.appendChild(confirmMsg);
-                    }
-
-                    const checkPasswords = () => {
-                        const original = passwordInput.value;
-                        const confirm = confirmPasswordInput.value;
-                        if (confirm === '') {
-                            confirmMsg.style.display = 'none';
-                            return;
-                        }
-                        confirmMsg.style.display = 'block';
-                        confirmMsg.textContent = original === confirm ? 'Senhas iguais' : 'Senhas diferentes';
-                        confirmMsg.style.color = original === confirm ? '#5c3' : '#f55';
-                    };
-
-                    confirmPasswordInput.addEventListener('input', checkPasswords);
-                    if (confirmPasswordInput.value) checkPasswords();
-                }
-            }
-
-            const emailInput = document.getElementById('email') as HTMLInputElement;
-            if (emailInput) {
-                if (!emailInput.parentNode?.querySelector('.email-msg')) {
-                    const emailMsg = document.createElement('div');
-                    emailMsg.className = 'email-msg';
-                    emailMsg.style.fontSize = '11px';
-                    emailMsg.style.marginTop = '4px';
-                    emailMsg.style.display = 'none';
-
-                    const inputBox = emailInput.closest('.input-box');
-                    if (inputBox && inputBox.nextSibling) {
-                        inputBox.parentNode?.insertBefore(emailMsg, inputBox.nextSibling);
-                    } else {
-                        emailInput.parentNode?.appendChild(emailMsg);
-                    }
-
-                    const validateEmail = () => {
-                        const email = emailInput.value;
-                        if (email === '') {
-                            emailMsg.style.display = 'none';
-                            return;
-                        }
-                        emailMsg.style.display = 'block';
-                        if (email.indexOf('@') > 0 && email.indexOf('.', email.indexOf('@')) > 0) {
-                            emailMsg.textContent = 'Email válido';
-                            emailMsg.style.color = '#5c3';
-                            return;
-                        }
-                        emailMsg.textContent = 'Email inválido';
-                        emailMsg.style.color = '#f55';
-                    };
-
-                    emailInput.addEventListener('input', validateEmail);
-                    if (emailInput.value) validateEmail();
-                }
-            }
-
-            const textFields = document.querySelectorAll('.text-field');
-            textFields.forEach((field) => {
-                const inputField = field as HTMLInputElement;
-                if (!inputField.maxLength) {
-                    inputField.maxLength = 50;
-                }
-
-                if (!field.parentNode?.querySelector('.status-container')) {
-                    let statusContainer = document.createElement('div');
-                    statusContainer.className = 'status-container';
-                    statusContainer.style.display = 'flex';
-                    statusContainer.style.justifyContent = 'space-between';
-                    statusContainer.style.alignItems = 'center';
-                    statusContainer.style.padding = '0 10px';
-                    statusContainer.style.width = '100%';
-
-                    let counter = document.createElement('div');
-                    counter.className = 'char-counter';
-                    counter.style.fontSize = '11px';
-                    counter.style.textAlign = 'right';
-                    counter.style.color = '#888';
-                    counter.style.position = 'relative';
-                    statusContainer.appendChild(counter);
-
-                    let lengthMsg = document.createElement('div');
-                    lengthMsg.className = 'length-msg';
-                    lengthMsg.style.fontSize = '11px';
-                    lengthMsg.style.textAlign = 'left';
-                    lengthMsg.style.visibility = 'hidden';
-                    lengthMsg.style.flexGrow = '1';
-                    lengthMsg.style.paddingLeft = '10px';
-                    statusContainer.style.position = 'relative';
-                    statusContainer.appendChild(lengthMsg);
-
-                    const inputBox = field.closest('.input-box');
-                    if (inputBox && inputBox.nextSibling) {
-                        inputBox.parentNode?.insertBefore(statusContainer, inputBox.nextSibling);
-                    } else {
-                        field.parentNode?.appendChild(statusContainer);
-                    }
-
-                    const updateStatus = () => {
-                        const maxLength = inputField.maxLength;
-                        counter.textContent = inputField.value.length + '/' + maxLength;
-
-                        if (inputField.minLength && inputField.value.length > 0 && inputField.value.length < inputField.minLength) {
-                            lengthMsg.style.visibility = 'visible';
-                            lengthMsg.textContent = `Mínimo de ${inputField.minLength} caracteres`;
-                            lengthMsg.style.color = '#f55';
-                            counter.style.color = '#f55';
-                        } else if (inputField.value.length > 0) {
-                            lengthMsg.style.visibility = 'visible';
-                            lengthMsg.textContent = 'Tamanho válido';
-                            lengthMsg.style.color = '#5c3';
-                            counter.style.color = '#888';
-                        } else {
-                            lengthMsg.style.visibility = 'hidden';
-                            counter.style.color = '#888';
-                        }
-                    };
-
-                    inputField.addEventListener('input', updateStatus);
-                    updateStatus();
-                }
-            });
-        };
-
-        setupValidations();
-    }, []);
+            setValidationState((prev) => ({
+                ...prev,
+                passwordStrength: {
+                    hasLength,
+                    hasLowercase,
+                    hasUppercase,
+                    hasNumber,
+                    hasSpecial,
+                    score: points,
+                    message,
+                },
+            }));
+        }
+    }, [formData.newPassword]);
 
     const handleTabChange = useCallback((tabId: string, event?: React.MouseEvent) => {
         if (event) {
             event.preventDefault();
             event.stopPropagation();
         }
-        resetFormValidations();
         setActiveTab(tabId);
     }, []);
 
@@ -452,6 +173,36 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
         });
     };
 
+    const handleZipCodeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        let value = event.target.value.replace(/\D/g, '');
+        if (value.length > 8) {
+            value = value.substring(0, 8);
+        }
+        if (value.length > 5) {
+            value = value.replace(/^(\d{5})(\d{1,3})$/, '$1-$2');
+        }
+        setFormData({
+            ...formData,
+            zipCode: value,
+        });
+    };
+
+    const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        let value = event.target.value.replace(/\D/g, '');
+        if (value.length > 11) {
+            value = value.substring(0, 11);
+        }
+        if (value.length > 7) {
+            value = value.replace(/^(\d{2})(\d{5})(\d{1,4})$/, '($1) $2-$3');
+        } else if (value.length > 2) {
+            value = value.replace(/^(\d{2})(\d{1,5})$/, '($1) $2');
+        }
+        setFormData({
+            ...formData,
+            phoneNumber: value,
+        });
+    };
+
     const handleReset = (fileType: 'profilePic' | 'bannerImg') => {
         setFormData({
             ...formData,
@@ -469,9 +220,9 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                 updateData.lastName = formData.lastName;
                 updateData.phoneNumber = formData.phoneNumber;
 
-                if (formData.street || formData.district || formData.zipCode || formData.houseNumber) {
+                if (formData.street || formData.district || formData.zipCode || formData.houseNumber || formData.complement) {
                     updateData.address = {
-                        addressId: null,
+                        addressId: formData.addressId,
                         street: formData.street,
                         district: formData.district,
                         zipCode: formData.zipCode,
@@ -522,6 +273,12 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
 
             if (response.success) {
                 dialogService.success('Informações atualizadas com sucesso!');
+                if (response.data?.address?.addressId) {
+                    setFormData((prev) => ({
+                        ...prev,
+                        addressId: response.data?.address?.addressId ? response.data.address.addressId : null,
+                    }));
+                }
             } else {
                 throw new Error(response.message || 'Erro ao atualizar');
             }
@@ -556,6 +313,13 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                 setIsLoading(false);
             }
         });
+    };
+
+    const getPasswordStrengthColor = () => {
+        if (formData.newPassword === '') return '#ddd';
+        if (validationState.passwordStrength.score <= 2) return '#f55';
+        if (validationState.passwordStrength.score <= 4) return '#fa3';
+        return '#5c3';
     };
 
     return (
@@ -661,6 +425,18 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                                             />
                                             <i className="bx bxs-user"></i>
                                         </div>
+                                        <div
+                                            className="status-container"
+                                            style={{ display: 'flex', justifyContent: 'space-between', padding: '0 10px' }}
+                                        >
+                                            <div
+                                                className="length-msg"
+                                                style={{ fontSize: '11px', visibility: 'hidden', flexGrow: 1, paddingLeft: '10px' }}
+                                            ></div>
+                                            <div className="char-counter" style={{ fontSize: '11px', textAlign: 'right', color: '#888' }}>
+                                                {formData.nickname.length}/20
+                                            </div>
+                                        </div>
                                     </div>
                                     <div className="form-group">
                                         <label className="form-label">Nome</label>
@@ -677,6 +453,33 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                                             />
                                             <i className="bx bxs-user"></i>
                                         </div>
+                                        <div
+                                            className="status-container"
+                                            style={{ display: 'flex', justifyContent: 'space-between', padding: '0 10px' }}
+                                        >
+                                            <div
+                                                className="length-msg"
+                                                style={{
+                                                    fontSize: '11px',
+                                                    visibility: formData.firstName.length > 0 ? 'visible' : 'hidden',
+                                                    color: formData.firstName.length >= 3 ? '#5c3' : '#f55',
+                                                    flexGrow: 1,
+                                                    paddingLeft: '10px',
+                                                }}
+                                            >
+                                                {formData.firstName.length >= 3 ? 'Tamanho válido' : `Mínimo de 3 caracteres`}
+                                            </div>
+                                            <div
+                                                className="char-counter"
+                                                style={{
+                                                    fontSize: '11px',
+                                                    textAlign: 'right',
+                                                    color: formData.firstName.length < 3 && formData.firstName.length > 0 ? '#f55' : '#888',
+                                                }}
+                                            >
+                                                {formData.firstName.length}/50
+                                            </div>
+                                        </div>
                                     </div>
                                     <div className="form-group">
                                         <label className="form-label">Sobrenome</label>
@@ -691,6 +494,26 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                                                 maxLength={50}
                                             />
                                             <i className="bx bxs-user"></i>
+                                        </div>
+                                        <div
+                                            className="status-container"
+                                            style={{ display: 'flex', justifyContent: 'space-between', padding: '0 10px' }}
+                                        >
+                                            <div
+                                                className="length-msg"
+                                                style={{
+                                                    fontSize: '11px',
+                                                    visibility: formData.lastName.length > 0 ? 'visible' : 'hidden',
+                                                    color: '#5c3',
+                                                    flexGrow: 1,
+                                                    paddingLeft: '10px',
+                                                }}
+                                            >
+                                                Tamanho válido
+                                            </div>
+                                            <div className="char-counter" style={{ fontSize: '11px', textAlign: 'right', color: '#888' }}>
+                                                {formData.lastName.length}/50
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="form-group">
@@ -707,6 +530,19 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                                             />
                                             <i className="bx bxs-envelope"></i>
                                         </div>
+                                        {formData.email && (
+                                            <div
+                                                className="email-msg"
+                                                style={{
+                                                    fontSize: '11px',
+                                                    marginTop: '4px',
+                                                    display: 'block',
+                                                    color: validationState.isEmailValid ? '#5c3' : '#f55',
+                                                }}
+                                            >
+                                                {validationState.isEmailValid ? 'Email válido' : 'Email inválido'}
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="form-group">
                                         <label className="form-label">Telefone</label>
@@ -717,7 +553,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                                                 name="phoneNumber"
                                                 id="phoneNumber"
                                                 value={formData.phoneNumber}
-                                                onChange={handleInputChange}
+                                                onChange={handlePhoneChange}
                                             />
                                             <i className="bx bx-phone"></i>
                                         </div>
@@ -738,6 +574,26 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                                             />
                                             <i className="bx bx-map"></i>
                                         </div>
+                                        <div
+                                            className="status-container"
+                                            style={{ display: 'flex', justifyContent: 'space-between', padding: '0 10px' }}
+                                        >
+                                            <div
+                                                className="length-msg"
+                                                style={{
+                                                    fontSize: '11px',
+                                                    visibility: formData.street.length > 0 ? 'visible' : 'hidden',
+                                                    color: '#5c3',
+                                                    flexGrow: 1,
+                                                    paddingLeft: '10px',
+                                                }}
+                                            >
+                                                Tamanho válido
+                                            </div>
+                                            <div className="char-counter" style={{ fontSize: '11px', textAlign: 'right', color: '#888' }}>
+                                                {formData.street.length}/100
+                                            </div>
+                                        </div>
                                     </div>
                                     <div className="row">
                                         <div className="col-md-6">
@@ -755,6 +611,26 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                                                     />
                                                     <i className="bx bx-building-house"></i>
                                                 </div>
+                                                <div
+                                                    className="status-container"
+                                                    style={{ display: 'flex', justifyContent: 'space-between', padding: '0 10px' }}
+                                                >
+                                                    <div
+                                                        className="length-msg"
+                                                        style={{
+                                                            fontSize: '11px',
+                                                            visibility: formData.district.length > 0 ? 'visible' : 'hidden',
+                                                            color: '#5c3',
+                                                            flexGrow: 1,
+                                                            paddingLeft: '10px',
+                                                        }}
+                                                    >
+                                                        Tamanho válido
+                                                    </div>
+                                                    <div className="char-counter" style={{ fontSize: '11px', textAlign: 'right', color: '#888' }}>
+                                                        {formData.district.length}/50
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="col-md-6">
@@ -767,7 +643,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                                                         name="zipCode"
                                                         id="zipCode"
                                                         value={formData.zipCode}
-                                                        onChange={handleInputChange}
+                                                        onChange={handleZipCodeChange}
                                                         maxLength={9}
                                                     />
                                                     <i className="bx bx-mailbox"></i>
@@ -807,6 +683,26 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                                                         maxLength={50}
                                                     />
                                                     <i className="bx bx-info-circle"></i>
+                                                </div>
+                                                <div
+                                                    className="status-container"
+                                                    style={{ display: 'flex', justifyContent: 'space-between', padding: '0 10px' }}
+                                                >
+                                                    <div
+                                                        className="length-msg"
+                                                        style={{
+                                                            fontSize: '11px',
+                                                            visibility: formData.complement.length > 0 ? 'visible' : 'hidden',
+                                                            color: '#5c3',
+                                                            flexGrow: 1,
+                                                            paddingLeft: '10px',
+                                                        }}
+                                                    >
+                                                        Tamanho válido
+                                                    </div>
+                                                    <div className="char-counter" style={{ fontSize: '11px', textAlign: 'right', color: '#888' }}>
+                                                        {formData.complement.length}/50
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -851,6 +747,111 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                                                 onClick={() => togglePasswordVisibility('new')}
                                             ></i>
                                         </div>
+                                        <div className="password-feedback" style={{ position: 'relative', zIndex: '10', clear: 'both' }}>
+                                            <div className="strength-bar">
+                                                <div style={{ height: '3px', background: '#ddd', margin: '5px 0' }}>
+                                                    <div
+                                                        style={{
+                                                            height: '100%',
+                                                            width: `${validationState.passwordStrength.score * 20}%`,
+                                                            background: getPasswordStrengthColor(),
+                                                        }}
+                                                    ></div>
+                                                </div>
+                                                <div style={{ fontSize: '11px', color: getPasswordStrengthColor(), marginBottom: '5px' }}>
+                                                    {validationState.passwordStrength.message}
+                                                </div>
+                                            </div>
+                                            <div
+                                                className="rules-list"
+                                                style={{ fontSize: '11px', marginTop: '5px', display: 'flex', flexWrap: 'wrap', gap: '5px' }}
+                                            >
+                                                <div style={{ flex: '1', minWidth: '45%' }}>
+                                                    <div
+                                                        className="rule length"
+                                                        style={{ display: 'flex', alignItems: 'center', marginBottom: '3px' }}
+                                                    >
+                                                        <span
+                                                            className="rule-status"
+                                                            style={{
+                                                                fontWeight: 'bold',
+                                                                marginRight: '5px',
+                                                                color: validationState.passwordStrength.hasLength ? '#5c3' : '#f55',
+                                                            }}
+                                                        >
+                                                            {validationState.passwordStrength.hasLength ? '✓' : '✕'}
+                                                        </span>
+                                                        <span className="rule-text">Mínimo de 8 caracteres</span>
+                                                    </div>
+                                                    <div
+                                                        className="rule lowercase"
+                                                        style={{ display: 'flex', alignItems: 'center', marginBottom: '3px' }}
+                                                    >
+                                                        <span
+                                                            className="rule-status"
+                                                            style={{
+                                                                fontWeight: 'bold',
+                                                                marginRight: '5px',
+                                                                color: validationState.passwordStrength.hasLowercase ? '#5c3' : '#f55',
+                                                            }}
+                                                        >
+                                                            {validationState.passwordStrength.hasLowercase ? '✓' : '✕'}
+                                                        </span>
+                                                        <span className="rule-text">Pelo menos 1 letra minúscula</span>
+                                                    </div>
+                                                    <div
+                                                        className="rule uppercase"
+                                                        style={{ display: 'flex', alignItems: 'center', marginBottom: '3px' }}
+                                                    >
+                                                        <span
+                                                            className="rule-status"
+                                                            style={{
+                                                                fontWeight: 'bold',
+                                                                marginRight: '5px',
+                                                                color: validationState.passwordStrength.hasUppercase ? '#5c3' : '#f55',
+                                                            }}
+                                                        >
+                                                            {validationState.passwordStrength.hasUppercase ? '✓' : '✕'}
+                                                        </span>
+                                                        <span className="rule-text">Pelo menos 1 letra maiúscula</span>
+                                                    </div>
+                                                </div>
+                                                <div style={{ flex: '1', minWidth: '45%' }}>
+                                                    <div
+                                                        className="rule number"
+                                                        style={{ display: 'flex', alignItems: 'center', marginBottom: '3px' }}
+                                                    >
+                                                        <span
+                                                            className="rule-status"
+                                                            style={{
+                                                                fontWeight: 'bold',
+                                                                marginRight: '5px',
+                                                                color: validationState.passwordStrength.hasNumber ? '#5c3' : '#f55',
+                                                            }}
+                                                        >
+                                                            {validationState.passwordStrength.hasNumber ? '✓' : '✕'}
+                                                        </span>
+                                                        <span className="rule-text">Pelo menos 1 número</span>
+                                                    </div>
+                                                    <div
+                                                        className="rule special"
+                                                        style={{ display: 'flex', alignItems: 'center', marginBottom: '3px' }}
+                                                    >
+                                                        <span
+                                                            className="rule-status"
+                                                            style={{
+                                                                fontWeight: 'bold',
+                                                                marginRight: '5px',
+                                                                color: validationState.passwordStrength.hasSpecial ? '#5c3' : '#f55',
+                                                            }}
+                                                        >
+                                                            {validationState.passwordStrength.hasSpecial ? '✓' : '✕'}
+                                                        </span>
+                                                        <span className="rule-text">Pelo menos 1 caractere especial</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div className="form-group">
                                         <label className="form-label">Confirme a nova senha</label>
@@ -869,6 +870,19 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                                                 onClick={() => togglePasswordVisibility('confirm')}
                                             ></i>
                                         </div>
+                                        {formData.confirmPassword && (
+                                            <div
+                                                className="confirm-msg"
+                                                style={{
+                                                    fontSize: '11px',
+                                                    marginTop: '4px',
+                                                    display: 'block',
+                                                    color: validationState.isPasswordMatch ? '#5c3' : '#f55',
+                                                }}
+                                            >
+                                                {validationState.isPasswordMatch ? 'Senhas iguais' : 'Senhas diferentes'}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

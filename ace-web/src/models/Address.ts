@@ -1,5 +1,5 @@
 export interface IAddress {
-    addressId: number;
+    addressId: number | null;
     street: string;
     district: string;
     zipCode: string;
@@ -8,7 +8,7 @@ export interface IAddress {
 }
 
 export interface AddressDto {
-    addressId: number | undefined;
+    addressId: number | null;
     street: string;
     district: string;
     zipCode: string;

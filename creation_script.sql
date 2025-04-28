@@ -6,7 +6,7 @@ CREATE TABLE address (
   address_id INT NOT NULL AUTO_INCREMENT,
   street VARCHAR(100) NOT NULL,
   district VARCHAR(50) NOT NULL,
-  zip_code CHAR(8) NOT NULL,
+  zip_code CHAR(9) NOT NULL,
   house_number VARCHAR(10) NOT NULL,
   complement VARCHAR(100) DEFAULT NULL,
   PRIMARY KEY (address_id)
