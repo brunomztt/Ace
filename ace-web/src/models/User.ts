@@ -47,6 +47,7 @@ export interface UserUpdateDto {
     currentPassword?: string;
     profilePic?: string | null;
     bannerImg?: string | null;
+    cpf?: string;
     birthDate?: string;
     address?: AddressDto;
 }

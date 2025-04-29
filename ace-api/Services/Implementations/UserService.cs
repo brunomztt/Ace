@@ -144,6 +144,14 @@ public class UserService : IUserService
         if (!string.IsNullOrEmpty(updateDto.PhoneNumber))
             user.PhoneNumber = updateDto.PhoneNumber;
 
+        if (!string.IsNullOrEmpty(updateDto.Cpf))
+        {
+            if (await _context.Users.AnyAsync(u => u.Cpf == updateDto.Cpf))
+                return ApiResponse<UserDto>.ErrorResponse("Este CPF já está cadastrado");
+            user.Cpf = updateDto.Cpf;
+        }
+        
+
         if (!string.IsNullOrEmpty(updateDto.Password))
         {
             if (string.IsNullOrEmpty(updateDto.CurrentPassword))

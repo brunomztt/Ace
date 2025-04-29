@@ -8,6 +8,7 @@ public class UserUpdateDto
     public string? PhoneNumber { get; set; }
     public string? Password { get; set; }
     public string? CurrentPassword { get; set; } 
+    public string? Cpf { get; set; }
     public string? ProfilePic { get; set; }
     public string? BannerImg { get; set; }
     public string? BirthDate { get; set; }

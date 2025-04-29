@@ -4,6 +4,7 @@ import { userApi } from '../../utils/userApi';
 import { IUser, UserDto, UserUpdateDto } from '../../models/User';
 import './UserSettings.scss';
 import authApi from '../../utils/authApi';
+import { validateCPF, formatCPF } from '../../utils/cpfUtils';
 
 interface UserSettingsProps {
     userId: string;
@@ -18,6 +19,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
         nickname: '',
         email: '',
         phoneNumber: '',
+        cpf: '',
         password: '',
         newPassword: '',
         confirmPassword: '',
@@ -37,6 +39,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
     const [validationState, setValidationState] = useState({
         isEmailValid: true,
         isPasswordMatch: true,
+        isCpfValid: false,
         passwordStrength: {
             hasLength: false,
             hasLowercase: false,
@@ -90,6 +93,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                         nickname: user.nickname || '',
                         email: user.email || '',
                         phoneNumber: user.phoneNumber || '',
+                        cpf: formatCPF(user.cpf || ''),
                         birthDate: user.birthDate || '',
                         street: user.address?.street || '',
                         district: user.address?.district || '',
@@ -100,6 +104,13 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                         profilePicBase64: user.profilePic || null,
                         bannerImgBase64: user.bannerImg || null,
                     }));
+
+                    if (user.cpf) {
+                        setValidationState((prev) => ({
+                            ...prev,
+                            isCpfValid: validateCPF(user.cpf),
+                        }));
+                    }
                 }
             } catch (error: any) {
                 dialogService.error(error.message || 'Erro ao carregar informações do usuário');
@@ -117,6 +128,16 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
             setValidationState((prev) => ({ ...prev, isEmailValid: isValid }));
         }
     }, [formData.email]);
+
+    useEffect(() => {
+        if (formData.cpf) {
+            const cpfValue = formData.cpf.replace(/\D/g, '');
+            const isValid = cpfValue.length === 11 && validateCPF(cpfValue);
+            setValidationState((prev) => ({ ...prev, isCpfValid: isValid }));
+        } else {
+            setValidationState((prev) => ({ ...prev, isCpfValid: false }));
+        }
+    }, [formData.cpf]);
 
     useEffect(() => {
         if (formData.confirmPassword) {
@@ -201,6 +222,15 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
         });
     };
 
+    const handleCpfChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        let value = event.target.value;
+        const formattedCpf = formatCPF(value);
+        setFormData({
+            ...formData,
+            cpf: formattedCpf,
+        });
+    };
+
     const handleZipCodeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         let value = event.target.value.replace(/\D/g, '');
         if (value.length > 8) {
@@ -248,6 +278,16 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                 updateData.firstName = formData.firstName;
                 updateData.lastName = formData.lastName;
                 updateData.phoneNumber = formData.phoneNumber;
+
+                const cpfValue = formData.cpf.replace(/\D/g, '');
+                if (cpfValue.length === 11) {
+                    if (!validateCPF(cpfValue)) {
+                        dialogService.error('CPF inválido');
+                        setIsLoading(false);
+                        return;
+                    }
+                    updateData.cpf = cpfValue;
+                }
 
                 if (formData.street || formData.district || formData.zipCode || formData.houseNumber || formData.complement) {
                     updateData.address = {
@@ -302,6 +342,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                         firstName: updateData.firstName,
                         lastName: updateData.lastName,
                         phoneNumber: updateData.phoneNumber,
+                        cpf: updateData.cpf,
                     });
                 }
 
@@ -478,6 +519,37 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                                             <div className="char-counter" style={{ fontSize: '11px', textAlign: 'right', color: '#888' }}>
                                                 {formData.nickname.length}/20
                                             </div>
+                                        </div>
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">CPF</label>
+                                        <div className="input-box">
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                name="cpf"
+                                                id="cpf"
+                                                value={formData.cpf}
+                                                onChange={handleCpfChange}
+                                                maxLength={14}
+                                                placeholder="000.000.000-00"
+                                            />
+                                            <i className="bx bx-id-card"></i>
+                                        </div>
+                                        <div
+                                            className="cpf-msg"
+                                            style={{
+                                                fontSize: '11px',
+                                                marginTop: '4px',
+                                                display: formData.cpf ? 'block' : 'none',
+                                                color: validationState.isCpfValid ? '#5c3' : '#f55',
+                                            }}
+                                        >
+                                            {formData.cpf.replace(/\D/g, '').length !== 11
+                                                ? 'CPF incompleto'
+                                                : validationState.isCpfValid
+                                                  ? 'CPF válido'
+                                                  : 'CPF inválido'}
                                         </div>
                                     </div>
                                     <div className="form-group">

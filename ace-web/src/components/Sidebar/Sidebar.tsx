@@ -40,6 +40,7 @@ const BUTTON_ICONS = {
 };
 
 const DEFAULT_PROFILE_IMAGE = '/logo.png';
+const DESKTOP_WIDTH = 1024;
 
 const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
     const navigate = useNavigate();
@@ -47,11 +48,28 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
     const [activeButton, setActiveButton] = useState<NavigationButton>(NavigationButton.HOME);
     const [userData, setUserData] = useState<IUser | null>(null);
     const [profileImage, setProfileImage] = useState<string>(DEFAULT_PROFILE_IMAGE);
+    const [isDesktop, setIsDesktop] = useState<boolean>(window.innerWidth >= DESKTOP_WIDTH);
 
     const menuRef = useRef<HTMLElement>(null);
     const logoRef = useRef<HTMLDivElement>(null);
     const sidebarRef = useRef<HTMLElement>(null);
     const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+    useEffect(() => {
+        const handleResize = () => {
+            const desktop = window.innerWidth >= DESKTOP_WIDTH;
+            setIsDesktop(desktop);
+            if (desktop && !isOpen) {
+                setIsOpen(true);
+            }
+        };
+
+        handleResize();
+
+        window.addEventListener('resize', handleResize);
+
+        return () => window.removeEventListener('resize', handleResize);
+    }, [isOpen]);
 
     useEffect(() => {
         if (sidebarRef.current) {
@@ -99,7 +117,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
         };
 
         window.addEventListener('storage', handleStorageChange);
-
         window.addEventListener('userDataUpdated', handleStorageChange);
 
         return () => {
@@ -191,60 +208,76 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
     );
 
     return (
-        
-            <aside className={`sidebar ${isOpen ? 'open' : 'closed'}`} ref={sidebarRef}>
-                {!isOpen ? (
-                    <button className="hamburger" type="button" onClick={() => setIsOpen(true)}>
-                        <span className="material-symbols-outlined">menu</span>
-                    </button>
-                ) : (
-                    <>
+        <aside className={`sidebar ${isOpen ? 'open' : 'closed'}`} ref={sidebarRef}>
+            {!isOpen ? (
+                <button className="hamburger" type="button" onClick={() => setIsOpen(true)}>
+                    <span className="material-symbols-outlined">menu</span>
+                </button>
+            ) : (
+                <>
+                    {!isDesktop && (
                         <button className="toggle" type="button" onClick={() => setIsOpen(false)}>
                             <span className="material-symbols-outlined">chevron_left</span>
                         </button>
-                        <div className="inner">
-                            <nav className="menu" ref={menuRef}>
-                                <div className="menu-buttons">
-                                    {renderNavigationButton(NavigationButton.HOME, BUTTON_ICONS[NavigationButton.HOME], BUTTON_LABELS[NavigationButton.HOME])}
-                                    {renderNavigationButton(NavigationButton.AGENTS, BUTTON_ICONS[NavigationButton.AGENTS], BUTTON_LABELS[NavigationButton.AGENTS])}
-                                    {renderNavigationButton(NavigationButton.WEAPONS, BUTTON_ICONS[NavigationButton.WEAPONS], BUTTON_LABELS[NavigationButton.WEAPONS])}
-                                    {renderNavigationButton(NavigationButton.MAPS, BUTTON_ICONS[NavigationButton.MAPS], BUTTON_LABELS[NavigationButton.MAPS])}
+                    )}
+                    <div className="inner">
+                        <nav className="menu" ref={menuRef}>
+                            <div className="menu-buttons">
+                                {renderNavigationButton(
+                                    NavigationButton.HOME,
+                                    BUTTON_ICONS[NavigationButton.HOME],
+                                    BUTTON_LABELS[NavigationButton.HOME]
+                                )}
+                                {renderNavigationButton(
+                                    NavigationButton.AGENTS,
+                                    BUTTON_ICONS[NavigationButton.AGENTS],
+                                    BUTTON_LABELS[NavigationButton.AGENTS]
+                                )}
+                                {renderNavigationButton(
+                                    NavigationButton.WEAPONS,
+                                    BUTTON_ICONS[NavigationButton.WEAPONS],
+                                    BUTTON_LABELS[NavigationButton.WEAPONS]
+                                )}
+                                {renderNavigationButton(
+                                    NavigationButton.MAPS,
+                                    BUTTON_ICONS[NavigationButton.MAPS],
+                                    BUTTON_LABELS[NavigationButton.MAPS]
+                                )}
+                            </div>
+                            <div className="configandexit">
+                                <div className="profile">
+                                    <button
+                                        type="button"
+                                        ref={(el) => addButtonRef(el, NavigationButton.PROFILE)}
+                                        className={activeButton === NavigationButton.PROFILE ? 'active' : ''}
+                                        onClick={() => handleButtonClick(NavigationButton.PROFILE)}
+                                    >
+                                        <img
+                                            src={profileImage || DEFAULT_PROFILE_IMAGE}
+                                            alt="Profile"
+                                            onError={() => setProfileImage(DEFAULT_PROFILE_IMAGE)}
+                                        />
+                                        <p>{userData?.nickname}</p>
+                                    </button>
                                 </div>
-                                <div className="configandexit">
-                                    <div className="profile">
-                                        <button
-                                            type="button"
-                                            ref={(el) => addButtonRef(el, NavigationButton.PROFILE)}
-                                            className={activeButton === NavigationButton.PROFILE ? 'active' : ''}
-                                            onClick={() => handleButtonClick(NavigationButton.PROFILE)}
-                                        >
-                                            <img
-                                                src={profileImage || DEFAULT_PROFILE_IMAGE}
-                                                alt="Profile"
-                                                onError={() => setProfileImage(DEFAULT_PROFILE_IMAGE)}
-                                            />
-                                            <p>{userData?.nickname}</p>
-                                        </button>
-                                    </div>
-                                    <div className="settings">
-                                        {renderNavigationButton(
-                                            NavigationButton.SETTINGS,
-                                            BUTTON_ICONS[NavigationButton.SETTINGS],
-                                            BUTTON_LABELS[NavigationButton.SETTINGS]
-                                        )}
-                                    </div>
+                                <div className="settings">
                                     {renderNavigationButton(
-                                        NavigationButton.LOGOUT,
-                                        BUTTON_ICONS[NavigationButton.LOGOUT],
-                                        BUTTON_LABELS[NavigationButton.LOGOUT]
+                                        NavigationButton.SETTINGS,
+                                        BUTTON_ICONS[NavigationButton.SETTINGS],
+                                        BUTTON_LABELS[NavigationButton.SETTINGS]
                                     )}
                                 </div>
-                            </nav>
-                        </div>
-                    </>
-                )}
-            </aside>
-
+                                {renderNavigationButton(
+                                    NavigationButton.LOGOUT,
+                                    BUTTON_ICONS[NavigationButton.LOGOUT],
+                                    BUTTON_LABELS[NavigationButton.LOGOUT]
+                                )}
+                            </div>
+                        </nav>
+                    </div>
+                </>
+            )}
+        </aside>
     );
 };
 

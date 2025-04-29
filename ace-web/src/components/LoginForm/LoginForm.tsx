@@ -4,12 +4,14 @@ import './LoginForm.scss';
 import authApi from '../../utils/authApi';
 import { useNavigate } from 'react-router-dom';
 import { UserLoginDto, UserRegistrationDto } from '../../models/User';
+import { validateCPF } from '../../utils/cpfUtils';
 
 const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
     const navigate = useNavigate();
     const [isActive, setIsActive] = useState(false);
     const setupDone = useRef(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [cpfValid, setCpfValid] = useState(false);
 
     const [passwordVisibility, setPasswordVisibility] = useState({
         login: false,
@@ -29,7 +31,7 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
             counter.textContent = '0/20';
         });
 
-        const validationMsgs = document.querySelectorAll('.email-msg, .confirm-msg');
+        const validationMsgs = document.querySelectorAll('.email-msg, .confirm-msg, .cpf-msg');
         validationMsgs.forEach((msg) => {
             (msg as HTMLElement).style.display = 'none';
         });
@@ -51,6 +53,8 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
             status.textContent = '✕';
             (status as HTMLElement).style.color = '#f55';
         });
+
+        setCpfValid(false);
     };
 
     const togglePasswordVisibility = (field: string) => {
@@ -67,12 +71,28 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
         const setupValidations = () => {
             const cpfInput = document.getElementById('reg-cpf') as HTMLInputElement;
             if (cpfInput) {
+                if (!cpfInput.parentNode?.querySelector('.cpf-msg')) {
+                    const cpfMsg = document.createElement('div');
+                    cpfMsg.className = 'cpf-msg';
+                    cpfMsg.style.fontSize = '11px';
+                    cpfMsg.style.marginTop = '4px';
+                    cpfMsg.style.display = 'none';
+
+                    const inputBox = cpfInput.closest('.input-box');
+                    if (inputBox && inputBox.nextSibling) {
+                        inputBox.parentNode?.insertBefore(cpfMsg, inputBox.nextSibling);
+                    } else {
+                        cpfInput.parentNode?.appendChild(cpfMsg);
+                    }
+                }
+
                 cpfInput.addEventListener('input', (e) => {
                     const target = e.target as HTMLInputElement;
                     let value = target.value.replace(/\D/g, '');
                     if (value.length > 11) {
                         value = value.substring(0, 11);
                     }
+
                     if (value.length > 9) {
                         value = value.replace(/^(\d{3})(\d{3})(\d{3})(\d{1,2})$/, '$1.$2.$3-$4');
                     } else if (value.length > 6) {
@@ -81,6 +101,26 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                         value = value.replace(/^(\d{3})(\d{1,3})$/, '$1.$2');
                     }
                     target.value = value;
+
+                    const cpfMsg = document.querySelector('.cpf-msg') as HTMLElement;
+                    if (cpfMsg) {
+                        const numericValue = value.replace(/\D/g, '');
+                        if (numericValue.length === 11) {
+                            const isValid = validateCPF(numericValue);
+                            setCpfValid(isValid);
+                            cpfMsg.style.display = 'block';
+                            cpfMsg.textContent = isValid ? 'CPF válido' : 'CPF inválido';
+                            cpfMsg.style.color = isValid ? '#5c3' : '#f55';
+                        } else if (numericValue.length > 0) {
+                            cpfMsg.style.display = 'block';
+                            cpfMsg.textContent = 'CPF incompleto';
+                            cpfMsg.style.color = '#f55';
+                            setCpfValid(false);
+                        } else {
+                            cpfMsg.style.display = 'none';
+                            setCpfValid(false);
+                        }
+                    }
                 });
             }
 
@@ -356,9 +396,14 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                         if (email.indexOf('@') < 0 || email.indexOf('.', email.indexOf('@')) < 0) {
                             errors.push('Email inválido');
                         }
-                        if (cpf.replace(/\D/g, '').length !== 11) {
+
+                        const cpfValue = cpf.replace(/\D/g, '');
+                        if (cpfValue.length !== 11) {
                             errors.push('CPF incompleto');
+                        } else if (!validateCPF(cpfValue)) {
+                            errors.push('CPF inválido');
                         }
+
                         if (pwd.length < 8) {
                             errors.push('Senha deve ter pelo menos 8 caracteres');
                         }
@@ -378,7 +423,7 @@ const LoginForm = forwardRef<HTMLDivElement>((props, ref) => {
                             const registrationData: UserRegistrationDto = {
                                 firstName: user,
                                 nickname: user,
-                                cpf: cpf.replace(/\D/g, ''),
+                                cpf: cpfValue,
                                 email: email,
                                 password: pwd,
                             };
