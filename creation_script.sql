@@ -1,6 +1,6 @@
+CREATE DATABASE Ace;
 USE ace;
 
--- Primeiro removemos a tabela se ela existir
 DROP TABLE IF EXISTS address;
 CREATE TABLE address (
   address_id INT NOT NULL AUTO_INCREMENT,
@@ -17,6 +17,23 @@ CREATE TABLE role (
   role_id INT NOT NULL AUTO_INCREMENT,
   role_name VARCHAR(50) NOT NULL,
   PRIMARY KEY (role_id)
+);
+
+DROP TABLE IF EXISTS agent;
+CREATE TABLE agent (
+  agent_id INT NOT NULL AUTO_INCREMENT,
+  agent_name VARCHAR(50) NOT NULL,
+  agent_description TEXT,
+  ability_one VARCHAR(50) DEFAULT NULL,
+  ability_one_description TEXT,
+  ability_two VARCHAR(50) DEFAULT NULL,
+  ability_two_description TEXT,
+  ability_three VARCHAR(50) DEFAULT NULL,
+  ability_three_description TEXT,
+  ultimate VARCHAR(50) DEFAULT NULL,
+  ultimate_description TEXT,
+  agent_image VARCHAR(255) DEFAULT NULL,
+  PRIMARY KEY (agent_id)
 );
 
 DROP TABLE IF EXISTS user;
@@ -43,23 +60,6 @@ CREATE TABLE user (
   CONSTRAINT user_ibfk_1 FOREIGN KEY (role_id) REFERENCES role (role_id),
   CONSTRAINT user_ibfk_2 FOREIGN KEY (address_id) REFERENCES address (address_id),
   CONSTRAINT user_ibfk_3 FOREIGN KEY (favorite_agent) REFERENCES agent (agent_id)
-);
-
-DROP TABLE IF EXISTS agent;
-CREATE TABLE agent (
-  agent_id INT NOT NULL AUTO_INCREMENT,
-  agent_name VARCHAR(50) NOT NULL,
-  agent_description TEXT,
-  ability_one VARCHAR(50) DEFAULT NULL,
-  ability_one_description TEXT,
-  ability_two VARCHAR(50) DEFAULT NULL,
-  ability_two_description TEXT,
-  ability_three VARCHAR(50) DEFAULT NULL,
-  ability_three_description TEXT,
-  ultimate VARCHAR(50) DEFAULT NULL,
-  ultimate_description TEXT,
-  agent_image VARCHAR(255) DEFAULT NULL,
-  PRIMARY KEY (agent_id)
 );
 
 DROP TABLE IF EXISTS agent_video;
