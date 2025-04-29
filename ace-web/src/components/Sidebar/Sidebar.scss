@@ -3,24 +3,25 @@
 
 .sidebar {
     --width-open: 200px;
-    --width-closed: 74px;
+    --width-closed: 56px; 
     position: absolute;
     top: 20px;
     left: 20px;
-    bottom: 30px;
     width: var(--width-closed);
+    height: var(--width-closed); 
     border-radius: 16px;
     background: $darker-bg;
-    transition:
-        width 0.3s,
-        height 0.3s;
+    transition: 
+      width 0.3s,
+      height 0.3s;
     display: flex;
     flex-direction: column;
     z-index: 100;
     overflow: hidden;
-
+  
     &.open {
-        width: var(--width-open);
+      width: var(--width-open);
+      height: calc(100vh - 50px); 
     }
 
     .toggle {
@@ -39,7 +40,7 @@
         transition: transform 0.3s;
 
         &:hover {
-            color: $darker-bg;
+            color: $primary-color;
         }
 
         span {
