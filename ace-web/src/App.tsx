@@ -12,6 +12,7 @@ import './App.scss';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useParams, Outlet } from 'react-router-dom';
 import HomePage from './components/HomePage/HomePage';
 import UserSettings from './components/UserSettings/UserSettings';
+import UserProfile from './components/UserProfile/UserProfile';
 
 gsap.registerPlugin(CustomEase);
 
@@ -199,6 +200,11 @@ const App: React.FC = () => {
         return <UserSettings userId={userid!} />;
     };
 
+    const UserProfileWrapper: React.FC = () => {
+        const { userid } = useParams<{ userid: string }>();
+        return <UserProfile userId={userid!} />;
+    };
+
     return (
         <Router>
             <DialogProvider>
@@ -208,6 +214,7 @@ const App: React.FC = () => {
                         <Route path="/home" element={<HomePage />} />
                         <Route path="/login" element={<LoginForm />} />
                         <Route path="/usersettings/:userid" element={<UserSettingWrapper />} />
+                        <Route path="/user/:userid" element={<UserProfileWrapper />} />
                     </Route>
                 </Routes>
             </DialogProvider>

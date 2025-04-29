@@ -151,8 +151,11 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
                 console.log('Maps button clicked');
                 break;
             case NavigationButton.PROFILE:
-                // TODO: Navigate to Profile page
-                console.log('Profile button clicked');
+                if (userData) {
+                    navigate(`/user/${userData.userId}`);
+                } else {
+                    console.warn('User data not loaded.');
+                }
                 break;
             case NavigationButton.SETTINGS:
                 if (userData) {
