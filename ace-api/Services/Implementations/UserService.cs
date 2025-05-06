@@ -146,7 +146,7 @@ public class UserService : IUserService
 
         if (!string.IsNullOrEmpty(updateDto.Cpf))
         {
-            if (await _context.Users.AnyAsync(u => u.Cpf == updateDto.Cpf))
+            if (await _context.Users.AnyAsync(u => u.Cpf == updateDto.Cpf && u.UserId != userId))
                 return ApiResponse<UserDto>.ErrorResponse("Este CPF já está cadastrado");
             user.Cpf = updateDto.Cpf;
         }
