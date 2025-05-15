@@ -8,6 +8,7 @@ import LoginForm from './components/LoginForm/LoginForm';
 import Logo from './components/Logo/Logo';
 import Sidebar from './components/Sidebar/Sidebar';
 import authApi from './utils/authApi';
+import useSessionTimeout from './hooks/useSessionTimeout';
 import './App.scss';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useParams, Outlet } from 'react-router-dom';
 import HomePage from './components/HomePage/HomePage';
@@ -20,6 +21,8 @@ const AppLayout: React.FC = () => {
     const navigate = useNavigate();
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
     const [animationsComplete, setAnimationsComplete] = useState<boolean>(false);
+
+    const { timeoutModal } = useSessionTimeout(isLoggedIn);
 
     const heroRef = useRef<HTMLDivElement>(null);
     const videoContainerRef = useRef<HTMLDivElement>(null);
@@ -188,6 +191,8 @@ const AppLayout: React.FC = () => {
 
                 <Logo ref={logoRef} logoSrc="logo.png" />
             </div>
+
+            {timeoutModal}
 
             <Outlet />
         </div>

@@ -1,0 +1,100 @@
+@use '../../styles/variables' as *;
+
+.timeout-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.timeout-modal {
+    width: 450px;
+    max-width: 90vw;
+    background-color: $darker-bg;
+    border-radius: 15px;
+    border: 2px solid $primary-color;
+    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    animation: popIn 0.3s ease-out forwards;
+    overflow: hidden;
+
+    @keyframes popIn {
+        0% {
+            transform: scale(0.9);
+            opacity: 0;
+        }
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+}
+
+.timeout-modal-header {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+    h2 {
+        margin: 0;
+        color: $primary-color;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+}
+
+.timeout-modal-body {
+    padding: 20px;
+
+    p {
+        color: $light-color;
+        margin: 10px 0;
+        font-size: 1rem;
+        text-transform: none;
+    }
+}
+
+.timeout-modal-footer {
+    padding: 15px 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+    button {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &.btn-stay {
+            background-color: $primary-color;
+            color: $light-color;
+            border: none;
+
+            &:hover {
+                background-color: darken($primary-color, 10%);
+            }
+        }
+
+        &.btn-logout {
+            background-color: transparent;
+            color: $light-color;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                border-color: rgba(255, 255, 255, 0.5);
+            }
+        }
+    }
+}
