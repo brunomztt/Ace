@@ -57,6 +57,39 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
         confirm: false,
     });
 
+    const [lastSearchedCep, setLastSearchedCep] = useState<string>('');
+
+    const searchCepData = async (cep: string) => {
+        const cleanCep = cep.replace(/\D/g, '');
+
+        if (cleanCep === lastSearchedCep || cleanCep.length !== 8) {
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            setLastSearchedCep(cleanCep);
+
+            const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+            const data = await response.json();
+
+            if (data.erro) {
+                dialogService.error('CEP não encontrado. Verifique se digitou corretamente.');
+            } else {
+                setFormData((prev) => ({
+                    ...prev,
+                    street: data.logradouro || prev.street,
+                    district: data.bairro || prev.district,
+                }));
+            }
+        } catch (error) {
+            dialogService.error('Erro ao buscar o CEP. Tente novamente mais tarde.');
+            console.error('Erro ao buscar CEP:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const togglePasswordVisibility = (field: string) => {
         setPasswordVisibility((prev) => ({
             ...prev,
@@ -239,6 +272,9 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
         if (value.length > 5) {
             value = value.replace(/^(\d{5})(\d{1,3})$/, '$1-$2');
         }
+        if (value.replace(/\D/g, '').length === 8) {
+            searchCepData(value);
+        }
         setFormData({
             ...formData,
             zipCode: value,
@@ -395,6 +431,12 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
         if (validationState.passwordStrength.score <= 2) return '#f55';
         if (validationState.passwordStrength.score <= 4) return '#fa3';
         return '#5c3';
+    };
+
+    const lockedFieldStyle = {
+        backgroundColor: '#808080',
+        cursor: 'not-allowed',
+        color: '#6c757d',
     };
 
     return (
@@ -685,6 +727,9 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                                                 value={formData.street}
                                                 onChange={handleInputChange}
                                                 maxLength={100}
+                                                readOnly
+                                                disabled
+                                                style={lockedFieldStyle}
                                             />
                                             <i className="bx bx-map"></i>
                                         </div>
@@ -722,6 +767,9 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
                                                         value={formData.district}
                                                         onChange={handleInputChange}
                                                         maxLength={50}
+                                                        readOnly
+                                                        disabled
+                                                        style={lockedFieldStyle}
                                                     />
                                                     <i className="bx bx-building-house"></i>
                                                 </div>
