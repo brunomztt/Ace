@@ -14,6 +14,7 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, useParams, Outlet 
 import HomePage from './components/HomePage/HomePage';
 import UserSettings from './components/UserSettings/UserSettings';
 import UserProfile from './components/UserProfile/UserProfile';
+import AdminPanel from './components/AdminPanel/AdminPanel';
 
 gsap.registerPlugin(CustomEase);
 
@@ -220,6 +221,7 @@ const App: React.FC = () => {
                         <Route path="/login" element={<LoginForm />} />
                         <Route path="/usersettings/:userid" element={<UserSettingWrapper />} />
                         <Route path="/user/:userid" element={<UserProfileWrapper />} />
+                        <Route path="/admin" element={<AdminPanel />} />
                     </Route>
                 </Routes>
             </DialogProvider>

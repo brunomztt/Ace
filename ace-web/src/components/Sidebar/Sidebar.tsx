@@ -14,9 +14,10 @@ enum NavigationButton {
     AGENTS = 1,
     WEAPONS = 2,
     MAPS = 3,
-    PROFILE = 4,
-    SETTINGS = 5,
-    LOGOUT = 6,
+    ADMIN_PANEL = 4,
+    PROFILE = 5,
+    SETTINGS = 6,
+    LOGOUT = 7,
 }
 
 const BUTTON_LABELS = {
@@ -24,6 +25,7 @@ const BUTTON_LABELS = {
     [NavigationButton.AGENTS]: 'Agentes',
     [NavigationButton.WEAPONS]: 'Armas',
     [NavigationButton.MAPS]: 'Mapas',
+    [NavigationButton.ADMIN_PANEL]: 'Painel Admin',
     [NavigationButton.PROFILE]: 'Perfil',
     [NavigationButton.SETTINGS]: 'Configurações',
     [NavigationButton.LOGOUT]: 'Sair',
@@ -34,6 +36,7 @@ const BUTTON_ICONS = {
     [NavigationButton.AGENTS]: 'groups',
     [NavigationButton.WEAPONS]: 'local_fire_department',
     [NavigationButton.MAPS]: 'map',
+    [NavigationButton.ADMIN_PANEL]: 'admin_panel_settings',
     [NavigationButton.PROFILE]: '', // Profile uses pfp
     [NavigationButton.SETTINGS]: 'settings',
     [NavigationButton.LOGOUT]: 'logout',
@@ -47,6 +50,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [activeButton, setActiveButton] = useState<NavigationButton>(NavigationButton.HOME);
     const [userData, setUserData] = useState<IUser | null>(null);
+    const [isAdmin, setIsAdmin] = useState<boolean>(false);
     const [profileImage, setProfileImage] = useState<string>(DEFAULT_PROFILE_IMAGE);
     const [isDesktop, setIsDesktop] = useState<boolean>(window.innerWidth >= DESKTOP_WIDTH);
 
@@ -101,6 +105,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
         const user = authApi.getCurrentUser();
         if (user) {
             setUserData(user);
+            setIsAdmin(user.roleName === 'Admin');
             if (user.profilePic) {
                 setProfileImage(user.profilePic);
             }
@@ -113,6 +118,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
             if (user) {
                 setProfileImage(user.profilePic || DEFAULT_PROFILE_IMAGE);
                 setUserData(user);
+                setIsAdmin(user.roleName === 'Admin');
             }
         };
 
@@ -151,6 +157,10 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
     const handleButtonClick = (button: NavigationButton): void => {
         setActiveButton(button);
 
+        if (!userData) {
+            return;
+        }
+
         switch (button) {
             case NavigationButton.HOME:
                 navigate(`/`);
@@ -167,19 +177,14 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
                 // TODO: Navigate to Maps page
                 console.log('Maps button clicked');
                 break;
+            case NavigationButton.ADMIN_PANEL:
+                navigate(`/admin`);
+                break;
             case NavigationButton.PROFILE:
-                if (userData) {
-                    navigate(`/user/${userData.userId}`);
-                } else {
-                    console.warn('User data not loaded.');
-                }
+                navigate(`/user/${userData.userId}`);
                 break;
             case NavigationButton.SETTINGS:
-                if (userData) {
-                    navigate(`/usersettings/${userData.userId}`);
-                } else {
-                    console.warn('User data not loaded.');
-                }
+                navigate(`/usersettings/${userData.userId}`);
                 break;
             case NavigationButton.LOGOUT:
                 if (onLogout && typeof onLogout === 'function') {
@@ -243,6 +248,12 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
                                     BUTTON_ICONS[NavigationButton.MAPS],
                                     BUTTON_LABELS[NavigationButton.MAPS]
                                 )}
+                                {isAdmin &&
+                                    renderNavigationButton(
+                                        NavigationButton.ADMIN_PANEL,
+                                        BUTTON_ICONS[NavigationButton.ADMIN_PANEL],
+                                        BUTTON_LABELS[NavigationButton.ADMIN_PANEL]
+                                    )}
                             </div>
                             <div className="configandexit">
                                 <div className="profile">

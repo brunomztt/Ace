@@ -112,6 +112,7 @@ public class UserService : IUserService
         var users = await _context.Users
             .Include(u => u.Role)
             .Include(u => u.Address)
+            .Where(u => u.IsEnabled)
             .ToListAsync();
 
         return ApiResponse<List<UserDto>>.SuccessResponse(users.Select(ToUserDto).ToList());

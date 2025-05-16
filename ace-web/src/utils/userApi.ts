@@ -3,6 +3,10 @@ import { ApiResponse } from '../models/ApiResponse';
 import api from './apiClient';
 
 export const userApi = {
+    getAllUsers: async (): Promise<ApiResponse<UserDto[]>> => {
+        return api.get<ApiResponse<UserDto[]>>('/users');
+    },
+
     getUserById: async (userId: string): Promise<ApiResponse<UserDto>> => {
         return api.get<ApiResponse<UserDto>>(`/users/${userId}`);
     },
