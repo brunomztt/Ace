@@ -5,12 +5,23 @@ import { IUser, UserDto, UserUpdateDto } from '../../models/User';
 import './UserSettings.scss';
 import authApi from '../../utils/authApi';
 import { validateCPF, formatCPF } from '../../utils/cpfUtils';
+import { useNavigate } from 'react-router-dom';
 
 interface UserSettingsProps {
     userId: string;
 }
 
 const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const currentUser = authApi.getCurrentUser();
+        if (!currentUser || (currentUser.roleName !== 'Admin' && currentUser.userId !== userId)) {
+            navigate('/');
+            dialogService.error('Acesso restrito a administradores');
+        }
+    }, [navigate]);
+
     const [activeTab, setActiveTab] = useState<string>('account-general');
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [formData, setFormData] = useState({

@@ -80,6 +80,9 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IAgentService, AgentService>();
 builder.Services.AddScoped<IGuideService, GuideService>();
+builder.Services.AddScoped<IMapService, MapService>();
+builder.Services.AddScoped<IWeaponService, WeaponService>();
+builder.Services.AddScoped<ISkinService, SkinService>();
 
 var app = builder.Build();
 

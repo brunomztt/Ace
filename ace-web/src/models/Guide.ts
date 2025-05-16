@@ -1,7 +1,7 @@
 import { IUser } from './User';
 import { IComment } from './Comment';
 
-export type GuideType = 'Agent' | 'Map' | 'Strategy' | 'Other';
+export type GuideType = 'Agent' | 'Map' | 'Weapon' | 'Other';
 
 export interface IGuide {
     guideId: number;

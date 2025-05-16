@@ -1,11 +1,9 @@
 namespace ace_api.DTOs;
 
-public class SkinDto
+public class SkinCreateDto
 {
-    public int SkinId { get; set; }
     public string SkinName { get; set; } = null!;
+    public int WeaponId { get; set; }
     public string? SkinImage { get; set; }
     public string? Description { get; set; }
-    public int WeaponId { get; set; }
-    public WeaponDto? Weapon { get; set; } = null!;
 }

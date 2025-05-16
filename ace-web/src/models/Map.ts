@@ -11,3 +11,15 @@ export interface MapDto {
     mapDescription?: string;
     mapImage?: string;
 }
+
+export interface MapCreateDto {
+    mapName: string;
+    mapDescription?: string;
+    mapImage?: string;
+}
+
+export interface MapUpdateDto {
+    mapName: string;
+    mapDescription?: string;
+    mapImage?: string;
+}

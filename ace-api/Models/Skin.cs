@@ -13,14 +13,14 @@ public class Skin
     [StringLength(100)]
     public string SkinName { get; set; } = null!;
 
-    [Column("skin_type")]
-    [Required]
-    [StringLength(20)]
-    public string SkinType { get; set; } = "Weapon";
-
     [Column("skin_image")]
-    [StringLength(255)]
     public string? SkinImage { get; set; }
 
     [Column("description")] public string? Description { get; set; }
+    
+    [Column("weapon_id")]
+    [ForeignKey(nameof(Weapon))]
+    public int WeaponId { get; set; }
+    
+    public Weapon? Weapon { get; set; } = null!;
 }

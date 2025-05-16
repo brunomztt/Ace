@@ -16,6 +16,5 @@ public class Map
     [Column("map_description")] public string? MapDescription { get; set; }
 
     [Column("map_image")]
-    [StringLength(255)]
     public string? MapImage { get; set; }
 }

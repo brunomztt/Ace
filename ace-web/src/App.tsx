@@ -15,6 +15,11 @@ import HomePage from './components/HomePage/HomePage';
 import UserSettings from './components/UserSettings/UserSettings';
 import UserProfile from './components/UserProfile/UserProfile';
 import AdminPanel from './components/AdminPanel/AdminPanel';
+import AgentForm from './components/AgentForm/AgentForm';
+import WeaponForm from './components/WeaponForm/WeaponForm';
+import MapForm from './components/MapForm/MapForm';
+import GuideForm from './components/GuideForm/GuideForm';
+import SkinForm from './components/SkinForm/SkinForm';
 
 gsap.registerPlugin(CustomEase);
 
@@ -222,6 +227,11 @@ const App: React.FC = () => {
                         <Route path="/usersettings/:userid" element={<UserSettingWrapper />} />
                         <Route path="/user/:userid" element={<UserProfileWrapper />} />
                         <Route path="/admin" element={<AdminPanel />} />
+                        <Route path="/agent" element={<AgentForm />} />
+                        <Route path="/weapon" element={<WeaponForm />} />
+                        <Route path="/map" element={<MapForm />} />
+                        <Route path="/guide" element={<GuideForm />} />
+                        <Route path="/skin" element={<SkinForm />} />
                     </Route>
                 </Routes>
             </DialogProvider>

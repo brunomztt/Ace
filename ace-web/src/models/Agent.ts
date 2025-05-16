@@ -36,3 +36,33 @@ export interface AgentVideoDto {
     videoId: number;
     youtubeLink: string;
 }
+
+export interface AgentUpdateDto {
+    agentName?: string;
+    agentDescription?: string;
+    abilityOne?: string;
+    abilityOneDescription?: string;
+    abilityTwo?: string;
+    abilityTwoDescription?: string;
+    abilityThree?: string;
+    abilityThreeDescription?: string;
+    ultimate?: string;
+    ultimateDescription?: string;
+    agentImage?: string;
+    videos?: AgentVideoDto[];
+}
+
+export interface AgentCreateDto {
+    agentName: string;
+    agentDescription?: string;
+    abilityOne?: string;
+    abilityOneDescription?: string;
+    abilityTwo?: string;
+    abilityTwoDescription?: string;
+    abilityThree?: string;
+    abilityThreeDescription?: string;
+    ultimate?: string;
+    ultimateDescription?: string;
+    agentImage?: string;
+    videos?: AgentVideoDto[];
+}

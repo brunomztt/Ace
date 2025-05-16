@@ -18,6 +18,8 @@ public class AceDbContext : DbContext
     public DbSet<Guide> Guides { get; set; } = null!;
     public DbSet<Comment> Comments { get; set; } = null!;
     public DbSet<Skin> Skins { get; set; } = null!;
+    public DbSet<Weapon> Weapons { get; set; } = null!;
+    public DbSet<WeaponCategory> WeaponCategories { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

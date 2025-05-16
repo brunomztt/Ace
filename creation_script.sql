@@ -41,7 +41,7 @@ CREATE TABLE agent (
   ability_three_description TEXT,
   ultimate VARCHAR(50) DEFAULT NULL,
   ultimate_description TEXT,
-  agent_image VARCHAR(255) DEFAULT NULL,
+  agent_image LONGTEXT DEFAULT NULL,
   PRIMARY KEY (agent_id)
 );
 
@@ -134,7 +134,7 @@ CREATE TABLE guide (
   user_id INT DEFAULT NULL,
   title VARCHAR(100) NOT NULL,
   content TEXT NOT NULL,
-  guide_type ENUM('Agent','Map','Strategy','Other') DEFAULT 'Other',
+  guide_type ENUM('Agent','Map','Weapon','Other') DEFAULT 'Other',
   created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (guide_id),
   KEY user_id (user_id),

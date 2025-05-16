@@ -40,7 +40,6 @@ public class Agent
     [Column("ultimate_description")] public string? UltimateDescription { get; set; }
 
     [Column("agent_image")]
-    [StringLength(255)]
     public string? AgentImage { get; set; }
 
     public virtual ICollection<AgentVideo> AgentVideos { get; set; } = new List<AgentVideo>();
