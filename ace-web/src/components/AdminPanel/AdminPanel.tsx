@@ -14,7 +14,7 @@ import guideApi from '../../utils/guideApi';
 import mapApi from '../../utils/mapApi';
 import skinApi from '../../utils/skinApi';
 import weaponApi from '../../utils/weaponApi';
-import { WeaponDto } from '../../models/Weapon';
+import { WeaponCategoryDto, WeaponDto } from '../../models/Weapon';
 
 type Tab = 'users' | 'agents' | 'weapons' | 'guides' | 'maps' | 'skins';
 
@@ -29,6 +29,18 @@ const AdminPanel: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const containerRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
+    const [userSearchTerm, setUserSearchTerm] = useState<string>('');
+    const [agentSearchTerm, setAgentSearchTerm] = useState<string>('');
+    const [weaponSearchTerm, setWeaponSearchTerm] = useState<string>('');
+    const [guideSearchTerm, setGuideSearchTerm] = useState<string>('');
+    const [mapSearchTerm, setMapSearchTerm] = useState<string>('');
+    const [skinSearchTerm, setSkinSearchTerm] = useState<string>('');
+    const [selectedWeaponCategory, setSelectedWeaponCategory] = useState<number | undefined>(undefined);
+    const [selectedGuideType, setSelectedGuideType] = useState<string | undefined>(undefined);
+    const [selectedWeaponForSkin, setSelectedWeaponForSkin] = useState<number | undefined>(undefined);
+    const [weaponCategories, setWeaponCategories] = useState<WeaponCategoryDto[]>([]);
+    const [availableWeapons, setAvailableWeapons] = useState<WeaponDto[]>([]);
+    const [guideTypes, setGuideTypes] = useState<string[]>(['Agent', 'Map', 'Weapon', 'Other']);
 
     useEffect(() => {
         const currentUser = authApi.getCurrentUser();
@@ -63,10 +75,41 @@ const AdminPanel: React.FC = () => {
         }
     }, [activeTab]);
 
+    useEffect(() => {
+        if (activeTab === 'weapons' || activeTab === 'skins') {
+            loadWeaponCategories();
+        }
+        if (activeTab === 'skins') {
+            loadWeaponsForDropdown();
+        }
+    }, [activeTab]);
+
+    const loadWeaponCategories = async () => {
+        try {
+            const response = await weaponApi.getAllWeaponCategories();
+            if (response.success) {
+                setWeaponCategories(response.data || []);
+            }
+        } catch (error) {
+            console.error('Erro ao carregar categorias de armas:', error);
+        }
+    };
+
+    const loadWeaponsForDropdown = async () => {
+        try {
+            const response = await weaponApi.getAllWeapons();
+            if (response.success) {
+                setAvailableWeapons(response.data || []);
+            }
+        } catch (error) {
+            console.error('Erro ao carregar armas:', error);
+        }
+    };
+
     const loadUsers = async () => {
         try {
             setIsLoading(true);
-            const response = await userApi.getAllUsers();
+            const response = await userApi.getAllUsers(userSearchTerm);
 
             if (response.success) {
                 setUsers(response.data || []);
@@ -80,10 +123,18 @@ const AdminPanel: React.FC = () => {
         }
     };
 
+    useEffect(() => {
+        if (activeTab === 'users') {
+            const timer = setTimeout(() => loadUsers(), 500);
+
+            return () => clearTimeout(timer);
+        }
+    }, [userSearchTerm, activeTab]);
+
     const loadAgents = async () => {
         try {
             setIsLoading(true);
-            const response = await agentApi.getAllAgents();
+            const response = await agentApi.getAllAgents(agentSearchTerm);
 
             if (response.success) {
                 setAgents(response.data || []);
@@ -97,10 +148,20 @@ const AdminPanel: React.FC = () => {
         }
     };
 
+    useEffect(() => {
+        if (activeTab === 'agents') {
+            const timer = setTimeout(() => {
+                loadAgents();
+            }, 500);
+
+            return () => clearTimeout(timer);
+        }
+    }, [agentSearchTerm, activeTab]);
+
     const loadWeapons = async () => {
         try {
             setIsLoading(true);
-            const response = await weaponApi.getAllWeapons();
+            const response = await weaponApi.getAllWeapons(weaponSearchTerm, selectedWeaponCategory);
 
             if (response.success) {
                 setWeapons(response.data || []);
@@ -117,7 +178,7 @@ const AdminPanel: React.FC = () => {
     const loadGuides = async () => {
         try {
             setIsLoading(true);
-            const response = await guideApi.getAllGuides();
+            const response = await guideApi.getAllGuides(guideSearchTerm, selectedGuideType);
 
             if (response.success) {
                 setGuides(response.data || []);
@@ -134,7 +195,7 @@ const AdminPanel: React.FC = () => {
     const loadMaps = async () => {
         try {
             setIsLoading(true);
-            const response = await mapApi.getAllMaps();
+            const response = await mapApi.getAllMaps(mapSearchTerm);
 
             if (response.success) {
                 setMaps(response.data || []);
@@ -151,7 +212,7 @@ const AdminPanel: React.FC = () => {
     const loadSkins = async () => {
         try {
             setIsLoading(true);
-            const response = await skinApi.getAllSkins();
+            const response = await skinApi.getAllSkins(skinSearchTerm, selectedWeaponForSkin);
 
             if (response.success) {
                 setSkins(response.data || []);
@@ -165,28 +226,91 @@ const AdminPanel: React.FC = () => {
         }
     };
 
+    useEffect(() => {
+        if (activeTab === 'weapons') {
+            const timer = setTimeout(() => {
+                loadWeapons();
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [weaponSearchTerm, selectedWeaponCategory, activeTab]);
+
+    useEffect(() => {
+        if (activeTab === 'guides') {
+            const timer = setTimeout(() => {
+                loadGuides();
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [guideSearchTerm, selectedGuideType, activeTab]);
+
+    useEffect(() => {
+        if (activeTab === 'maps') {
+            const timer = setTimeout(() => {
+                loadMaps();
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [mapSearchTerm, activeTab]);
+
+    useEffect(() => {
+        if (activeTab === 'skins') {
+            const timer = setTimeout(() => {
+                loadSkins();
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [skinSearchTerm, selectedWeaponForSkin, activeTab]);
+
     const handleAddAgent = () => {
         navigate('/agent');
     };
 
-    const handleEditAgent = (agentId: number) => {
+    const handleViewUser = (userId: number) => {
+        navigate(`/user/${userId}`);
+    };
+
+    const handleEditUser = (userId: number) => {
+        navigate(`/user/edit/${userId}`);
+    };
+
+    const handleDeleteUser = async (userId: number) => {
+        try {
+            dialogService.confirm('Confirmar Ação', 'Tem certeza que deseja excluir este usuário?', async () => {
+                const response = await userApi.deleteUser(userId.toString());
+
+                if (response.success) {
+                    dialogService.success('Usuário excluído com sucesso');
+                    loadUsers();
+                } else {
+                    throw new Error(response.message || 'Erro ao excluir usuário');
+                }
+            });
+        } catch (error: any) {
+            dialogService.error(error.message || 'Erro ao excluir usuário');
+        }
+    };
+
+    const handleViewAgent = (agentId: number) => {
         navigate(`/agent/${agentId}`);
+    };
+
+    const handleEditAgent = (agentId: number) => {
+        navigate(`/agent/edit/${agentId}`);
     };
 
     const handleDeleteAgent = async (agentId: number) => {
         try {
-            if (!window.confirm('Tem certeza que deseja excluir este agente?')) {
-                return;
-            }
+            dialogService.confirm('Confirmar Ação', 'Tem certeza que deseja excluir este agente?', async () => {
+                const response = await agentApi.deleteAgent(agentId.toString());
 
-            const response = await agentApi.deleteAgent(agentId.toString());
-
-            if (response.success) {
-                dialogService.success('Agente excluído com sucesso');
-                loadAgents();
-            } else {
-                throw new Error(response.message || 'Erro ao excluir agente');
-            }
+                if (response.success) {
+                    dialogService.success('Agente excluído com sucesso');
+                    loadAgents();
+                } else {
+                    throw new Error(response.message || 'Erro ao excluir agente');
+                }
+            });
         } catch (error: any) {
             dialogService.error(error.message || 'Erro ao excluir agente');
         }
@@ -196,24 +320,26 @@ const AdminPanel: React.FC = () => {
         navigate('/weapon');
     };
 
-    const handleEditWeapon = (weaponId: number) => {
+    const handleViewWeapon = (weaponId: number) => {
         navigate(`/weapon/${weaponId}`);
+    };
+
+    const handleEditWeapon = (weaponId: number) => {
+        navigate(`/weapon/edit/${weaponId}`);
     };
 
     const handleDeleteWeapon = async (weaponId: number) => {
         try {
-            if (!window.confirm('Tem certeza que deseja excluir esta arma?')) {
-                return;
-            }
+            dialogService.confirm('Confirmar Ação', 'Tem certeza que deseja excluir esta arma?', async () => {
+                const response = await weaponApi.deleteWeapon(weaponId.toString());
 
-            const response = await weaponApi.deleteWeapon(weaponId.toString());
-
-            if (response.success) {
-                dialogService.success('Arma excluída com sucesso');
-                loadWeapons();
-            } else {
-                throw new Error(response.message || 'Erro ao excluir arma');
-            }
+                if (response.success) {
+                    dialogService.success('Arma excluída com sucesso');
+                    loadWeapons();
+                } else {
+                    throw new Error(response.message || 'Erro ao excluir arma');
+                }
+            });
         } catch (error: any) {
             dialogService.error(error.message || 'Erro ao excluir arma');
         }
@@ -223,24 +349,26 @@ const AdminPanel: React.FC = () => {
         navigate('/guide');
     };
 
-    const handleEditGuide = (guideId: number) => {
+    const handleViewGuide = (guideId: number) => {
         navigate(`/guide/${guideId}`);
+    };
+
+    const handleEditGuide = (guideId: number) => {
+        navigate(`/guide/edit/${guideId}`);
     };
 
     const handleDeleteGuide = async (guideId: number) => {
         try {
-            if (!window.confirm('Tem certeza que deseja excluir este guia?')) {
-                return;
-            }
+            dialogService.confirm('Confirmar Ação', 'Tem certeza que deseja excluir este guia?', async () => {
+                const response = await guideApi.deleteGuide(guideId.toString());
 
-            const response = await guideApi.deleteGuide(guideId.toString());
-
-            if (response.success) {
-                dialogService.success('Guia excluído com sucesso');
-                loadGuides();
-            } else {
-                throw new Error(response.message || 'Erro ao excluir guia');
-            }
+                if (response.success) {
+                    dialogService.success('Guia excluído com sucesso');
+                    loadGuides();
+                } else {
+                    throw new Error(response.message || 'Erro ao excluir guia');
+                }
+            });
         } catch (error: any) {
             dialogService.error(error.message || 'Erro ao excluir guia');
         }
@@ -250,24 +378,26 @@ const AdminPanel: React.FC = () => {
         navigate('/map');
     };
 
-    const handleEditMap = (mapId: number) => {
+    const handleViewMap = (mapId: number) => {
         navigate(`/map/${mapId}`);
+    };
+
+    const handleEditMap = (mapId: number) => {
+        navigate(`/map/edit/${mapId}`);
     };
 
     const handleDeleteMap = async (mapId: number) => {
         try {
-            if (!window.confirm('Tem certeza que deseja excluir este mapa?')) {
-                return;
-            }
+            dialogService.confirm('Confirmar Ação', 'Tem certeza que deseja excluir este mapa?', async () => {
+                const response = await mapApi.deleteMap(mapId.toString());
 
-            const response = await mapApi.deleteMap(mapId.toString());
-
-            if (response.success) {
-                dialogService.success('Mapa excluído com sucesso');
-                loadMaps();
-            } else {
-                throw new Error(response.message || 'Erro ao excluir mapa');
-            }
+                if (response.success) {
+                    dialogService.success('Mapa excluído com sucesso');
+                    loadMaps();
+                } else {
+                    throw new Error(response.message || 'Erro ao excluir mapa');
+                }
+            });
         } catch (error: any) {
             dialogService.error(error.message || 'Erro ao excluir mapa');
         }
@@ -277,49 +407,28 @@ const AdminPanel: React.FC = () => {
         navigate('/skin');
     };
 
-    const handleEditSkin = (skinId: number) => {
+    const handleViewSkin = (skinId: number) => {
         navigate(`/skin/${skinId}`);
+    };
+
+    const handleEditSkin = (skinId: number) => {
+        navigate(`/skin/edit/${skinId}`);
     };
 
     const handleDeleteSkin = async (skinId: number) => {
         try {
-            if (!window.confirm('Tem certeza que deseja excluir esta skin?')) {
-                return;
-            }
+            dialogService.confirm('Confirmar Ação', 'Tem certeza que deseja excluir esta skin?', async () => {
+                const response = await skinApi.deleteSkin(skinId.toString());
 
-            const response = await skinApi.deleteSkin(skinId.toString());
-
-            if (response.success) {
-                dialogService.success('Skin excluída com sucesso');
-                loadSkins();
-            } else {
-                throw new Error(response.message || 'Erro ao excluir skin');
-            }
+                if (response.success) {
+                    dialogService.success('Skin excluída com sucesso');
+                    loadSkins();
+                } else {
+                    throw new Error(response.message || 'Erro ao excluir skin');
+                }
+            });
         } catch (error: any) {
             dialogService.error(error.message || 'Erro ao excluir skin');
-        }
-    };
-
-    const handleEditUser = (userId: number) => {
-        navigate(`/usersettings/${userId}`);
-    };
-
-    const handleDeleteUser = async (userId: number) => {
-        try {
-            if (!window.confirm('Tem certeza que deseja excluir este usuário?')) {
-                return;
-            }
-
-            const response = await userApi.deleteUser(userId.toString());
-
-            if (response.success) {
-                dialogService.success('Usuário excluído com sucesso');
-                loadUsers();
-            } else {
-                throw new Error(response.message || 'Erro ao excluir usuário');
-            }
-        } catch (error: any) {
-            dialogService.error(error.message || 'Erro ao excluir usuário');
         }
     };
 
@@ -349,7 +458,18 @@ const AdminPanel: React.FC = () => {
             <div className="tab-content">
                 {activeTab === 'users' && (
                     <div className="users-tab">
-                        <h2>Gerenciamento de Usuários</h2>
+                        <div className="tab-header">
+                            <h2>Gerenciamento de Usuários</h2>
+                            <div className="search-container">
+                                <input
+                                    type="text"
+                                    className="search-input"
+                                    placeholder="Buscar por username..."
+                                    value={userSearchTerm}
+                                    onChange={(e) => setUserSearchTerm(e.target.value)}
+                                />
+                            </div>
+                        </div>
 
                         {isLoading ? (
                             <div className="loading">Carregando usuários...</div>
@@ -368,7 +488,7 @@ const AdminPanel: React.FC = () => {
                                     <tbody>
                                         {users.length === 0 ? (
                                             <tr>
-                                                <td colSpan={6} className="no-users">
+                                                <td colSpan={5} className="no-users">
                                                     Nenhum usuário encontrado
                                                 </td>
                                             </tr>
@@ -387,13 +507,14 @@ const AdminPanel: React.FC = () => {
                                                     <td>{`${user.firstName} ${user.lastName || ''}`}</td>
                                                     <td>{user.email}</td>
                                                     <td className="actions">
+                                                        <button className="view-button" onClick={() => handleViewUser(user.userId)}>
+                                                            <i className="bx bx-show"></i>
+                                                        </button>
                                                         <button className="edit-button" onClick={() => handleEditUser(user.userId)}>
                                                             <i className="bx bx-edit"></i>
-                                                            Editar
                                                         </button>
                                                         <button className="delete-button" onClick={() => handleDeleteUser(user.userId)}>
                                                             <i className="bx bx-trash"></i>
-                                                            Excluir
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -410,10 +531,21 @@ const AdminPanel: React.FC = () => {
                     <div className="agents-tab">
                         <div className="tab-header">
                             <h2>Gerenciamento de Agentes</h2>
-                            <button className="add-button" onClick={handleAddAgent}>
-                                <i className="bx bx-plus"></i>
-                                Adicionar Agente
-                            </button>
+                            <div className="actions-container">
+                                <div className="search-container">
+                                    <input
+                                        type="text"
+                                        className="search-input"
+                                        placeholder="Buscar por nome..."
+                                        value={agentSearchTerm}
+                                        onChange={(e) => setAgentSearchTerm(e.target.value)}
+                                    />
+                                </div>
+                                <button className="add-button" onClick={handleAddAgent}>
+                                    <i className="bx bx-plus"></i>
+                                    Adicionar Agente
+                                </button>
+                            </div>
                         </div>
 
                         {isLoading ? (
@@ -432,7 +564,7 @@ const AdminPanel: React.FC = () => {
                                     <tbody>
                                         {agents.length === 0 ? (
                                             <tr>
-                                                <td colSpan={5} className="no-agents">
+                                                <td colSpan={4} className="no-agents">
                                                     Nenhum agente encontrado
                                                 </td>
                                             </tr>
@@ -450,13 +582,14 @@ const AdminPanel: React.FC = () => {
                                                     <td>{agent.agentName}</td>
                                                     <td className="description-cell">{agent.agentDescription}</td>
                                                     <td className="actions">
+                                                        <button className="view-button" onClick={() => handleViewAgent(agent.agentId)}>
+                                                            <i className="bx bx-show"></i>
+                                                        </button>
                                                         <button className="edit-button" onClick={() => handleEditAgent(agent.agentId)}>
                                                             <i className="bx bx-edit"></i>
-                                                            Editar
                                                         </button>
                                                         <button className="delete-button" onClick={() => handleDeleteAgent(agent.agentId)}>
                                                             <i className="bx bx-trash"></i>
-                                                            Excluir
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -473,10 +606,35 @@ const AdminPanel: React.FC = () => {
                     <div className="weapons-tab">
                         <div className="tab-header">
                             <h2>Gerenciamento de Armas</h2>
-                            <button className="add-button" onClick={handleAddWeapon}>
-                                <i className="bx bx-plus"></i>
-                                Adicionar Arma
-                            </button>
+                            <div className="actions-container">
+                                <div className="search-container">
+                                    <input
+                                        type="text"
+                                        className="search-input"
+                                        placeholder="Buscar por nome..."
+                                        value={weaponSearchTerm}
+                                        onChange={(e) => setWeaponSearchTerm(e.target.value)}
+                                    />
+                                </div>
+                                <div className="select-container">
+                                    <select
+                                        className="filter-select"
+                                        value={selectedWeaponCategory || ''}
+                                        onChange={(e) => setSelectedWeaponCategory(e.target.value ? Number(e.target.value) : undefined)}
+                                    >
+                                        <option value="">Todas as categorias</option>
+                                        {weaponCategories.map((category) => (
+                                            <option key={category.categoryId} value={category.categoryId}>
+                                                {category.categoryName}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <button className="add-button" onClick={handleAddWeapon}>
+                                    <i className="bx bx-plus"></i>
+                                    Adicionar Arma
+                                </button>
+                            </div>
                         </div>
 
                         {isLoading ? (
@@ -515,13 +673,14 @@ const AdminPanel: React.FC = () => {
                                                     <td>{weapon.category?.categoryName}</td>
                                                     <td>{weapon.credits}</td>
                                                     <td className="actions">
+                                                        <button className="view-button" onClick={() => handleViewWeapon(weapon.weaponId)}>
+                                                            <i className="bx bx-show"></i>
+                                                        </button>
                                                         <button className="edit-button" onClick={() => handleEditWeapon(weapon.weaponId)}>
                                                             <i className="bx bx-edit"></i>
-                                                            Editar
                                                         </button>
                                                         <button className="delete-button" onClick={() => handleDeleteWeapon(weapon.weaponId)}>
                                                             <i className="bx bx-trash"></i>
-                                                            Excluir
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -538,10 +697,35 @@ const AdminPanel: React.FC = () => {
                     <div className="guides-tab">
                         <div className="tab-header">
                             <h2>Gerenciamento de Guias</h2>
-                            <button className="add-button" onClick={handleAddGuide}>
-                                <i className="bx bx-plus"></i>
-                                Adicionar Guia
-                            </button>
+                            <div className="actions-container">
+                                <div className="search-container">
+                                    <input
+                                        type="text"
+                                        className="search-input"
+                                        placeholder="Buscar por título..."
+                                        value={guideSearchTerm}
+                                        onChange={(e) => setGuideSearchTerm(e.target.value)}
+                                    />
+                                </div>
+                                <div className="select-container">
+                                    <select
+                                        className="filter-select"
+                                        value={selectedGuideType || ''}
+                                        onChange={(e) => setSelectedGuideType(e.target.value || undefined)}
+                                    >
+                                        <option value="">Todos os tipos</option>
+                                        {guideTypes.map((type) => (
+                                            <option key={type} value={type}>
+                                                {type}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <button className="add-button" onClick={handleAddGuide}>
+                                    <i className="bx bx-plus"></i>
+                                    Adicionar Guia
+                                </button>
+                            </div>
                         </div>
 
                         {isLoading ? (
@@ -573,13 +757,14 @@ const AdminPanel: React.FC = () => {
                                                     <td>{guide.guideType}</td>
                                                     <td>{new Date(guide.createdAt).toLocaleDateString()}</td>
                                                     <td className="actions">
+                                                        <button className="view-button" onClick={() => handleViewGuide(guide.guideId)}>
+                                                            <i className="bx bx-show"></i>
+                                                        </button>
                                                         <button className="edit-button" onClick={() => handleEditGuide(guide.guideId)}>
                                                             <i className="bx bx-edit"></i>
-                                                            Editar
                                                         </button>
                                                         <button className="delete-button" onClick={() => handleDeleteGuide(guide.guideId)}>
                                                             <i className="bx bx-trash"></i>
-                                                            Excluir
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -596,12 +781,22 @@ const AdminPanel: React.FC = () => {
                     <div className="maps-tab">
                         <div className="tab-header">
                             <h2>Gerenciamento de Mapas</h2>
-                            <button className="add-button" onClick={handleAddMap}>
-                                <i className="bx bx-plus"></i>
-                                Adicionar Mapa
-                            </button>
+                            <div className="actions-container">
+                                <div className="search-container">
+                                    <input
+                                        type="text"
+                                        className="search-input"
+                                        placeholder="Buscar por nome..."
+                                        value={mapSearchTerm}
+                                        onChange={(e) => setMapSearchTerm(e.target.value)}
+                                    />
+                                </div>
+                                <button className="add-button" onClick={handleAddMap}>
+                                    <i className="bx bx-plus"></i>
+                                    Adicionar Mapa
+                                </button>
+                            </div>
                         </div>
-
                         {isLoading ? (
                             <div className="loading">Carregando mapas...</div>
                         ) : (
@@ -636,13 +831,14 @@ const AdminPanel: React.FC = () => {
                                                     <td>{map.mapName}</td>
                                                     <td className="description-cell">{map.mapDescription}</td>
                                                     <td className="actions">
+                                                        <button className="view-button" onClick={() => handleViewMap(map.mapId)}>
+                                                            <i className="bx bx-show"></i>
+                                                        </button>
                                                         <button className="edit-button" onClick={() => handleEditMap(map.mapId)}>
                                                             <i className="bx bx-edit"></i>
-                                                            Editar
                                                         </button>
                                                         <button className="delete-button" onClick={() => handleDeleteMap(map.mapId)}>
                                                             <i className="bx bx-trash"></i>
-                                                            Excluir
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -659,10 +855,35 @@ const AdminPanel: React.FC = () => {
                     <div className="skins-tab">
                         <div className="tab-header">
                             <h2>Gerenciamento de Skins</h2>
-                            <button className="add-button" onClick={handleAddSkin}>
-                                <i className="bx bx-plus"></i>
-                                Adicionar Skin
-                            </button>
+                            <div className="actions-container">
+                                <div className="search-container">
+                                    <input
+                                        type="text"
+                                        className="search-input"
+                                        placeholder="Buscar por nome..."
+                                        value={skinSearchTerm}
+                                        onChange={(e) => setSkinSearchTerm(e.target.value)}
+                                    />
+                                </div>
+                                <div className="select-container">
+                                    <select
+                                        className="filter-select"
+                                        value={selectedWeaponForSkin || ''}
+                                        onChange={(e) => setSelectedWeaponForSkin(e.target.value ? Number(e.target.value) : undefined)}
+                                    >
+                                        <option value="">Todas as armas</option>
+                                        {availableWeapons.map((weapon) => (
+                                            <option key={weapon.weaponId} value={weapon.weaponId}>
+                                                {weapon.weaponName}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <button className="add-button" onClick={handleAddSkin}>
+                                    <i className="bx bx-plus"></i>
+                                    Adicionar Skin
+                                </button>
+                            </div>
                         </div>
 
                         {isLoading ? (
@@ -699,13 +920,14 @@ const AdminPanel: React.FC = () => {
                                                     <td>{skin.skinName}</td>
                                                     <td>{skin.weapon?.weaponName}</td>
                                                     <td className="actions">
+                                                        <button className="view-button" onClick={() => handleViewSkin(skin.skinId)}>
+                                                            <i className="bx bx-show"></i>
+                                                        </button>
                                                         <button className="edit-button" onClick={() => handleEditSkin(skin.skinId)}>
                                                             <i className="bx bx-edit"></i>
-                                                            Editar
                                                         </button>
                                                         <button className="delete-button" onClick={() => handleDeleteSkin(skin.skinId)}>
                                                             <i className="bx bx-trash"></i>
-                                                            Excluir
                                                         </button>
                                                     </td>
                                                 </tr>

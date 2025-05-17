@@ -17,9 +17,9 @@ public class SkinsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<List<SkinDto>>>> GetAllSkins()
+    public async Task<ActionResult<ApiResponse<List<SkinDto>>>> GetAllSkins([FromQuery] string? searchTerm = null, [FromQuery] int? weaponId = null)
     {
-        var response = await _skinService.GetAllSkinsAsync();
+        var response = await _skinService.GetAllSkinsAsync(searchTerm, weaponId);
         return Ok(response);
     }
 

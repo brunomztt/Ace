@@ -107,13 +107,19 @@ public class UserService : IUserService
         return user == null ? ApiResponse<UserDto>.ErrorResponse("Usuário não encontrado") : ApiResponse<UserDto>.SuccessResponse(ToUserDto(user));
     }
 
-    public async Task<ApiResponse<List<UserDto>>> GetAllUsersAsync()
+    public async Task<ApiResponse<List<UserDto>>> GetAllUsersAsync(string? searchTerm = null)
     {
-        var users = await _context.Users
+        var query = _context.Users
             .Include(u => u.Role)
             .Include(u => u.Address)
-            .Where(u => u.IsEnabled)
-            .ToListAsync();
+            .Where(u => u.IsEnabled);
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            query = query.Where(u => u.Nickname.Contains(searchTerm));
+        }
+
+        var users = await query.ToListAsync();
 
         return ApiResponse<List<UserDto>>.SuccessResponse(users.Select(ToUserDto).ToList());
     }

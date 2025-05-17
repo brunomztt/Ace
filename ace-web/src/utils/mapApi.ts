@@ -3,8 +3,9 @@ import { ApiResponse } from '../models/ApiResponse';
 import api from './apiClient';
 
 export const mapApi = {
-    getAllMaps: async (): Promise<ApiResponse<MapDto[]>> => {
-        return api.get<ApiResponse<MapDto[]>>('/maps');
+    getAllMaps: async (searchTerm?: string): Promise<ApiResponse<MapDto[]>> => {
+        const params = searchTerm ? { searchTerm } : {};
+        return api.get<ApiResponse<MapDto[]>>('/maps', { params });
     },
 
     getMapById: async (mapId: string): Promise<ApiResponse<MapDto>> => {

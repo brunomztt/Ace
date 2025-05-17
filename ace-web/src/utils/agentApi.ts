@@ -3,8 +3,9 @@ import { ApiResponse } from '../models/ApiResponse';
 import api from './apiClient';
 
 export const agentApi = {
-    getAllAgents: async (): Promise<ApiResponse<AgentDto[]>> => {
-        return api.get<ApiResponse<AgentDto[]>>('/agents');
+    getAllAgents: async (searchTerm?: string): Promise<ApiResponse<AgentDto[]>> => {
+        const params = searchTerm ? { searchTerm } : {};
+        return api.get<ApiResponse<AgentDto[]>>('/agents', { params });
     },
 
     getAgentById: async (agentId: string): Promise<ApiResponse<AgentDto>> => {

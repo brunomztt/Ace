@@ -216,6 +216,56 @@ const App: React.FC = () => {
         return <UserProfile userId={userid!} />;
     };
 
+    const AgentViewWrapper: React.FC = () => {
+        const { agentId } = useParams<{ agentId: string }>();
+        return <AgentForm agentId={agentId!} />;
+    };
+
+    const AgentEditWrapper: React.FC = () => {
+        const { agentId } = useParams<{ agentId: string }>();
+        return <AgentForm agentId={agentId!} />;
+    };
+
+    const WeaponViewWrapper: React.FC = () => {
+        const { weaponId } = useParams<{ weaponId: string }>();
+        return <WeaponForm weaponId={weaponId!} />;
+    };
+
+    const WeaponEditWrapper: React.FC = () => {
+        const { weaponId } = useParams<{ weaponId: string }>();
+        return <WeaponForm weaponId={weaponId!} />;
+    };
+
+    const MapViewWrapper: React.FC = () => {
+        const { mapId } = useParams<{ mapId: string }>();
+        return <MapForm mapId={mapId!} />;
+    };
+
+    const MapEditWrapper: React.FC = () => {
+        const { mapId } = useParams<{ mapId: string }>();
+        return <MapForm mapId={mapId!} />;
+    };
+
+    const GuideViewWrapper: React.FC = () => {
+        const { guideId } = useParams<{ guideId: string }>();
+        return <GuideForm guideId={guideId!} />;
+    };
+
+    const GuideEditWrapper: React.FC = () => {
+        const { guideId } = useParams<{ guideId: string }>();
+        return <GuideForm guideId={guideId!} />;
+    };
+
+    const SkinViewWrapper: React.FC = () => {
+        const { skinId } = useParams<{ skinId: string }>();
+        return <SkinForm skinId={skinId!} />;
+    };
+
+    const SkinEditWrapper: React.FC = () => {
+        const { skinId } = useParams<{ skinId: string }>();
+        return <SkinForm skinId={skinId!} />;
+    };
+
     return (
         <Router>
             <DialogProvider>
@@ -224,14 +274,24 @@ const App: React.FC = () => {
                         <Route path="/" element={<HomePage />} />
                         <Route path="/home" element={<HomePage />} />
                         <Route path="/login" element={<LoginForm />} />
-                        <Route path="/usersettings/:userid" element={<UserSettingWrapper />} />
+                        <Route path="/user/edit/:userid" element={<UserSettingWrapper />} />
                         <Route path="/user/:userid" element={<UserProfileWrapper />} />
                         <Route path="/admin" element={<AdminPanel />} />
                         <Route path="/agent" element={<AgentForm />} />
+                        <Route path="/agent/:agentId" element={<AgentViewWrapper />} />
+                        <Route path="/agent/edit/:agentId" element={<AgentEditWrapper />} />
                         <Route path="/weapon" element={<WeaponForm />} />
+                        <Route path="/weapon/:weaponId" element={<WeaponViewWrapper />} />
+                        <Route path="/weapon/edit/:weaponId" element={<WeaponEditWrapper />} />
                         <Route path="/map" element={<MapForm />} />
+                        <Route path="/map/:mapId" element={<MapViewWrapper />} />
+                        <Route path="/map/edit/:mapId" element={<MapEditWrapper />} />
                         <Route path="/guide" element={<GuideForm />} />
+                        <Route path="/guide/:guideId" element={<GuideViewWrapper />} />
+                        <Route path="/guide/edit/:guideId" element={<GuideEditWrapper />} />
                         <Route path="/skin" element={<SkinForm />} />
+                        <Route path="/skin/:skinId" element={<SkinViewWrapper />} />
+                        <Route path="/skin/edit/:skinId" element={<SkinEditWrapper />} />
                     </Route>
                 </Routes>
             </DialogProvider>

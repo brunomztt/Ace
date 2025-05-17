@@ -3,10 +3,12 @@ import { ApiResponse } from '../models/ApiResponse';
 import api from './apiClient';
 
 export const guideApi = {
-    getAllGuides: async (): Promise<ApiResponse<GuideDto[]>> => {
-        return api.get<ApiResponse<GuideDto[]>>('/guides');
+    getAllGuides: async (searchTerm?: string, guideType?: string): Promise<ApiResponse<GuideDto[]>> => {
+        const params: any = {};
+        if (searchTerm) params.searchTerm = searchTerm;
+        if (guideType) params.guideType = guideType;
+        return api.get<ApiResponse<GuideDto[]>>('/guides', { params });
     },
-
     getGuideById: async (guideId: string): Promise<ApiResponse<GuideDto>> => {
         return api.get<ApiResponse<GuideDto>>(`/guides/${guideId}`);
     },

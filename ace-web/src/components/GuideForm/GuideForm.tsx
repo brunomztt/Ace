@@ -1,18 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GuideCreateDto, GuideType } from '../../models/Guide';
 import guideApi from '../../utils/guideApi';
 import { dialogService } from '../Dialog/dialogService';
 import './GuideForm.scss';
 
-const GuideForm: React.FC = () => {
+interface GuideFormProps {
+    guideId?: string;
+}
+
+const GuideForm: React.FC<GuideFormProps> = ({ guideId }) => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isEditMode, setIsEditMode] = useState<boolean>(false);
     const [formData, setFormData] = useState<GuideCreateDto>({
         title: '',
         content: '',
-        guideType: 'Agent',
+        guideType: 'Other',
     });
+
+    useEffect(() => {
+        if (guideId) {
+            setIsEditMode(true);
+            loadGuideData(guideId);
+        }
+    }, [guideId]);
+
+    const loadGuideData = async (id: string) => {
+        setIsLoading(true);
+        try {
+            const response = await guideApi.getGuideById(id);
+            if (response.success && response.data) {
+                const guide = response.data;
+                setFormData({
+                    title: guide.title,
+                    content: guide.content,
+                    guideType: guide.guideType,
+                });
+            } else {
+                dialogService.error('Erro ao carregar dados do guia');
+                navigate('/admin');
+            }
+        } catch (error: any) {
+            dialogService.error(error.message || 'Erro ao carregar dados do guia');
+            navigate('/admin');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = event.target;
@@ -38,16 +73,26 @@ const GuideForm: React.FC = () => {
         setIsLoading(true);
 
         try {
-            const response = await guideApi.createGuide(formData);
+            let response;
+            if (isEditMode && guideId) {
+                response = await guideApi.updateGuide(guideId, formData);
+                if (response.success) {
+                    dialogService.success('Guia atualizado com sucesso!');
+                }
+            } else {
+                response = await guideApi.createGuide(formData);
+                if (response.success) {
+                    dialogService.success('Guia criado com sucesso!');
+                }
+            }
 
-            if (response.success) {
-                dialogService.success('Guia criado com sucesso!');
+            if (response && response.success) {
                 navigate('/admin');
             } else {
-                throw new Error(response.message || 'Erro ao criar guia');
+                throw new Error((response && response.message) || 'Erro ao processar guia');
             }
         } catch (error: any) {
-            dialogService.error(error.message || 'Erro ao criar guia');
+            dialogService.error(error.message || 'Erro ao processar guia');
         } finally {
             setIsLoading(false);
         }
@@ -59,12 +104,12 @@ const GuideForm: React.FC = () => {
 
     return (
         <div className="guide-form-container">
-            <h4 className="form-title">Criar Novo Guia</h4>
+            <h4 className="form-title">{isEditMode ? 'Editar Guia' : 'Criar Novo Guia'}</h4>
 
             <form onSubmit={handleSubmit}>
                 <div className="form-content">
                     <div className="form-section">
-                        <h5>Informações do Guia</h5>
+                        <h5>Informações Básicas</h5>
 
                         <div className="form-group">
                             <label className="form-label">Título *</label>
@@ -99,26 +144,30 @@ const GuideForm: React.FC = () => {
                             <label className="form-label">Conteúdo *</label>
                             <div className="input-box">
                                 <textarea
-                                    className="form-control content-textarea"
+                                    className="form-control content-editor"
                                     name="content"
                                     value={formData.content}
                                     onChange={handleInputChange}
-                                    required
-                                    placeholder="Digite o conteúdo do seu guia aqui..."
+                                    placeholder="Escreva o conteúdo do seu guia aqui..."
                                     rows={15}
+                                    required
                                 />
+                            </div>
+                            <div className="text-light text-small mt-2">
+                                <i className="fas fa-info-circle mr-2"></i>
+                                Dica: Escreva guias detalhados com dicas úteis para os jogadores
                             </div>
                         </div>
                     </div>
 
                     <div className="form-section">
-                        <h5>Dicas para um bom guia</h5>
+                        <h5>Dicas para Escrever Guias</h5>
                         <ul className="tips-list">
-                            <li>Use títulos e subtítulos para organizar o conteúdo</li>
-                            <li>Inclua detalhes específicos e dicas práticas</li>
-                            <li>Seja claro e conciso em suas explicações</li>
-                            <li>Considere incluir exemplos e casos de uso</li>
-                            <li>Revise seu texto para erros gramaticais antes de publicar</li>
+                            <li>Use títulos claros que indiquem o conteúdo do guia</li>
+                            <li>Divida o conteúdo em seções para facilitar a leitura</li>
+                            <li>Inclua dicas específicas e estratégias úteis</li>
+                            <li>Mantenha o texto organizado e fácil de seguir</li>
+                            <li>Mencione mapas, agentes ou armas específicas quando relevante</li>
                         </ul>
                     </div>
                 </div>
@@ -135,7 +184,7 @@ const GuideForm: React.FC = () => {
                             </>
                         ) : (
                             <>
-                                <i className="fas fa-save mr-2"></i> Publicar Guia
+                                <i className="fas fa-save mr-2"></i> {isEditMode ? 'Atualizar' : 'Publicar'}
                             </>
                         )}
                     </button>

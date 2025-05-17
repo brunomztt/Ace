@@ -7,9 +7,14 @@ import weaponApi from '../../utils/weaponApi';
 import { dialogService } from '../Dialog/dialogService';
 import './SkinForm.scss';
 
-const SkinForm: React.FC = () => {
+interface SkinFormProps {
+    skinId?: string;
+}
+
+const SkinForm: React.FC<SkinFormProps> = ({ skinId }) => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isEditMode, setIsEditMode] = useState<boolean>(false);
     const [weapons, setWeapons] = useState<WeaponDto[]>([]);
     const [skinImageFile, setSkinImageFile] = useState<File | null>(null);
     const [formData, setFormData] = useState<SkinCreateDto>({
@@ -20,25 +25,55 @@ const SkinForm: React.FC = () => {
     });
 
     useEffect(() => {
-        const fetchWeapons = async () => {
-            try {
-                const response = await weaponApi.getAllWeapons();
-                if (response.success && response.data) {
-                    setWeapons(response.data);
-                    if (response.data.length > 0) {
-                        setFormData((prev) => ({
-                            ...prev,
-                            weaponId: response.data[0].weaponId,
-                        }));
-                    }
+        fetchWeapons();
+        if (skinId) {
+            setIsEditMode(true);
+            loadSkinData(skinId);
+        }
+    }, [skinId]);
+
+    const fetchWeapons = async () => {
+        try {
+            const response = await weaponApi.getAllWeapons();
+            if (response.success && response.data) {
+                setWeapons(response.data);
+                if (response.data.length > 0 && !isEditMode) {
+                    setFormData((prev) => ({
+                        ...prev,
+                        weaponId: response.data[0].weaponId,
+                    }));
                 }
-            } catch (error) {
+            } else {
                 dialogService.error('Erro ao carregar armas');
             }
-        };
+        } catch (error: any) {
+            dialogService.error(error.message || 'Erro ao carregar armas');
+        }
+    };
 
-        fetchWeapons();
-    }, []);
+    const loadSkinData = async (id: string) => {
+        setIsLoading(true);
+        try {
+            const response = await skinApi.getSkinById(id);
+            if (response.success && response.data) {
+                const skin = response.data;
+                setFormData({
+                    skinName: skin.skinName,
+                    weaponId: skin.weaponId,
+                    description: skin.description || '',
+                    skinImage: skin.skinImage,
+                });
+            } else {
+                dialogService.error('Erro ao carregar dados da skin');
+                navigate('/admin');
+            }
+        } catch (error: any) {
+            dialogService.error(error.message || 'Erro ao carregar dados da skin');
+            navigate('/admin');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const fileToBase64 = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
@@ -101,24 +136,29 @@ const SkinForm: React.FC = () => {
             return;
         }
 
-        if (!formData.skinImage) {
-            dialogService.error('A imagem da skin é obrigatória');
-            return;
-        }
-
         setIsLoading(true);
 
         try {
-            const response = await skinApi.createSkin(formData);
+            let response;
+            if (isEditMode && skinId) {
+                response = await skinApi.updateSkin(skinId, formData);
+                if (response.success) {
+                    dialogService.success('Skin atualizada com sucesso!');
+                }
+            } else {
+                response = await skinApi.createSkin(formData);
+                if (response.success) {
+                    dialogService.success('Skin criada com sucesso!');
+                }
+            }
 
-            if (response.success) {
-                dialogService.success('Skin criada com sucesso!');
+            if (response && response.success) {
                 navigate('/admin');
             } else {
-                throw new Error(response.message || 'Erro ao criar skin');
+                throw new Error((response && response.message) || 'Erro ao processar skin');
             }
         } catch (error: any) {
-            dialogService.error(error.message || 'Erro ao criar skin');
+            dialogService.error(error.message || 'Erro ao processar skin');
         } finally {
             setIsLoading(false);
         }
@@ -130,7 +170,7 @@ const SkinForm: React.FC = () => {
 
     return (
         <div className="skin-form-container">
-            <h4 className="form-title">Adicionar Nova Skin</h4>
+            <h4 className="form-title">{isEditMode ? 'Editar Skin' : 'Adicionar Nova Skin'}</h4>
 
             <form onSubmit={handleSubmit}>
                 <div className="form-content">
@@ -189,7 +229,7 @@ const SkinForm: React.FC = () => {
                         </div>
 
                         <div className="form-group">
-                            <label className="form-label">Imagem da Skin *</label>
+                            <label className="form-label">Imagem da Skin</label>
                             <div className="image-upload-container">
                                 {formData.skinImage && (
                                     <div className="image-preview">
@@ -201,7 +241,7 @@ const SkinForm: React.FC = () => {
                                         <i className="fas fa-upload mr-2"></i> Escolher Imagem
                                         <input type="file" className="hidden-file-input" onChange={handleFileChange} accept="image/*" />
                                     </label>
-                                    {skinImageFile && (
+                                    {(skinImageFile || formData.skinImage) && (
                                         <button
                                             type="button"
                                             className="btn btn-default"
@@ -226,7 +266,7 @@ const SkinForm: React.FC = () => {
                     </div>
 
                     <div className="form-section">
-                        <h5>Dicas para Adicionar Skins</h5>
+                        <h5>Dicas para {isEditMode ? 'Editar' : 'Adicionar'} Skins</h5>
                         <ul className="tips-list">
                             <li>Use nomes oficiais para facilitar a busca pelos jogadores</li>
                             <li>Na descrição, inclua informações sobre como obter a skin</li>
@@ -249,7 +289,7 @@ const SkinForm: React.FC = () => {
                             </>
                         ) : (
                             <>
-                                <i className="fas fa-save mr-2"></i> Salvar
+                                <i className="fas fa-save mr-2"></i> {isEditMode ? 'Atualizar' : 'Salvar'}
                             </>
                         )}
                     </button>

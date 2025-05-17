@@ -3,8 +3,11 @@ import { ApiResponse } from '../models/ApiResponse';
 import api from './apiClient';
 
 export const weaponApi = {
-    getAllWeapons: async (): Promise<ApiResponse<WeaponDto[]>> => {
-        return api.get<ApiResponse<WeaponDto[]>>('/weapons');
+    getAllWeapons: async (searchTerm?: string, categoryId?: number): Promise<ApiResponse<WeaponDto[]>> => {
+        const params: any = {};
+        if (searchTerm) params.searchTerm = searchTerm;
+        if (categoryId) params.categoryId = categoryId;
+        return api.get<ApiResponse<WeaponDto[]>>('/weapons', { params });
     },
 
     getWeaponById: async (weaponId: string): Promise<ApiResponse<WeaponDto>> => {

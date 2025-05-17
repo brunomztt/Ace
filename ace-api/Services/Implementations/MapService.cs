@@ -15,9 +15,16 @@ public class MapService : IMapService
         _context = context;
     }
 
-    public async Task<ApiResponse<List<MapDto>>> GetAllMapsAsync()
+    public async Task<ApiResponse<List<MapDto>>> GetAllMapsAsync(string? searchTerm = null)
     {
-        var maps = await _context.Maps
+        IQueryable<Map> query = _context.Maps;
+        
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            query = query.Where(m => m.MapName.Contains(searchTerm));
+        }
+    
+        var maps = await query
             .Select(m => new MapDto
             {
                 MapId = m.MapId,

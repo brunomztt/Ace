@@ -17,9 +17,9 @@ public class WeaponsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<List<WeaponDto>>>> GetAllWeapons()
+    public async Task<ActionResult<ApiResponse<List<WeaponDto>>>> GetAllWeapons([FromQuery] string? searchTerm = null, [FromQuery] int? categoryId = null)
     {
-        var response = await _weaponService.GetAllWeaponsAsync();
+        var response = await _weaponService.GetAllWeaponsAsync(searchTerm, categoryId);
         return Ok(response);
     }
 

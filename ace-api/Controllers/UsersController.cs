@@ -21,12 +21,12 @@ public class UsersController : ControllerBase
 
     [HttpGet]
     [Authorize(Roles = "Admin,Moderator")]
-    public async Task<ActionResult<ApiResponse<List<UserDto>>>> GetAllUsers()
+    public async Task<ActionResult<ApiResponse<List<UserDto>>>> GetAllUsers([FromQuery] string? searchTerm = null)
     {
-        var response = await _userService.GetAllUsersAsync();
+        var response = await _userService.GetAllUsersAsync(searchTerm);
         return Ok(response);
     }
-
+    
     [HttpGet("{id}")]
     public async Task<ActionResult<ApiResponse<UserDto>>> GetUserById(int id)
     {

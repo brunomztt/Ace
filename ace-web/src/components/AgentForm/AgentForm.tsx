@@ -1,13 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AgentCreateDto, AgentVideoDto } from '../../models/Agent';
 import agentApi from '../../utils/agentApi';
 import { dialogService } from '../Dialog/dialogService';
 import './AgentForm.scss';
 
-const AgentForm: React.FC = () => {
+interface AgentFormProps {
+    agentId?: string;
+}
+
+const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isEditMode, setIsEditMode] = useState<boolean>(false);
     const [formData, setFormData] = useState<AgentCreateDto>({
         agentName: '',
         agentDescription: '',
@@ -25,6 +30,49 @@ const AgentForm: React.FC = () => {
 
     const [agentImageFile, setAgentImageFile] = useState<File | null>(null);
     const [videoInputs, setVideoInputs] = useState<{ youtubeLink: string }[]>([{ youtubeLink: '' }]);
+
+    useEffect(() => {
+        if (agentId) {
+            setIsEditMode(true);
+            loadAgentData(agentId);
+        }
+    }, [agentId]);
+
+    const loadAgentData = async (id: string) => {
+        setIsLoading(true);
+        try {
+            const response = await agentApi.getAgentById(id);
+            if (response.success && response.data) {
+                const agent = response.data;
+                setFormData({
+                    agentName: agent.agentName || '',
+                    agentDescription: agent.agentDescription || '',
+                    abilityOne: agent.abilityOne || '',
+                    abilityOneDescription: agent.abilityOneDescription || '',
+                    abilityTwo: agent.abilityTwo || '',
+                    abilityTwoDescription: agent.abilityTwoDescription || '',
+                    abilityThree: agent.abilityThree || '',
+                    abilityThreeDescription: agent.abilityThreeDescription || '',
+                    ultimate: agent.ultimate || '',
+                    ultimateDescription: agent.ultimateDescription || '',
+                    agentImage: agent.agentImage || '',
+                    videos: agent.videos || [],
+                });
+
+                if (agent.videos && agent.videos.length > 0) {
+                    setVideoInputs(agent.videos.map((video) => ({ youtubeLink: video.youtubeLink })));
+                }
+            } else {
+                dialogService.error('Erro ao carregar dados do agente');
+                navigate('/admin');
+            }
+        } catch (error: any) {
+            dialogService.error(error.message || 'Erro ao carregar dados do agente');
+            navigate('/admin');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const fileToBase64 = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
@@ -73,7 +121,10 @@ const AgentForm: React.FC = () => {
 
         const validVideos: AgentVideoDto[] = updatedVideoInputs
             .filter((v) => v.youtubeLink.trim() !== '')
-            .map((v) => ({ videoId: 0, youtubeLink: v.youtubeLink }));
+            .map((v, i) => ({
+                videoId: isEditMode && formData.videos && formData.videos[i] ? formData.videos[i].videoId : 0,
+                youtubeLink: v.youtubeLink,
+            }));
 
         setFormData({
             ...formData,
@@ -92,7 +143,10 @@ const AgentForm: React.FC = () => {
 
         const validVideos: AgentVideoDto[] = updatedVideoInputs
             .filter((v) => v.youtubeLink.trim() !== '')
-            .map((v) => ({ videoId: 0, youtubeLink: v.youtubeLink }));
+            .map((v, i) => ({
+                videoId: isEditMode && formData.videos && formData.videos[i] ? formData.videos[i].videoId : 0,
+                youtubeLink: v.youtubeLink,
+            }));
 
         setFormData({
             ...formData,
@@ -113,23 +167,36 @@ const AgentForm: React.FC = () => {
         try {
             const validVideos: AgentVideoDto[] = videoInputs
                 .filter((v) => v.youtubeLink.trim() !== '')
-                .map((v) => ({ videoId: 0, youtubeLink: v.youtubeLink }));
+                .map((v, i) => ({
+                    videoId: isEditMode && formData.videos && formData.videos[i] ? formData.videos[i].videoId : 0,
+                    youtubeLink: v.youtubeLink,
+                }));
 
             const agentData: AgentCreateDto = {
                 ...formData,
                 videos: validVideos,
             };
 
-            const response = await agentApi.createAgent(agentData);
+            let response;
+            if (isEditMode && agentId) {
+                response = await agentApi.updateAgent(agentId, agentData);
+                if (response.success) {
+                    dialogService.success('Agente atualizado com sucesso!');
+                }
+            } else {
+                response = await agentApi.createAgent(agentData);
+                if (response.success) {
+                    dialogService.success('Agente criado com sucesso!');
+                }
+            }
 
-            if (response.success) {
-                dialogService.success('Agente criado com sucesso!');
+            if (response && response.success) {
                 navigate('/admin');
             } else {
-                throw new Error(response.message || 'Erro ao criar agente');
+                throw new Error((response && response.message) || 'Erro ao processar agente');
             }
         } catch (error: any) {
-            dialogService.error(error.message || 'Erro ao criar agente');
+            dialogService.error(error.message || 'Erro ao processar agente');
         } finally {
             setIsLoading(false);
         }
@@ -141,7 +208,7 @@ const AgentForm: React.FC = () => {
 
     return (
         <div className="agent-form-container">
-            <h4 className="form-title">Adicionar Novo Agente</h4>
+            <h4 className="form-title">{isEditMode ? 'Editar Agente' : 'Adicionar Novo Agente'}</h4>
 
             <form onSubmit={handleSubmit}>
                 <div className="form-content">
@@ -188,7 +255,7 @@ const AgentForm: React.FC = () => {
                                         <i className="fas fa-upload mr-2"></i> Escolher Imagem
                                         <input type="file" className="hidden-file-input" onChange={handleFileChange} accept="image/*" />
                                     </label>
-                                    {agentImageFile && (
+                                    {(agentImageFile || formData.agentImage) && (
                                         <button
                                             type="button"
                                             className="btn btn-default"
@@ -361,7 +428,7 @@ const AgentForm: React.FC = () => {
                             </>
                         ) : (
                             <>
-                                <i className="fas fa-save mr-2"></i> Salvar
+                                <i className="fas fa-save mr-2"></i> {isEditMode ? 'Atualizar' : 'Salvar'}
                             </>
                         )}
                     </button>

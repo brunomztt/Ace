@@ -17,9 +17,9 @@ public class MapsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<List<MapDto>>>> GetAllMaps()
+    public async Task<ActionResult<ApiResponse<List<MapDto>>>> GetAllMaps([FromQuery] string? searchTerm = null)
     {
-        var response = await _mapService.GetAllMapsAsync();
+        var response = await _mapService.GetAllMapsAsync(searchTerm);
         return Ok(response);
     }
 

@@ -15,10 +15,17 @@ public class AgentService : IAgentService
         _context = context;
     }
 
-    public async Task<ApiResponse<List<AgentDto>>> GetAllAgentsAsync()
+    public async Task<ApiResponse<List<AgentDto>>> GetAllAgentsAsync(string? searchTerm = null)
     {
-        var agents = await _context.Agents
-            .Include(a => a.AgentVideos)
+        IQueryable<Agent> query = _context.Agents
+            .Include(a => a.AgentVideos);
+        
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            query = query.Where(a => a.AgentName.Contains(searchTerm));
+        }
+    
+        var agents = await query
             .Select(a => new AgentDto
             {
                 AgentId = a.AgentId,

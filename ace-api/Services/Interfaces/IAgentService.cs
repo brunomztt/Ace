@@ -4,7 +4,7 @@ namespace ace_api.Services.Interfaces;
 
 public interface IAgentService
 {
-    Task<ApiResponse<List<AgentDto>>> GetAllAgentsAsync();
+    Task<ApiResponse<List<AgentDto>>> GetAllAgentsAsync(string? searchTerm = null);
     Task<ApiResponse<AgentDto>> GetAgentByIdAsync(int agentId);
     Task<ApiResponse<AgentDto>> UpdateAgentAsync(int agentId, AgentUpdateDto agentUpdateDto);
     Task<ApiResponse<bool>> DeleteAgentAsync(int agentId);

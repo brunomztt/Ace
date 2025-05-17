@@ -184,7 +184,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
                 navigate(`/user/${userData.userId}`);
                 break;
             case NavigationButton.SETTINGS:
-                navigate(`/usersettings/${userData.userId}`);
+                navigate(`/user/edit/${userData.userId}`);
                 break;
             case NavigationButton.LOGOUT:
                 if (onLogout && typeof onLogout === 'function') {

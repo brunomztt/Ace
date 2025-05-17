@@ -19,9 +19,9 @@ public class GuidesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<List<GuideDto>>>> GetAllGuides()
+    public async Task<ActionResult<ApiResponse<List<GuideDto>>>> GetAllGuides([FromQuery] string? searchTerm = null, [FromQuery] string? guideType = null)
     {
-        var response = await _guideService.GetAllGuidesAsync();
+        var response = await _guideService.GetAllGuidesAsync(searchTerm, guideType);
         return Ok(response);
     }
 

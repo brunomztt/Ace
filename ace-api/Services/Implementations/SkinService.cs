@@ -15,10 +15,22 @@ public class SkinService : ISkinService
         _context = context;
     }
 
-    public async Task<ApiResponse<List<SkinDto>>> GetAllSkinsAsync()
+    public async Task<ApiResponse<List<SkinDto>>> GetAllSkinsAsync(string? searchTerm = null, int? weaponId = null)
     {
-        var skins = await _context.Skins
-            .Include(s => s.Weapon)
+        IQueryable<Skin> query = _context.Skins
+            .Include(s => s.Weapon);
+        
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            query = query.Where(s => s.SkinName.Contains(searchTerm));
+        }
+    
+        if (weaponId.HasValue)
+        {
+            query = query.Where(s => s.WeaponId == weaponId.Value);
+        }
+    
+        var skins = await query
             .Select(s => new SkinDto
             {
                 SkinId = s.SkinId,

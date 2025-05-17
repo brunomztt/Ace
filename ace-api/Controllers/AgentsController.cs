@@ -17,9 +17,9 @@ public class AgentsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<List<AgentDto>>>> GetAllAgents()
+    public async Task<ActionResult<ApiResponse<List<AgentDto>>>> GetAllAgents([FromQuery] string? searchTerm = null)
     {
-        var response = await _agentService.GetAllAgentsAsync();
+        var response = await _agentService.GetAllAgentsAsync(searchTerm);
         return Ok(response);
     }
 

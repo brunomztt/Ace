@@ -4,7 +4,7 @@ namespace ace_api.Services.Interfaces;
 
 public interface IWeaponService
 {
-    Task<ApiResponse<List<WeaponDto>>> GetAllWeaponsAsync();
+    Task<ApiResponse<List<WeaponDto>>> GetAllWeaponsAsync(string? searchTerm = null, int? categoryId = null);
     Task<ApiResponse<WeaponDto>> GetWeaponByIdAsync(int weaponId);
     Task<ApiResponse<WeaponDto>> CreateWeaponAsync(WeaponCreateDto weaponDto);
     Task<ApiResponse<WeaponDto>> UpdateWeaponAsync(int weaponId, WeaponUpdateDto weaponDto);

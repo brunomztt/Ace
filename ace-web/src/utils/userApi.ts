@@ -3,8 +3,9 @@ import { ApiResponse } from '../models/ApiResponse';
 import api from './apiClient';
 
 export const userApi = {
-    getAllUsers: async (): Promise<ApiResponse<UserDto[]>> => {
-        return api.get<ApiResponse<UserDto[]>>('/users');
+    getAllUsers: async (searchTerm?: string): Promise<ApiResponse<UserDto[]>> => {
+        const params = searchTerm ? { searchTerm } : {};
+        return api.get<ApiResponse<UserDto[]>>('/users', { params });
     },
 
     getUserById: async (userId: string): Promise<ApiResponse<UserDto>> => {

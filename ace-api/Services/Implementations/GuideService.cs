@@ -15,11 +15,23 @@ public class GuideService : IGuideService
         _context = context;
     }
 
-    public async Task<ApiResponse<List<GuideDto>>> GetAllGuidesAsync()
+    public async Task<ApiResponse<List<GuideDto>>> GetAllGuidesAsync(string? searchTerm = null, string? guideType = null)
     {
-        var guides = await _context.Guides
+        IQueryable<Guide> query = _context.Guides
             .Include(g => g.User)
-            .OrderByDescending(g => g.CreatedAt)
+            .OrderByDescending(g => g.CreatedAt);
+        
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            query = query.Where(g => g.Title.Contains(searchTerm));
+        }
+    
+        if (!string.IsNullOrWhiteSpace(guideType))
+        {
+            query = query.Where(g => g.GuideType == guideType);
+        }
+    
+        var guides = await query
             .Select(g => new GuideDto
             {
                 GuideId = g.GuideId,

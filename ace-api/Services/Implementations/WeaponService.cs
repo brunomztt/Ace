@@ -15,10 +15,22 @@ public class WeaponService : IWeaponService
         _context = context;
     }
 
-    public async Task<ApiResponse<List<WeaponDto>>> GetAllWeaponsAsync()
+    public async Task<ApiResponse<List<WeaponDto>>> GetAllWeaponsAsync(string? searchTerm = null, int? categoryId = null)
     {
-        var weapons = await _context.Weapons
-            .Include(w => w.Category)
+        IQueryable<Weapon> query = _context.Weapons
+            .Include(w => w.Category);
+        
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            query = query.Where(w => w.WeaponName.Contains(searchTerm));
+        }
+    
+        if (categoryId.HasValue)
+        {
+            query = query.Where(w => w.CategoryId == categoryId.Value);
+        }
+    
+        var weapons = await query
             .Select(w => new WeaponDto
             {
                 WeaponId = w.WeaponId,
