@@ -41,11 +41,11 @@ const MapForm: React.FC<MapFormProps> = ({ mapId }) => {
                 });
             } else {
                 dialogService.error('Erro ao carregar dados do mapa');
-                navigate('/admin');
+                navigate(-1);
             }
         } catch (error: any) {
             dialogService.error(error.message || 'Erro ao carregar dados do mapa');
-            navigate('/admin');
+            navigate(-1);
         } finally {
             setIsLoading(false);
         }
@@ -116,7 +116,7 @@ const MapForm: React.FC<MapFormProps> = ({ mapId }) => {
             }
 
             if (response && response.success) {
-                navigate('/admin');
+                navigate(-1);
             } else {
                 throw new Error((response && response.message) || 'Erro ao processar mapa');
             }
@@ -128,7 +128,7 @@ const MapForm: React.FC<MapFormProps> = ({ mapId }) => {
     };
 
     const handleCancel = () => {
-        navigate('/admin');
+        navigate(-1);
     };
 
     return (

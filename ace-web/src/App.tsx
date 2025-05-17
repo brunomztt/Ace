@@ -20,6 +20,7 @@ import WeaponForm from './components/WeaponForm/WeaponForm';
 import MapForm from './components/MapForm/MapForm';
 import GuideForm from './components/GuideForm/GuideForm';
 import SkinForm from './components/SkinForm/SkinForm';
+import AgentListing from './components/AgentListing/AgentListing';
 
 gsap.registerPlugin(CustomEase);
 
@@ -278,6 +279,7 @@ const App: React.FC = () => {
                         <Route path="/user/:userid" element={<UserProfileWrapper />} />
                         <Route path="/admin" element={<AdminPanel />} />
                         <Route path="/agent" element={<AgentForm />} />
+                        <Route path="/agent/list" element={<AgentListing />} />
                         <Route path="/agent/:agentId" element={<AgentViewWrapper />} />
                         <Route path="/agent/edit/:agentId" element={<AgentEditWrapper />} />
                         <Route path="/weapon" element={<WeaponForm />} />

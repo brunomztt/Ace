@@ -2,45 +2,127 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AdminPanel.scss';
 import authApi from '../../utils/authApi';
+import { dialogService } from '../Dialog/dialogService';
 import userApi from '../../utils/userApi';
 import agentApi from '../../utils/agentApi';
-import { dialogService } from '../Dialog/dialogService';
-import { UserDto } from '../../models/User';
-import { AgentDto, IAgent } from '../../models/Agent';
-import { GuideDto } from '../../models/Guide';
-import { MapDto } from '../../models/Map';
-import { SkinDto } from '../../models/Skin';
 import guideApi from '../../utils/guideApi';
 import mapApi from '../../utils/mapApi';
 import skinApi from '../../utils/skinApi';
 import weaponApi from '../../utils/weaponApi';
+import { UserDto } from '../../models/User';
+import { AgentDto } from '../../models/Agent';
+import { GuideDto } from '../../models/Guide';
+import { MapDto } from '../../models/Map';
+import { SkinDto } from '../../models/Skin';
 import { WeaponCategoryDto, WeaponDto } from '../../models/Weapon';
 
 type Tab = 'users' | 'agents' | 'weapons' | 'guides' | 'maps' | 'skins';
 
+type FilterOption = {
+    id: any;
+    name: string;
+};
+
 const AdminPanel: React.FC = () => {
-    const [activeTab, setActiveTab] = useState<Tab>('users');
-    const [users, setUsers] = useState<UserDto[]>([]);
-    const [agents, setAgents] = useState<AgentDto[]>([]);
-    const [weapons, setWeapons] = useState<WeaponDto[]>([]);
-    const [guides, setGuides] = useState<GuideDto[]>([]);
-    const [maps, setMaps] = useState<MapDto[]>([]);
-    const [skins, setSkins] = useState<SkinDto[]>([]);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-    const containerRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
-    const [userSearchTerm, setUserSearchTerm] = useState<string>('');
-    const [agentSearchTerm, setAgentSearchTerm] = useState<string>('');
-    const [weaponSearchTerm, setWeaponSearchTerm] = useState<string>('');
-    const [guideSearchTerm, setGuideSearchTerm] = useState<string>('');
-    const [mapSearchTerm, setMapSearchTerm] = useState<string>('');
-    const [skinSearchTerm, setSkinSearchTerm] = useState<string>('');
-    const [selectedWeaponCategory, setSelectedWeaponCategory] = useState<number | undefined>(undefined);
-    const [selectedGuideType, setSelectedGuideType] = useState<string | undefined>(undefined);
-    const [selectedWeaponForSkin, setSelectedWeaponForSkin] = useState<number | undefined>(undefined);
-    const [weaponCategories, setWeaponCategories] = useState<WeaponCategoryDto[]>([]);
-    const [availableWeapons, setAvailableWeapons] = useState<WeaponDto[]>([]);
-    const [guideTypes, setGuideTypes] = useState<string[]>(['Agent', 'Map', 'Weapon', 'Other']);
+    const [activeTab, setActiveTab] = useState<Tab>('users');
+    const [data, setData] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const [filters, setFilters] = useState<Record<string, any>>({});
+    const [weaponCategoryOptions, setWeaponCategoryOptions] = useState<FilterOption[]>([]);
+    const [weaponOptions, setWeaponOptions] = useState<FilterOption[]>([]);
+    const [guideTypeOptions] = useState<FilterOption[]>([
+        { id: 'Agent', name: 'Agent' },
+        { id: 'Map', name: 'Map' },
+        { id: 'Weapon', name: 'Weapon' },
+        { id: 'Other', name: 'Other' },
+    ]);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const tabConfigs = {
+        users: {
+            title: 'Usuários',
+            entity: 'user',
+            apiLoad: (search?: string) => userApi.getAllUsers(search),
+            apiDelete: (id: string) => userApi.deleteUser(id),
+            columns: [
+                { key: 'profilePic', label: 'Foto', type: 'image' },
+                { key: 'nickname', label: 'Username' },
+                { key: 'fullName', label: 'Nome Completo' },
+                { key: 'email', label: 'Email' },
+            ],
+            filters: [],
+            canAdd: false,
+            agents: {
+                title: 'Agentes',
+                entity: 'agent',
+                apiLoad: (search?: string) => agentApi.getAllAgents(search),
+                apiDelete: (id: string) => agentApi.deleteAgent(id),
+                columns: [
+                    { key: 'agentImage', label: 'Imagem', type: 'image' },
+                    { key: 'agentName', label: 'Nome' },
+                    { key: 'agentDescription', label: 'Descrição', type: 'description' },
+                ],
+                filters: [],
+                canAdd: true,
+            },
+        },
+        weapons: {
+            title: 'Armas',
+            entity: 'weapon',
+            apiLoad: (search?: string, categoryId?: any) => weaponApi.getAllWeapons(search, categoryId),
+            apiDelete: (id: string) => weaponApi.deleteWeapon(id),
+            columns: [
+                { key: 'weaponImage', label: 'Imagem', type: 'image' },
+                { key: 'weaponName', label: 'Nome' },
+                { key: 'categoryName', label: 'Categoria' },
+                { key: 'credits', label: 'Créditos' },
+            ],
+            filters: [{ key: 'categoryId', label: 'as Categorias' }],
+            canAdd: true,
+        },
+        guides: {
+            title: 'Guias',
+            entity: 'guide',
+            apiLoad: (search?: string, guideType?: any) => guideApi.getAllGuides(search, guideType),
+            apiDelete: (id: string) => guideApi.deleteGuide(id),
+            columns: [
+                { key: 'title', label: 'Título' },
+                { key: 'authorName', label: 'Autor' },
+                { key: 'guideType', label: 'Tipo' },
+                { key: 'createdAt', label: 'Data de Criação', type: 'date' },
+            ],
+            filters: [{ key: 'guideType', label: 'os Tipos' }],
+            maps: {
+                title: 'Mapas',
+                entity: 'map',
+                apiLoad: (search?: string) => mapApi.getAllMaps(search),
+                apiDelete: (id: string) => mapApi.deleteMap(id),
+                columns: [
+                    { key: 'mapImage', label: 'Imagem', type: 'image' },
+                    { key: 'mapName', label: 'Nome' },
+                    { key: 'mapDescription', label: 'Descrição', type: 'description' },
+                ],
+                filters: [],
+                canAdd: true,
+            },
+            canAdd: true,
+        },
+        skins: {
+            title: 'Skins',
+            entity: 'skin',
+            apiLoad: (search?: string, weaponId?: any) => skinApi.getAllSkins(search, weaponId),
+            apiDelete: (id: string) => skinApi.deleteSkin(id),
+            columns: [
+                { key: 'skinImage', label: 'Imagem', type: 'image' },
+                { key: 'skinName', label: 'Nome' },
+                { key: 'weaponName', label: 'Arma' },
+            ],
+            filters: [{ key: 'weaponId', label: 'as Armas' }],
+            canAdd: true,
+        },
+    };
 
     useEffect(() => {
         const currentUser = authApi.getCurrentUser();
@@ -51,894 +133,287 @@ const AdminPanel: React.FC = () => {
     }, [navigate]);
 
     useEffect(() => {
+        loadData();
+        loadFilterOptions();
+        setSearchTerm('');
+        setFilters({});
+    }, [activeTab]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            loadData();
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchTerm, filters]);
+
+    const loadFilterOptions = async () => {
+        if (activeTab === 'weapons' || activeTab === 'skins') {
+            try {
+                const response = await weaponApi.getAllWeaponCategories();
+                if (response.success) {
+                    const options =
+                        response.data?.map((c) => ({
+                            id: c.categoryId,
+                            name: c.categoryName,
+                        })) || [];
+                    setWeaponCategoryOptions(options);
+                }
+            } catch (error) {
+                console.error('Error loading weapon categories:', error);
+            }
+        }
+
+        if (activeTab === 'skins') {
+            try {
+                const response = await weaponApi.getAllWeapons();
+                if (response.success) {
+                    const options =
+                        response.data?.map((w) => ({
+                            id: w.weaponId,
+                            name: w.weaponName,
+                        })) || [];
+                    setWeaponOptions(options);
+                }
+            } catch (error) {
+                console.error('Error loading weapons:', error);
+            }
+        }
+    };
+
+    const loadData = async () => {
+        const config = tabConfigs[activeTab];
+        try {
+            setIsLoading(true);
+            const filterValue = Object.values(filters)[0];
+            const response = await config.apiLoad(searchTerm, filterValue);
+
+            if (response.success) {
+                let processedData = (response.data || []).map((item: any) => {
+                    const processed: any = { ...item };
+
+                    if (activeTab === 'users') {
+                        processed.fullName = `${item.firstName} ${item.lastName || ''}`;
+                    } else if (activeTab === 'guides') {
+                        processed.authorName = item.author?.nickname || '-';
+                    } else if (activeTab === 'weapons') {
+                        processed.categoryName = item.category?.categoryName;
+                    } else if (activeTab === 'skins') {
+                        processed.weaponName = item.weapon?.weaponName;
+                    }
+
+                    return processed;
+                });
+
+                setData(processedData);
+            } else {
+                throw new Error(response.message || `Erro ao carregar ${config.title.toLowerCase()}`);
+            }
+        } catch (error: any) {
+            dialogService.error(error.message || `Erro ao carregar ${config.title.toLowerCase()}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const getFilterOptions = (filterKey: string): FilterOption[] => {
+        if (filterKey === 'categoryId') {
+            return weaponCategoryOptions;
+        } else if (filterKey === 'weaponId') {
+            return weaponOptions;
+        } else if (filterKey === 'guideType') {
+            return guideTypeOptions;
+        }
+        return [];
+    };
+
+    const handleView = (id: number) => {
+        navigate(`/${tabConfigs[activeTab].entity}/${id}`);
+    };
+
+    const handleEdit = (id: number) => {
+        navigate(`/${tabConfigs[activeTab].entity}/edit/${id}`);
+    };
+
+    const handleAdd = () => {
+        navigate(`/${tabConfigs[activeTab].entity}`);
+    };
+
+    const handleDelete = async (id: number) => {
+        const config = tabConfigs[activeTab];
+        try {
+            dialogService.confirm('Confirmar Ação', `Tem certeza que deseja excluir este ${config.entity}?`, async () => {
+                const response = await config.apiDelete(id.toString());
+
+                if (response.success) {
+                    dialogService.success(`${config.entity.charAt(0).toUpperCase() + config.entity.slice(1)} excluído com sucesso`);
+                    loadData();
+                } else {
+                    throw new Error(response.message || `Erro ao excluir ${config.entity}`);
+                }
+            });
+        } catch (error: any) {
+            dialogService.error(error.message || `Erro ao excluir ${config.entity}`);
+        }
+    };
+
+    const getItemId = (item: any): number => {
         switch (activeTab) {
             case 'users':
-                loadUsers();
-                break;
+                return (item as UserDto).userId;
             case 'agents':
-                loadAgents();
-                break;
+                return (item as AgentDto).agentId;
             case 'weapons':
-                loadWeapons();
-                break;
+                return (item as WeaponDto).weaponId;
             case 'guides':
-                loadGuides();
-                break;
+                return (item as GuideDto).guideId;
             case 'maps':
-                loadMaps();
-                break;
+                return (item as MapDto).mapId;
             case 'skins':
-                loadSkins();
-                break;
+                return (item as SkinDto).skinId;
             default:
-                break;
-        }
-    }, [activeTab]);
-
-    useEffect(() => {
-        if (activeTab === 'weapons' || activeTab === 'skins') {
-            loadWeaponCategories();
-        }
-        if (activeTab === 'skins') {
-            loadWeaponsForDropdown();
-        }
-    }, [activeTab]);
-
-    const loadWeaponCategories = async () => {
-        try {
-            const response = await weaponApi.getAllWeaponCategories();
-            if (response.success) {
-                setWeaponCategories(response.data || []);
-            }
-        } catch (error) {
-            console.error('Erro ao carregar categorias de armas:', error);
+                return 0;
         }
     };
 
-    const loadWeaponsForDropdown = async () => {
-        try {
-            const response = await weaponApi.getAllWeapons();
-            if (response.success) {
-                setAvailableWeapons(response.data || []);
-            }
-        } catch (error) {
-            console.error('Erro ao carregar armas:', error);
+    const getImageUrl = (item: any, column: string): string => {
+        const imageValue = item[column];
+        return imageValue ? imageValue : '/logo.png';
+    };
+
+    const handleFilterChange = (key: string, value: any) => {
+        setFilters((prev) => ({
+            ...prev,
+            [key]: value === '' ? undefined : value,
+        }));
+    };
+
+    const renderTable = () => {
+        const config = tabConfigs[activeTab];
+
+        if (isLoading) {
+            return <div className="loading">Carregando {config.title.toLowerCase()}...</div>;
         }
-    };
 
-    const loadUsers = async () => {
-        try {
-            setIsLoading(true);
-            const response = await userApi.getAllUsers(userSearchTerm);
-
-            if (response.success) {
-                setUsers(response.data || []);
-            } else {
-                throw new Error(response.message || 'Erro ao carregar usuários');
-            }
-        } catch (error: any) {
-            dialogService.error(error.message || 'Erro ao carregar usuários');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        if (activeTab === 'users') {
-            const timer = setTimeout(() => loadUsers(), 500);
-
-            return () => clearTimeout(timer);
-        }
-    }, [userSearchTerm, activeTab]);
-
-    const loadAgents = async () => {
-        try {
-            setIsLoading(true);
-            const response = await agentApi.getAllAgents(agentSearchTerm);
-
-            if (response.success) {
-                setAgents(response.data || []);
-            } else {
-                throw new Error(response.message || 'Erro ao carregar agentes');
-            }
-        } catch (error: any) {
-            dialogService.error(error.message || 'Erro ao carregar agentes');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        if (activeTab === 'agents') {
-            const timer = setTimeout(() => {
-                loadAgents();
-            }, 500);
-
-            return () => clearTimeout(timer);
-        }
-    }, [agentSearchTerm, activeTab]);
-
-    const loadWeapons = async () => {
-        try {
-            setIsLoading(true);
-            const response = await weaponApi.getAllWeapons(weaponSearchTerm, selectedWeaponCategory);
-
-            if (response.success) {
-                setWeapons(response.data || []);
-            } else {
-                throw new Error(response.message || 'Erro ao carregar armas');
-            }
-        } catch (error: any) {
-            dialogService.error(error.message || 'Erro ao carregar armas');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const loadGuides = async () => {
-        try {
-            setIsLoading(true);
-            const response = await guideApi.getAllGuides(guideSearchTerm, selectedGuideType);
-
-            if (response.success) {
-                setGuides(response.data || []);
-            } else {
-                throw new Error(response.message || 'Erro ao carregar guias');
-            }
-        } catch (error: any) {
-            dialogService.error(error.message || 'Erro ao carregar guias');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const loadMaps = async () => {
-        try {
-            setIsLoading(true);
-            const response = await mapApi.getAllMaps(mapSearchTerm);
-
-            if (response.success) {
-                setMaps(response.data || []);
-            } else {
-                throw new Error(response.message || 'Erro ao carregar mapas');
-            }
-        } catch (error: any) {
-            dialogService.error(error.message || 'Erro ao carregar mapas');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const loadSkins = async () => {
-        try {
-            setIsLoading(true);
-            const response = await skinApi.getAllSkins(skinSearchTerm, selectedWeaponForSkin);
-
-            if (response.success) {
-                setSkins(response.data || []);
-            } else {
-                throw new Error(response.message || 'Erro ao carregar skins');
-            }
-        } catch (error: any) {
-            dialogService.error(error.message || 'Erro ao carregar skins');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        if (activeTab === 'weapons') {
-            const timer = setTimeout(() => {
-                loadWeapons();
-            }, 500);
-            return () => clearTimeout(timer);
-        }
-    }, [weaponSearchTerm, selectedWeaponCategory, activeTab]);
-
-    useEffect(() => {
-        if (activeTab === 'guides') {
-            const timer = setTimeout(() => {
-                loadGuides();
-            }, 500);
-            return () => clearTimeout(timer);
-        }
-    }, [guideSearchTerm, selectedGuideType, activeTab]);
-
-    useEffect(() => {
-        if (activeTab === 'maps') {
-            const timer = setTimeout(() => {
-                loadMaps();
-            }, 500);
-            return () => clearTimeout(timer);
-        }
-    }, [mapSearchTerm, activeTab]);
-
-    useEffect(() => {
-        if (activeTab === 'skins') {
-            const timer = setTimeout(() => {
-                loadSkins();
-            }, 500);
-            return () => clearTimeout(timer);
-        }
-    }, [skinSearchTerm, selectedWeaponForSkin, activeTab]);
-
-    const handleAddAgent = () => {
-        navigate('/agent');
-    };
-
-    const handleViewUser = (userId: number) => {
-        navigate(`/user/${userId}`);
-    };
-
-    const handleEditUser = (userId: number) => {
-        navigate(`/user/edit/${userId}`);
-    };
-
-    const handleDeleteUser = async (userId: number) => {
-        try {
-            dialogService.confirm('Confirmar Ação', 'Tem certeza que deseja excluir este usuário?', async () => {
-                const response = await userApi.deleteUser(userId.toString());
-
-                if (response.success) {
-                    dialogService.success('Usuário excluído com sucesso');
-                    loadUsers();
-                } else {
-                    throw new Error(response.message || 'Erro ao excluir usuário');
-                }
-            });
-        } catch (error: any) {
-            dialogService.error(error.message || 'Erro ao excluir usuário');
-        }
-    };
-
-    const handleViewAgent = (agentId: number) => {
-        navigate(`/agent/${agentId}`);
-    };
-
-    const handleEditAgent = (agentId: number) => {
-        navigate(`/agent/edit/${agentId}`);
-    };
-
-    const handleDeleteAgent = async (agentId: number) => {
-        try {
-            dialogService.confirm('Confirmar Ação', 'Tem certeza que deseja excluir este agente?', async () => {
-                const response = await agentApi.deleteAgent(agentId.toString());
-
-                if (response.success) {
-                    dialogService.success('Agente excluído com sucesso');
-                    loadAgents();
-                } else {
-                    throw new Error(response.message || 'Erro ao excluir agente');
-                }
-            });
-        } catch (error: any) {
-            dialogService.error(error.message || 'Erro ao excluir agente');
-        }
-    };
-
-    const handleAddWeapon = () => {
-        navigate('/weapon');
-    };
-
-    const handleViewWeapon = (weaponId: number) => {
-        navigate(`/weapon/${weaponId}`);
-    };
-
-    const handleEditWeapon = (weaponId: number) => {
-        navigate(`/weapon/edit/${weaponId}`);
-    };
-
-    const handleDeleteWeapon = async (weaponId: number) => {
-        try {
-            dialogService.confirm('Confirmar Ação', 'Tem certeza que deseja excluir esta arma?', async () => {
-                const response = await weaponApi.deleteWeapon(weaponId.toString());
-
-                if (response.success) {
-                    dialogService.success('Arma excluída com sucesso');
-                    loadWeapons();
-                } else {
-                    throw new Error(response.message || 'Erro ao excluir arma');
-                }
-            });
-        } catch (error: any) {
-            dialogService.error(error.message || 'Erro ao excluir arma');
-        }
-    };
-
-    const handleAddGuide = () => {
-        navigate('/guide');
-    };
-
-    const handleViewGuide = (guideId: number) => {
-        navigate(`/guide/${guideId}`);
-    };
-
-    const handleEditGuide = (guideId: number) => {
-        navigate(`/guide/edit/${guideId}`);
-    };
-
-    const handleDeleteGuide = async (guideId: number) => {
-        try {
-            dialogService.confirm('Confirmar Ação', 'Tem certeza que deseja excluir este guia?', async () => {
-                const response = await guideApi.deleteGuide(guideId.toString());
-
-                if (response.success) {
-                    dialogService.success('Guia excluído com sucesso');
-                    loadGuides();
-                } else {
-                    throw new Error(response.message || 'Erro ao excluir guia');
-                }
-            });
-        } catch (error: any) {
-            dialogService.error(error.message || 'Erro ao excluir guia');
-        }
-    };
-
-    const handleAddMap = () => {
-        navigate('/map');
-    };
-
-    const handleViewMap = (mapId: number) => {
-        navigate(`/map/${mapId}`);
-    };
-
-    const handleEditMap = (mapId: number) => {
-        navigate(`/map/edit/${mapId}`);
-    };
-
-    const handleDeleteMap = async (mapId: number) => {
-        try {
-            dialogService.confirm('Confirmar Ação', 'Tem certeza que deseja excluir este mapa?', async () => {
-                const response = await mapApi.deleteMap(mapId.toString());
-
-                if (response.success) {
-                    dialogService.success('Mapa excluído com sucesso');
-                    loadMaps();
-                } else {
-                    throw new Error(response.message || 'Erro ao excluir mapa');
-                }
-            });
-        } catch (error: any) {
-            dialogService.error(error.message || 'Erro ao excluir mapa');
-        }
-    };
-
-    const handleAddSkin = () => {
-        navigate('/skin');
-    };
-
-    const handleViewSkin = (skinId: number) => {
-        navigate(`/skin/${skinId}`);
-    };
-
-    const handleEditSkin = (skinId: number) => {
-        navigate(`/skin/edit/${skinId}`);
-    };
-
-    const handleDeleteSkin = async (skinId: number) => {
-        try {
-            dialogService.confirm('Confirmar Ação', 'Tem certeza que deseja excluir esta skin?', async () => {
-                const response = await skinApi.deleteSkin(skinId.toString());
-
-                if (response.success) {
-                    dialogService.success('Skin excluída com sucesso');
-                    loadSkins();
-                } else {
-                    throw new Error(response.message || 'Erro ao excluir skin');
-                }
-            });
-        } catch (error: any) {
-            dialogService.error(error.message || 'Erro ao excluir skin');
-        }
+        return (
+            <div className={`${activeTab}-table-container`}>
+                <table className={`${activeTab}-table`}>
+                    <thead>
+                        <tr>
+                            {config.columns.map((col) => (
+                                <th key={col.key} className={col.type === 'image' ? 'photo-column' : ''}>
+                                    {col.label}
+                                </th>
+                            ))}
+                            <th className="actions-column">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {data.length === 0 ? (
+                            <tr>
+                                <td colSpan={config.columns.length + 1} className={`no-${activeTab}`}>
+                                    Nenhum {config.entity} encontrado
+                                </td>
+                            </tr>
+                        ) : (
+                            data.map((item) => (
+                                <tr key={getItemId(item)}>
+                                    {config.columns.map((col) => {
+                                        if (col.type === 'image') {
+                                            return (
+                                                <td key={col.key}>
+                                                    <div
+                                                        className={`${activeTab.slice(0, -1)}-photo`}
+                                                        style={{
+                                                            backgroundImage: `url(${getImageUrl(item, col.key)})`,
+                                                        }}
+                                                    />
+                                                </td>
+                                            );
+                                        } else if (col.type === 'date') {
+                                            return <td key={col.key}>{new Date(item[col.key]).toLocaleDateString()}</td>;
+                                        } else if (col.type === 'description') {
+                                            return (
+                                                <td key={col.key} className="description-cell">
+                                                    {item[col.key]}
+                                                </td>
+                                            );
+                                        } else {
+                                            return <td key={col.key}>{item[col.key]}</td>;
+                                        }
+                                    })}
+                                    <td className="actions">
+                                        <button className="view-button" onClick={() => handleView(getItemId(item))}>
+                                            <i className="bx bx-show"></i>
+                                        </button>
+                                        <button className="edit-button" onClick={() => handleEdit(getItemId(item))}>
+                                            <i className="bx bx-edit"></i>
+                                        </button>
+                                        <button className="delete-button" onClick={() => handleDelete(getItemId(item))}>
+                                            <i className="bx bx-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
+        );
     };
 
     return (
         <div className="admin-panel-container" ref={containerRef}>
             <div className="admin-tabs">
-                <button className={`tab-button ${activeTab === 'users' ? 'active' : ''}`} onClick={() => setActiveTab('users')}>
-                    Usuários
-                </button>
-                <button className={`tab-button ${activeTab === 'agents' ? 'active' : ''}`} onClick={() => setActiveTab('agents')}>
-                    Agentes
-                </button>
-                <button className={`tab-button ${activeTab === 'weapons' ? 'active' : ''}`} onClick={() => setActiveTab('weapons')}>
-                    Armas
-                </button>
-                <button className={`tab-button ${activeTab === 'guides' ? 'active' : ''}`} onClick={() => setActiveTab('guides')}>
-                    Guias
-                </button>
-                <button className={`tab-button ${activeTab === 'maps' ? 'active' : ''}`} onClick={() => setActiveTab('maps')}>
-                    Mapas
-                </button>
-                <button className={`tab-button ${activeTab === 'skins' ? 'active' : ''}`} onClick={() => setActiveTab('skins')}>
-                    Skins
-                </button>
+                {Object.entries(tabConfigs).map(([key, config]) => (
+                    <button key={key} className={`tab-button ${activeTab === key ? 'active' : ''}`} onClick={() => setActiveTab(key as Tab)}>
+                        {config.title}
+                    </button>
+                ))}
             </div>
 
             <div className="tab-content">
-                {activeTab === 'users' && (
-                    <div className="users-tab">
-                        <div className="tab-header">
-                            <h2>Gerenciamento de Usuários</h2>
+                <div className={`${activeTab}-tab`}>
+                    <div className="tab-header">
+                        <h2>Gerenciamento de {tabConfigs[activeTab].title}</h2>
+                        <div className="actions-container">
                             <div className="search-container">
                                 <input
                                     type="text"
                                     className="search-input"
-                                    placeholder="Buscar por username..."
-                                    value={userSearchTerm}
-                                    onChange={(e) => setUserSearchTerm(e.target.value)}
+                                    placeholder={`Buscar por ${activeTab === 'users' ? 'username' : 'nome'}...`}
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
                                 />
                             </div>
-                        </div>
 
-                        {isLoading ? (
-                            <div className="loading">Carregando usuários...</div>
-                        ) : (
-                            <div className="users-table-container">
-                                <table className="users-table">
-                                    <thead>
-                                        <tr>
-                                            <th className="photo-column">Foto</th>
-                                            <th>Username</th>
-                                            <th>Nome Completo</th>
-                                            <th>Email</th>
-                                            <th className="actions-column">Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {users.length === 0 ? (
-                                            <tr>
-                                                <td colSpan={5} className="no-users">
-                                                    Nenhum usuário encontrado
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            users.map((user) => (
-                                                <tr key={user.userId}>
-                                                    <td>
-                                                        <div
-                                                            className="user-photo"
-                                                            style={{
-                                                                backgroundImage: user.profilePic ? `url(${user.profilePic})` : 'url(/logo.png)',
-                                                            }}
-                                                        />
-                                                    </td>
-                                                    <td>{user.nickname}</td>
-                                                    <td>{`${user.firstName} ${user.lastName || ''}`}</td>
-                                                    <td>{user.email}</td>
-                                                    <td className="actions">
-                                                        <button className="view-button" onClick={() => handleViewUser(user.userId)}>
-                                                            <i className="bx bx-show"></i>
-                                                        </button>
-                                                        <button className="edit-button" onClick={() => handleEditUser(user.userId)}>
-                                                            <i className="bx bx-edit"></i>
-                                                        </button>
-                                                        <button className="delete-button" onClick={() => handleDeleteUser(user.userId)}>
-                                                            <i className="bx bx-trash"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {activeTab === 'agents' && (
-                    <div className="agents-tab">
-                        <div className="tab-header">
-                            <h2>Gerenciamento de Agentes</h2>
-                            <div className="actions-container">
-                                <div className="search-container">
-                                    <input
-                                        type="text"
-                                        className="search-input"
-                                        placeholder="Buscar por nome..."
-                                        value={agentSearchTerm}
-                                        onChange={(e) => setAgentSearchTerm(e.target.value)}
-                                    />
-                                </div>
-                                <button className="add-button" onClick={handleAddAgent}>
-                                    <i className="bx bx-plus"></i>
-                                    Adicionar Agente
-                                </button>
-                            </div>
-                        </div>
-
-                        {isLoading ? (
-                            <div className="loading">Carregando agentes...</div>
-                        ) : (
-                            <div className="agents-table-container">
-                                <table className="agents-table">
-                                    <thead>
-                                        <tr>
-                                            <th className="photo-column">Imagem</th>
-                                            <th>Nome</th>
-                                            <th>Descrição</th>
-                                            <th className="actions-column">Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {agents.length === 0 ? (
-                                            <tr>
-                                                <td colSpan={4} className="no-agents">
-                                                    Nenhum agente encontrado
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            agents.map((agent) => (
-                                                <tr key={agent.agentId}>
-                                                    <td>
-                                                        <div
-                                                            className="agent-photo"
-                                                            style={{
-                                                                backgroundImage: agent.agentImage ? `url(${agent.agentImage})` : 'url(/logo.png)',
-                                                            }}
-                                                        />
-                                                    </td>
-                                                    <td>{agent.agentName}</td>
-                                                    <td className="description-cell">{agent.agentDescription}</td>
-                                                    <td className="actions">
-                                                        <button className="view-button" onClick={() => handleViewAgent(agent.agentId)}>
-                                                            <i className="bx bx-show"></i>
-                                                        </button>
-                                                        <button className="edit-button" onClick={() => handleEditAgent(agent.agentId)}>
-                                                            <i className="bx bx-edit"></i>
-                                                        </button>
-                                                        <button className="delete-button" onClick={() => handleDeleteAgent(agent.agentId)}>
-                                                            <i className="bx bx-trash"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {activeTab === 'weapons' && (
-                    <div className="weapons-tab">
-                        <div className="tab-header">
-                            <h2>Gerenciamento de Armas</h2>
-                            <div className="actions-container">
-                                <div className="search-container">
-                                    <input
-                                        type="text"
-                                        className="search-input"
-                                        placeholder="Buscar por nome..."
-                                        value={weaponSearchTerm}
-                                        onChange={(e) => setWeaponSearchTerm(e.target.value)}
-                                    />
-                                </div>
-                                <div className="select-container">
+                            {tabConfigs[activeTab].filters?.map((filter) => (
+                                <div key={filter.key} className="select-container">
                                     <select
                                         className="filter-select"
-                                        value={selectedWeaponCategory || ''}
-                                        onChange={(e) => setSelectedWeaponCategory(e.target.value ? Number(e.target.value) : undefined)}
+                                        value={filters[filter.key] || ''}
+                                        onChange={(e) => handleFilterChange(filter.key, e.target.value)}
                                     >
-                                        <option value="">Todas as categorias</option>
-                                        {weaponCategories.map((category) => (
-                                            <option key={category.categoryId} value={category.categoryId}>
-                                                {category.categoryName}
+                                        <option value="">{`Todos ${filter.label.toLowerCase()}`}</option>
+                                        {getFilterOptions(filter.key).map((option) => (
+                                            <option key={option.id} value={option.id}>
+                                                {option.name}
                                             </option>
                                         ))}
                                     </select>
                                 </div>
-                                <button className="add-button" onClick={handleAddWeapon}>
+                            ))}
+
+                            {tabConfigs[activeTab].canAdd && (
+                                <button className="add-button" onClick={handleAdd}>
                                     <i className="bx bx-plus"></i>
-                                    Adicionar Arma
+                                    Adicionar {tabConfigs[activeTab].entity.charAt(0).toUpperCase() + tabConfigs[activeTab].entity.slice(1)}
                                 </button>
-                            </div>
+                            )}
                         </div>
-
-                        {isLoading ? (
-                            <div className="loading">Carregando armas...</div>
-                        ) : (
-                            <div className="weapons-table-container">
-                                <table className="weapons-table">
-                                    <thead>
-                                        <tr>
-                                            <th className="photo-column">Imagem</th>
-                                            <th>Nome</th>
-                                            <th>Categoria</th>
-                                            <th>Créditos</th>
-                                            <th className="actions-column">Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {weapons.length === 0 ? (
-                                            <tr>
-                                                <td colSpan={5} className="no-weapons">
-                                                    Nenhuma arma encontrada
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            weapons.map((weapon) => (
-                                                <tr key={weapon.weaponId}>
-                                                    <td>
-                                                        <div
-                                                            className="weapon-photo"
-                                                            style={{
-                                                                backgroundImage: weapon.weaponImage ? `url(${weapon.weaponImage})` : 'url(/logo.png)',
-                                                            }}
-                                                        />
-                                                    </td>
-                                                    <td>{weapon.weaponName}</td>
-                                                    <td>{weapon.category?.categoryName}</td>
-                                                    <td>{weapon.credits}</td>
-                                                    <td className="actions">
-                                                        <button className="view-button" onClick={() => handleViewWeapon(weapon.weaponId)}>
-                                                            <i className="bx bx-show"></i>
-                                                        </button>
-                                                        <button className="edit-button" onClick={() => handleEditWeapon(weapon.weaponId)}>
-                                                            <i className="bx bx-edit"></i>
-                                                        </button>
-                                                        <button className="delete-button" onClick={() => handleDeleteWeapon(weapon.weaponId)}>
-                                                            <i className="bx bx-trash"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
                     </div>
-                )}
 
-                {activeTab === 'guides' && (
-                    <div className="guides-tab">
-                        <div className="tab-header">
-                            <h2>Gerenciamento de Guias</h2>
-                            <div className="actions-container">
-                                <div className="search-container">
-                                    <input
-                                        type="text"
-                                        className="search-input"
-                                        placeholder="Buscar por título..."
-                                        value={guideSearchTerm}
-                                        onChange={(e) => setGuideSearchTerm(e.target.value)}
-                                    />
-                                </div>
-                                <div className="select-container">
-                                    <select
-                                        className="filter-select"
-                                        value={selectedGuideType || ''}
-                                        onChange={(e) => setSelectedGuideType(e.target.value || undefined)}
-                                    >
-                                        <option value="">Todos os tipos</option>
-                                        {guideTypes.map((type) => (
-                                            <option key={type} value={type}>
-                                                {type}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <button className="add-button" onClick={handleAddGuide}>
-                                    <i className="bx bx-plus"></i>
-                                    Adicionar Guia
-                                </button>
-                            </div>
-                        </div>
-
-                        {isLoading ? (
-                            <div className="loading">Carregando guias...</div>
-                        ) : (
-                            <div className="guides-table-container">
-                                <table className="guides-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Título</th>
-                                            <th>Autor</th>
-                                            <th>Tipo</th>
-                                            <th>Data de Criação</th>
-                                            <th className="actions-column">Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {guides.length === 0 ? (
-                                            <tr>
-                                                <td colSpan={5} className="no-guides">
-                                                    Nenhum guia encontrado
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            guides.map((guide) => (
-                                                <tr key={guide.guideId}>
-                                                    <td>{guide.title}</td>
-                                                    <td>{guide.author?.nickname || '-'}</td>
-                                                    <td>{guide.guideType}</td>
-                                                    <td>{new Date(guide.createdAt).toLocaleDateString()}</td>
-                                                    <td className="actions">
-                                                        <button className="view-button" onClick={() => handleViewGuide(guide.guideId)}>
-                                                            <i className="bx bx-show"></i>
-                                                        </button>
-                                                        <button className="edit-button" onClick={() => handleEditGuide(guide.guideId)}>
-                                                            <i className="bx bx-edit"></i>
-                                                        </button>
-                                                        <button className="delete-button" onClick={() => handleDeleteGuide(guide.guideId)}>
-                                                            <i className="bx bx-trash"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {activeTab === 'maps' && (
-                    <div className="maps-tab">
-                        <div className="tab-header">
-                            <h2>Gerenciamento de Mapas</h2>
-                            <div className="actions-container">
-                                <div className="search-container">
-                                    <input
-                                        type="text"
-                                        className="search-input"
-                                        placeholder="Buscar por nome..."
-                                        value={mapSearchTerm}
-                                        onChange={(e) => setMapSearchTerm(e.target.value)}
-                                    />
-                                </div>
-                                <button className="add-button" onClick={handleAddMap}>
-                                    <i className="bx bx-plus"></i>
-                                    Adicionar Mapa
-                                </button>
-                            </div>
-                        </div>
-                        {isLoading ? (
-                            <div className="loading">Carregando mapas...</div>
-                        ) : (
-                            <div className="maps-table-container">
-                                <table className="maps-table">
-                                    <thead>
-                                        <tr>
-                                            <th className="photo-column">Imagem</th>
-                                            <th>Nome</th>
-                                            <th>Descrição</th>
-                                            <th className="actions-column">Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {maps.length === 0 ? (
-                                            <tr>
-                                                <td colSpan={4} className="no-maps">
-                                                    Nenhum mapa encontrado
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            maps.map((map) => (
-                                                <tr key={map.mapId}>
-                                                    <td>
-                                                        <div
-                                                            className="map-photo"
-                                                            style={{
-                                                                backgroundImage: map.mapImage ? `url(${map.mapImage})` : 'url(/logo.png)',
-                                                            }}
-                                                        />
-                                                    </td>
-                                                    <td>{map.mapName}</td>
-                                                    <td className="description-cell">{map.mapDescription}</td>
-                                                    <td className="actions">
-                                                        <button className="view-button" onClick={() => handleViewMap(map.mapId)}>
-                                                            <i className="bx bx-show"></i>
-                                                        </button>
-                                                        <button className="edit-button" onClick={() => handleEditMap(map.mapId)}>
-                                                            <i className="bx bx-edit"></i>
-                                                        </button>
-                                                        <button className="delete-button" onClick={() => handleDeleteMap(map.mapId)}>
-                                                            <i className="bx bx-trash"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {activeTab === 'skins' && (
-                    <div className="skins-tab">
-                        <div className="tab-header">
-                            <h2>Gerenciamento de Skins</h2>
-                            <div className="actions-container">
-                                <div className="search-container">
-                                    <input
-                                        type="text"
-                                        className="search-input"
-                                        placeholder="Buscar por nome..."
-                                        value={skinSearchTerm}
-                                        onChange={(e) => setSkinSearchTerm(e.target.value)}
-                                    />
-                                </div>
-                                <div className="select-container">
-                                    <select
-                                        className="filter-select"
-                                        value={selectedWeaponForSkin || ''}
-                                        onChange={(e) => setSelectedWeaponForSkin(e.target.value ? Number(e.target.value) : undefined)}
-                                    >
-                                        <option value="">Todas as armas</option>
-                                        {availableWeapons.map((weapon) => (
-                                            <option key={weapon.weaponId} value={weapon.weaponId}>
-                                                {weapon.weaponName}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <button className="add-button" onClick={handleAddSkin}>
-                                    <i className="bx bx-plus"></i>
-                                    Adicionar Skin
-                                </button>
-                            </div>
-                        </div>
-
-                        {isLoading ? (
-                            <div className="loading">Carregando skins...</div>
-                        ) : (
-                            <div className="skins-table-container">
-                                <table className="skins-table">
-                                    <thead>
-                                        <tr>
-                                            <th className="photo-column">Imagem</th>
-                                            <th>Nome</th>
-                                            <th>Arma</th>
-                                            <th className="actions-column">Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {skins.length === 0 ? (
-                                            <tr>
-                                                <td colSpan={4} className="no-skins">
-                                                    Nenhuma skin encontrada
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            skins.map((skin) => (
-                                                <tr key={skin.skinId}>
-                                                    <td>
-                                                        <div
-                                                            className="skin-photo"
-                                                            style={{
-                                                                backgroundImage: skin.skinImage ? `url(${skin.skinImage})` : 'url(/logo.png)',
-                                                            }}
-                                                        />
-                                                    </td>
-                                                    <td>{skin.skinName}</td>
-                                                    <td>{skin.weapon?.weaponName}</td>
-                                                    <td className="actions">
-                                                        <button className="view-button" onClick={() => handleViewSkin(skin.skinId)}>
-                                                            <i className="bx bx-show"></i>
-                                                        </button>
-                                                        <button className="edit-button" onClick={() => handleEditSkin(skin.skinId)}>
-                                                            <i className="bx bx-edit"></i>
-                                                        </button>
-                                                        <button className="delete-button" onClick={() => handleDeleteSkin(skin.skinId)}>
-                                                            <i className="bx bx-trash"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </div>
-                )}
+                    {renderTable()}
+                </div>
             </div>
         </div>
     );

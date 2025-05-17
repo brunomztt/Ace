@@ -64,11 +64,11 @@ const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
                 }
             } else {
                 dialogService.error('Erro ao carregar dados do agente');
-                navigate('/admin');
+                navigate(-1);
             }
         } catch (error: any) {
             dialogService.error(error.message || 'Erro ao carregar dados do agente');
-            navigate('/admin');
+            navigate(-1);
         } finally {
             setIsLoading(false);
         }
@@ -191,7 +191,7 @@ const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
             }
 
             if (response && response.success) {
-                navigate('/admin');
+                navigate(-1);
             } else {
                 throw new Error((response && response.message) || 'Erro ao processar agente');
             }
@@ -203,7 +203,7 @@ const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
     };
 
     const handleCancel = () => {
-        navigate('/admin');
+        navigate(-1);
     };
 
     return (

@@ -65,11 +65,11 @@ const SkinForm: React.FC<SkinFormProps> = ({ skinId }) => {
                 });
             } else {
                 dialogService.error('Erro ao carregar dados da skin');
-                navigate('/admin');
+                navigate(-1);
             }
         } catch (error: any) {
             dialogService.error(error.message || 'Erro ao carregar dados da skin');
-            navigate('/admin');
+            navigate(-1);
         } finally {
             setIsLoading(false);
         }
@@ -153,7 +153,7 @@ const SkinForm: React.FC<SkinFormProps> = ({ skinId }) => {
             }
 
             if (response && response.success) {
-                navigate('/admin');
+                navigate(-1);
             } else {
                 throw new Error((response && response.message) || 'Erro ao processar skin');
             }
@@ -165,7 +165,7 @@ const SkinForm: React.FC<SkinFormProps> = ({ skinId }) => {
     };
 
     const handleCancel = () => {
-        navigate('/admin');
+        navigate(-1);
     };
 
     return (

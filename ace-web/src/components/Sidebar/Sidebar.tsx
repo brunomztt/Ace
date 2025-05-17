@@ -166,8 +166,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
                 navigate(`/`);
                 break;
             case NavigationButton.AGENTS:
-                // TODO: Navigate to Agents page
-                console.log('Agents button clicked');
+                navigate(`/agent/list`);
                 break;
             case NavigationButton.WEAPONS:
                 // TODO: Navigate to Weapons page

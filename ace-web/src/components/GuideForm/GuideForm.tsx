@@ -39,11 +39,11 @@ const GuideForm: React.FC<GuideFormProps> = ({ guideId }) => {
                 });
             } else {
                 dialogService.error('Erro ao carregar dados do guia');
-                navigate('/admin');
+                navigate(-1);
             }
         } catch (error: any) {
             dialogService.error(error.message || 'Erro ao carregar dados do guia');
-            navigate('/admin');
+            navigate(-1);
         } finally {
             setIsLoading(false);
         }
@@ -87,7 +87,7 @@ const GuideForm: React.FC<GuideFormProps> = ({ guideId }) => {
             }
 
             if (response && response.success) {
-                navigate('/admin');
+                navigate(-1);
             } else {
                 throw new Error((response && response.message) || 'Erro ao processar guia');
             }
@@ -99,7 +99,7 @@ const GuideForm: React.FC<GuideFormProps> = ({ guideId }) => {
     };
 
     const handleCancel = () => {
-        navigate('/admin');
+        navigate(-1);
     };
 
     return (

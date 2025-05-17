@@ -95,11 +95,11 @@ const WeaponForm: React.FC<WeaponFormProps> = ({ weaponId }) => {
                 });
             } else {
                 dialogService.error('Erro ao carregar dados da arma');
-                navigate('/admin');
+                navigate(-1);
             }
         } catch (error: any) {
             dialogService.error(error.message || 'Erro ao carregar dados da arma');
-            navigate('/admin');
+            navigate(-1);
         } finally {
             setIsLoading(false);
         }
@@ -201,7 +201,7 @@ const WeaponForm: React.FC<WeaponFormProps> = ({ weaponId }) => {
             }
 
             if (response && response.success) {
-                navigate('/admin');
+                navigate(-1);
             } else {
                 throw new Error((response && response.message) || 'Erro ao processar arma');
             }
@@ -213,7 +213,7 @@ const WeaponForm: React.FC<WeaponFormProps> = ({ weaponId }) => {
     };
 
     const handleCancel = () => {
-        navigate('/admin');
+        navigate(-1);
     };
 
     return (
