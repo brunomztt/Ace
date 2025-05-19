@@ -106,16 +106,17 @@ public class AgentService : IAgentService
         agent.Ultimate = agentUpdateDto.Ultimate ?? agent.Ultimate;
         agent.UltimateDescription = agentUpdateDto.UltimateDescription ?? agent.UltimateDescription;
         agent.AgentImage = agentUpdateDto.AgentImage ?? agent.AgentImage;
-
+        
+        agent.AgentVideos.Clear();
         if (agentUpdateDto.Videos != null && agentUpdateDto.Videos.Count > 0)
         {
-            foreach (var video in agent.AgentVideos)
+            foreach (var video in agentUpdateDto.Videos)
             {
-                var updatedVideo = agentUpdateDto.Videos.FirstOrDefault(v => v.VideoId == video.VideoId);
-                if (updatedVideo != null)
+                var newVideo = new AgentVideo
                 {
-                    video.YoutubeLink = updatedVideo.YoutubeLink;
-                }
+                    YoutubeLink = video.YoutubeLink
+                };
+                agent.AgentVideos.Add(newVideo);
             }
         }
 

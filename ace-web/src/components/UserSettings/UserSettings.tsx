@@ -16,7 +16,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ userId }) => {
 
     useEffect(() => {
         const currentUser = authApi.getCurrentUser();
-        if (!currentUser || (currentUser.roleName !== 'Admin' && currentUser.userId !== userId)) {
+        if (!currentUser || (currentUser.roleName !== 'Admin' && currentUser.userId != userId)) {
             navigate('/');
             dialogService.error('Acesso restrito a administradores');
         }

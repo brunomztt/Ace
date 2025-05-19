@@ -21,6 +21,11 @@ import MapForm from './components/MapForm/MapForm';
 import GuideForm from './components/GuideForm/GuideForm';
 import SkinForm from './components/SkinForm/SkinForm';
 import AgentListing from './components/AgentListing/AgentListing';
+import WeaponListing from './components/WeaponListing/WeaponListing';
+import MapListing from './components/MapListing/MapListing';
+import GuideListing from './components/GuideListing/GuideListing';
+import AgentView from './components/AgentView/AgentView';
+import WeaponView from './components/WeaponView/WeaponView';
 
 gsap.registerPlugin(CustomEase);
 
@@ -219,7 +224,7 @@ const App: React.FC = () => {
 
     const AgentViewWrapper: React.FC = () => {
         const { agentId } = useParams<{ agentId: string }>();
-        return <AgentForm agentId={agentId!} />;
+        return <AgentView agentId={agentId!} />;
     };
 
     const AgentEditWrapper: React.FC = () => {
@@ -229,7 +234,7 @@ const App: React.FC = () => {
 
     const WeaponViewWrapper: React.FC = () => {
         const { weaponId } = useParams<{ weaponId: string }>();
-        return <WeaponForm weaponId={weaponId!} />;
+        return <WeaponView weaponId={weaponId!} />;
     };
 
     const WeaponEditWrapper: React.FC = () => {
@@ -283,12 +288,15 @@ const App: React.FC = () => {
                         <Route path="/agent/:agentId" element={<AgentViewWrapper />} />
                         <Route path="/agent/edit/:agentId" element={<AgentEditWrapper />} />
                         <Route path="/weapon" element={<WeaponForm />} />
+                        <Route path="/weapon/list" element={<WeaponListing />} />
                         <Route path="/weapon/:weaponId" element={<WeaponViewWrapper />} />
                         <Route path="/weapon/edit/:weaponId" element={<WeaponEditWrapper />} />
                         <Route path="/map" element={<MapForm />} />
+                        <Route path="/map/list" element={<MapListing />} />
                         <Route path="/map/:mapId" element={<MapViewWrapper />} />
                         <Route path="/map/edit/:mapId" element={<MapEditWrapper />} />
                         <Route path="/guide" element={<GuideForm />} />
+                        <Route path="/guide/list" element={<GuideListing />} />
                         <Route path="/guide/:guideId" element={<GuideViewWrapper />} />
                         <Route path="/guide/edit/:guideId" element={<GuideEditWrapper />} />
                         <Route path="/skin" element={<SkinForm />} />

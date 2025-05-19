@@ -14,10 +14,11 @@ enum NavigationButton {
     AGENTS = 1,
     WEAPONS = 2,
     MAPS = 3,
-    ADMIN_PANEL = 4,
-    PROFILE = 5,
-    SETTINGS = 6,
-    LOGOUT = 7,
+    GUIDES = 4,
+    ADMIN_PANEL = 5,
+    PROFILE = 6,
+    SETTINGS = 7,
+    LOGOUT = 8,
 }
 
 const BUTTON_LABELS = {
@@ -25,6 +26,7 @@ const BUTTON_LABELS = {
     [NavigationButton.AGENTS]: 'Agentes',
     [NavigationButton.WEAPONS]: 'Armas',
     [NavigationButton.MAPS]: 'Mapas',
+    [NavigationButton.GUIDES]: 'Guias',
     [NavigationButton.ADMIN_PANEL]: 'Painel Admin',
     [NavigationButton.PROFILE]: 'Perfil',
     [NavigationButton.SETTINGS]: 'Configurações',
@@ -36,6 +38,7 @@ const BUTTON_ICONS = {
     [NavigationButton.AGENTS]: 'groups',
     [NavigationButton.WEAPONS]: 'local_fire_department',
     [NavigationButton.MAPS]: 'map',
+    [NavigationButton.GUIDES]: 'book',
     [NavigationButton.ADMIN_PANEL]: 'admin_panel_settings',
     [NavigationButton.PROFILE]: '', // Profile uses pfp
     [NavigationButton.SETTINGS]: 'settings',
@@ -169,12 +172,10 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
                 navigate(`/agent/list`);
                 break;
             case NavigationButton.WEAPONS:
-                // TODO: Navigate to Weapons page
-                console.log('Weapons button clicked');
+                navigate(`/weapon/list`);
                 break;
             case NavigationButton.MAPS:
-                // TODO: Navigate to Maps page
-                console.log('Maps button clicked');
+                navigate('/map/list');
                 break;
             case NavigationButton.ADMIN_PANEL:
                 navigate(`/admin`);
@@ -184,6 +185,9 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
                 break;
             case NavigationButton.SETTINGS:
                 navigate(`/user/edit/${userData.userId}`);
+                break;
+            case NavigationButton.GUIDES:
+                navigate('/guide/list');
                 break;
             case NavigationButton.LOGOUT:
                 if (onLogout && typeof onLogout === 'function') {
@@ -231,6 +235,11 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
                                     NavigationButton.HOME,
                                     BUTTON_ICONS[NavigationButton.HOME],
                                     BUTTON_LABELS[NavigationButton.HOME]
+                                )}
+                                {renderNavigationButton(
+                                    NavigationButton.GUIDES,
+                                    BUTTON_ICONS[NavigationButton.GUIDES],
+                                    BUTTON_LABELS[NavigationButton.GUIDES]
                                 )}
                                 {renderNavigationButton(
                                     NavigationButton.AGENTS,

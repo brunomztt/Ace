@@ -68,7 +68,7 @@ const AgentListing: React.FC = () => {
             <div className="searchContainer">
                 <input type="text" className="searchInput" placeholder="Buscar agente..." value={searchTerm} onChange={handleSearchChange} />
             </div>
-            <h1 className="verticalTitle">AGENTS</h1>
+            <h1 className="verticalTitle">AGENTES</h1>
             <div className="carouselOuterContainer">
                 <div className="carouselContainer" ref={carouselRef}>
                     {agents.length === 0 ? (
