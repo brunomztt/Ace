@@ -26,6 +26,8 @@ import MapListing from './components/MapListing/MapListing';
 import GuideListing from './components/GuideListing/GuideListing';
 import AgentView from './components/AgentView/AgentView';
 import WeaponView from './components/WeaponView/WeaponView';
+import MapView from './components/MapView/MapView';
+import GuideView from './components/GuideView/GuideView';
 
 gsap.registerPlugin(CustomEase);
 
@@ -244,7 +246,7 @@ const App: React.FC = () => {
 
     const MapViewWrapper: React.FC = () => {
         const { mapId } = useParams<{ mapId: string }>();
-        return <MapForm mapId={mapId!} />;
+        return <MapView mapId={mapId!} />;
     };
 
     const MapEditWrapper: React.FC = () => {
@@ -254,17 +256,12 @@ const App: React.FC = () => {
 
     const GuideViewWrapper: React.FC = () => {
         const { guideId } = useParams<{ guideId: string }>();
-        return <GuideForm guideId={guideId!} />;
+        return <GuideView guideId={guideId!} />;
     };
 
     const GuideEditWrapper: React.FC = () => {
         const { guideId } = useParams<{ guideId: string }>();
         return <GuideForm guideId={guideId!} />;
-    };
-
-    const SkinViewWrapper: React.FC = () => {
-        const { skinId } = useParams<{ skinId: string }>();
-        return <SkinForm skinId={skinId!} />;
     };
 
     const SkinEditWrapper: React.FC = () => {
@@ -300,7 +297,6 @@ const App: React.FC = () => {
                         <Route path="/guide/:guideId" element={<GuideViewWrapper />} />
                         <Route path="/guide/edit/:guideId" element={<GuideEditWrapper />} />
                         <Route path="/skin" element={<SkinForm />} />
-                        <Route path="/skin/:skinId" element={<SkinViewWrapper />} />
                         <Route path="/skin/edit/:skinId" element={<SkinEditWrapper />} />
                     </Route>
                 </Routes>

@@ -43,10 +43,17 @@ const AgentView: React.FC<AgentViewProps> = ({ agentId }) => {
     if (isLoading) {
         return (
             <div className="agent-view-loading">
-                <div className="loading-animation">
-                    <span className="material-symbols-outlined">cached</span>
+                <div className="loading-container">
+                    <div className="loading-icon">
+                        <span className="material-symbols-outlined">person_search</span>
+                    </div>
+                    <div className="loading-text">LOCALIZANDO AGENTE</div>
+                    <div className="loading-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
                 </div>
-                <p>Carregando informações do agente...</p>
             </div>
         );
     }
@@ -54,8 +61,15 @@ const AgentView: React.FC<AgentViewProps> = ({ agentId }) => {
     if (!agent) {
         return (
             <div className="agent-view-error">
-                <span className="material-symbols-outlined">error</span>
-                <p>Agente não encontrado</p>
+                <div className="error-container">
+                    <div className="error-label">AGENTE NÃO ENCONTRADO</div>
+                    <div className="error-code">ERRO #404</div>
+                    <p>O agente solicitado não existe na nossa base de dados ou foi removido.</p>
+                    <button className="return-button" onClick={() => navigate('/')}>
+                        <span className="material-symbols-outlined">arrow_back</span>
+                        VOLTAR
+                    </button>
+                </div>
             </div>
         );
     }
@@ -76,46 +90,68 @@ const AgentView: React.FC<AgentViewProps> = ({ agentId }) => {
     return (
         <div className="agent-view-container">
             <div className="agent-view-header">
-                <h1>{agent.agentName}</h1>
+                <div className="agent-name-wrapper">
+                    <h1 className="agent-name" data-text={agent.agentName}>
+                        {agent.agentName}
+                    </h1>
+                    <div className="agent-name-accent"></div>
+                </div>
             </div>
 
             <div className="agent-view-content">
                 <div className="agent-profile">
                     <div className="agent-image-container">
                         <div className="agent-image" style={{ backgroundImage: `url(${agent.agentImage})` }} />
+                        <div className="image-frame-top"></div>
+                        <div className="image-frame-bottom"></div>
+                        <div className="image-corner-tl"></div>
+                        <div className="image-corner-tr"></div>
+                        <div className="image-corner-bl"></div>
+                        <div className="image-corner-br"></div>
                         <div className="agent-gradient-overlay"></div>
                     </div>
 
                     <div className="agent-details">
-                        <h2>{agent.agentName}</h2>
-                        <p className="agent-description">{agent.agentDescription}</p>
-
-                        <div className="ability-selector">
-                            {abilities.map((ability, index) => (
-                                <button
-                                    key={index}
-                                    className={`ability-key ${activeAbility === index ? 'active' : ''}`}
-                                    onClick={() => setActiveAbility(index)}
-                                >
-                                    {ability.type}
-                                </button>
-                            ))}
+                        <div className="agent-info-header">
+                            <div className="agent-title">{agent.agentName}</div>
+                            <div className="agent-codename">INFORMAÇÕES</div>
                         </div>
 
-                        <div className="ability-details">
-                            {abilities.length > 0 && (
-                                <>
-                                    <h3>{abilities[activeAbility].name}</h3>
-                                    <p>{abilities[activeAbility].description}</p>
-                                </>
-                            )}
+                        <div className="agent-description-container">
+                            <div className="description-content">
+                                <p>{agent.agentDescription || 'Informação classificada. Acesso restrito a agentes autorizados.'}</p>
+                            </div>
+                        </div>
+
+                        <div className="ability-section">
+                            <div className="ability-heading">HABILIDADES</div>
+                            <div className="ability-selector">
+                                {abilities.map((ability, index) => (
+                                    <button
+                                        key={index}
+                                        className={`ability-key ${activeAbility === index ? 'active' : ''}`}
+                                        onClick={() => setActiveAbility(index)}
+                                    >
+                                        {ability.type}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="ability-details">
+                                {abilities.length > 0 && (
+                                    <>
+                                        <h3>{abilities[activeAbility].name}</h3>
+                                        <p>{abilities[activeAbility].description}</p>
+                                    </>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {agent.videos && agent.videos.length > 0 && (
                     <div className="agent-videos-section">
-                        <h2>Vídeos</h2>
+                        <h2>VÍDEOS DO AGENTE</h2>
                         <div className="video-selector">
                             {agent.videos.map((video, index) => (
                                 <button

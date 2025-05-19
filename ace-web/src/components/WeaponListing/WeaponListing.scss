@@ -12,6 +12,8 @@
     flex-direction: column;
     color: $light-color;
     overflow-x: hidden;
+    overflow-y: auto;
+    max-height: 100vh;
 
     @media (max-width: $tablet) {
         padding: 80px 20px 20px 20px;

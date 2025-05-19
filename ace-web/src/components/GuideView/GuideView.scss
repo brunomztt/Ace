@@ -1,0 +1,528 @@
+@use '../../styles/variables' as *;
+@use 'sass:color';
+
+.guide-view-container {
+    width: 100%;
+    min-height: 100vh;
+    padding: 60px 40px 40px 260px;
+    background: linear-gradient(135deg, rgba(223, 76, 76, 0.92), rgba(153, 35, 35, 0.95)), url('/game.png');
+    background-color: $dark-bg;
+    background-attachment: fixed;
+    color: $light-color;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: 100vh;
+
+    @media (max-width: $tablet) {
+        padding: 80px 20px 20px 20px;
+    }
+
+    .guide-view-header {
+        margin-bottom: 30px;
+        position: relative;
+        z-index: 2;
+
+        .guide-type-badge {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 10px;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-family: $rajdhani-font;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            position: relative;
+            top: -5px;
+            overflow: hidden;
+            max-width: fit-content;
+            vertical-align: middle;
+
+            &::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                transition: 0.5s;
+            }
+
+            &:hover::before {
+                left: 100%;
+            }
+
+            i {
+                font-size: 18px;
+            }
+
+            &[data-type='Agent'] {
+                color: #ff4655;
+                border-left: 3px solid #ff4655;
+            }
+
+            &[data-type='Map'] {
+                color: #45ceff;
+                border-left: 3px solid #45ceff;
+            }
+
+            &[data-type='Weapon'] {
+                color: #00ff88;
+                border-left: 3px solid #00ff88;
+            }
+
+            &[data-type='Other'] {
+                color: #ffcd45;
+                border-left: 3px solid #ffcd45;
+            }
+        }
+
+        h1 {
+            font-family: $valorant-font;
+            font-size: 3.5rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin: 0 0 20px 0;
+            line-height: 1.2;
+            background: linear-gradient(90deg, $light-color, rgba(255, 255, 255, 0.8));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: inline-block;
+            position: relative;
+
+            &::after {
+                content: '';
+                position: absolute;
+                left: 0;
+                bottom: -10px;
+                width: 80px;
+                height: 4px;
+                background: linear-gradient(90deg, #ff4655, transparent);
+            }
+
+            @media (max-width: $mobile) {
+                font-size: 2.5rem;
+            }
+        }
+
+        .guide-metadata {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 25px;
+
+            .author-info {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .author-avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background-color: rgba(0, 0, 0, 0.5);
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                font-size: 16px;
+                color: $light-color;
+                text-transform: uppercase;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            }
+
+            .author-details {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .author-name {
+                font-size: 16px;
+                font-weight: 600;
+                color: $light-color;
+            }
+
+            .guide-date {
+                font-size: 14px;
+                color: rgba(255, 255, 255, 0.6);
+            }
+
+            .comments-count {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                background: rgba(0, 0, 0, 0.3);
+                padding: 8px 15px;
+                border-radius: 20px;
+                font-size: 14px;
+                color: rgba(255, 255, 255, 0.8);
+
+                i {
+                    font-size: 18px;
+                }
+            }
+        }
+    }
+
+    .guide-view-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .guide-card {
+        background: rgba(20, 20, 20, 0.9);
+        border-radius: 20px;
+        overflow: hidden;
+        position: relative;
+        z-index: 2;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        margin-bottom: 30px;
+
+        .guide-content {
+            padding: 40px;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
+
+            @media (max-width: $tablet) {
+                padding: 30px;
+            }
+
+            @media (max-width: $mobile) {
+                padding: 20px;
+            }
+
+            .markdown-content {
+                color: $light-color;
+                font-family: $rajdhani-font;
+                line-height: 1.7;
+
+                // Markdown styling
+                h1,
+                h2,
+                h3,
+                h4,
+                h5,
+                h6 {
+                    font-family: $valorant-font;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                    margin-top: 1.5em;
+                    margin-bottom: 0.8em;
+                    color: $light-color;
+                }
+
+                h1 {
+                    font-size: 2.2rem;
+                    border-bottom: 2px solid rgba(223, 76, 76, 0.5);
+                    padding-bottom: 0.3em;
+                }
+
+                h2 {
+                    font-size: 1.8rem;
+                    color: $primary-color;
+                }
+
+                h3 {
+                    font-size: 1.5rem;
+                }
+
+                h4 {
+                    font-size: 1.3rem;
+                }
+
+                p {
+                    margin-bottom: 1.2em;
+                    font-size: 1.1rem;
+                }
+
+                a {
+                    color: $primary-color;
+                    text-decoration: none;
+                    transition: all 0.2s ease;
+                    border-bottom: 1px dotted rgba(223, 76, 76, 0.5);
+
+                    &:hover {
+                        border-bottom: 1px solid $primary-color;
+                    }
+                }
+
+                strong {
+                    color: $primary-color;
+                    font-weight: 700;
+                }
+
+                em {
+                    font-style: italic;
+                }
+
+                ul,
+                ol {
+                    margin-bottom: 1.2em;
+                    padding-left: 2em;
+
+                    li {
+                        margin-bottom: 0.5em;
+                    }
+                }
+
+                ul {
+                    list-style-type: none;
+
+                    li {
+                        position: relative;
+
+                        &::before {
+                            content: '•';
+                            color: $primary-color;
+                            position: absolute;
+                            left: -1em;
+                            font-weight: bold;
+                        }
+                    }
+                }
+
+                ol {
+                    list-style-type: decimal;
+
+                    li::marker {
+                        color: $primary-color;
+                        font-weight: bold;
+                    }
+                }
+
+                blockquote {
+                    border-left: 4px solid $primary-color;
+                    padding: 0.5em 1em;
+                    background: rgba(223, 76, 76, 0.15);
+                    margin: 1.5em 0;
+                    border-radius: 0 8px 8px 0;
+
+                    p {
+                        margin: 0.5em 0;
+                        font-style: italic;
+                    }
+                }
+
+                code {
+                    font-family: monospace;
+                    background-color: rgba(0, 0, 0, 0.3);
+                    padding: 0.2em 0.4em;
+                    border-radius: 3px;
+                    font-size: 0.9em;
+                }
+
+                pre {
+                    background-color: rgba(0, 0, 0, 0.5);
+                    padding: 1em;
+                    border-radius: 8px;
+                    overflow-x: auto;
+                    margin: 1.5em 0;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+
+                    code {
+                        background-color: transparent;
+                        padding: 0;
+                    }
+                }
+
+                hr {
+                    border: none;
+                    height: 2px;
+                    background: linear-gradient(90deg, transparent, $primary-color, transparent);
+                    margin: 2em 0;
+                }
+
+                img {
+                    max-width: 100%;
+                    height: auto;
+                    border-radius: 8px;
+                    margin: 1.5em 0;
+                    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+                }
+
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 1.5em 0;
+
+                    th {
+                        background-color: rgba(223, 76, 76, 0.2);
+                        color: $light-color;
+                        padding: 0.8em;
+                        text-align: left;
+                        border-bottom: 2px solid $primary-color;
+                        font-family: $valorant-font;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                        font-size: 0.9em;
+                    }
+
+                    td {
+                        padding: 0.8em;
+                        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                    }
+
+                    tr:nth-child(even) {
+                        background-color: rgba(255, 255, 255, 0.05);
+                    }
+
+                    tr:hover {
+                        background-color: rgba(223, 76, 76, 0.1);
+                    }
+                }
+            }
+        }
+    }
+
+    .guide-comments-section {
+        h2 {
+            font-family: $valorant-font;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: $light-color;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .comment-item {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 3px solid $primary-color;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+
+            .comment-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 12px;
+
+                .comment-author {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+
+                    .author-avatar {
+                        width: 32px;
+                        height: 32px;
+                        border-radius: 50%;
+                        background-color: rgba(223, 76, 76, 0.2);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: bold;
+                        font-size: 14px;
+                        color: $light-color;
+                        text-transform: uppercase;
+                    }
+
+                    .author-name {
+                        font-weight: 600;
+                        font-size: 16px;
+                    }
+                }
+
+                .comment-date {
+                    font-size: 14px;
+                    color: rgba(255, 255, 255, 0.5);
+                }
+            }
+
+            .comment-text {
+                color: rgba(255, 255, 255, 0.9);
+                line-height: 1.5;
+                font-size: 16px;
+            }
+        }
+    }
+}
+
+.guide-view-loading,
+.guide-view-error {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: $light-color;
+    background: linear-gradient(rgba(223, 76, 76, 0.92), rgba(223, 76, 76, 0.95)), url('/game.png');
+    background-attachment: fixed;
+    padding: 20px;
+    text-align: center;
+
+    .material-symbols-outlined {
+        font-size: 60px;
+        margin-bottom: 25px;
+        color: $light-color;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    p {
+        font-size: 1.8rem;
+        margin: 10px 0 30px;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+    }
+
+    .loading-animation {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: spin 1.5s infinite linear;
+    }
+
+    .btn-back {
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid $light-color;
+        color: $light-color;
+        padding: 12px 25px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-family: $rajdhani-font;
+        font-size: 1.3rem;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .material-symbols-outlined {
+            font-size: 24px;
+            margin: 0;
+        }
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}

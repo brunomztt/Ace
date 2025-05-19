@@ -9,45 +9,27 @@ interface UserProfileProps {
 }
 
 const UserProfile: React.FC<UserProfileProps> = ({ userId }) => {
-    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
     const [userData, setUserData] = useState<{
         firstName: string;
         lastName: string;
         nickname: string;
-        username: string;
         email: string;
         phoneNumber: string;
         profilePic: string | null;
         bannerImg: string | null;
         location: string;
-        stats: {
-            tips: number;
-            visits: number;
-        };
-        lastPost: {
-            id: string;
-            title: string;
-            coverImage: string;
-        };
+        tipsCount: number;
     }>({
         firstName: '',
         lastName: '',
         nickname: '',
-        username: '',
         email: '',
         phoneNumber: '',
         profilePic: null,
         bannerImg: null,
         location: '',
-        stats: {
-            tips: 0,
-            visits: 0,
-        },
-        lastPost: {
-            id: '',
-            title: '',
-            coverImage: '',
-        },
+        tipsCount: 0,
     });
 
     useEffect(() => {
@@ -58,29 +40,23 @@ const UserProfile: React.FC<UserProfileProps> = ({ userId }) => {
                 if (response.success && response.data) {
                     const user: UserDto = response.data;
 
+                    // TODO: implementar número de dicas
+                    const tipsCount = getTipsCount(userId);
+
                     setUserData({
                         firstName: user.firstName || '',
                         lastName: user.lastName || '',
                         nickname: user.nickname || '',
-                        username: user.nickname || '',
                         email: user.email || '',
                         phoneNumber: user.phoneNumber || '',
                         profilePic: user.profilePic || null,
                         bannerImg: user.bannerImg || null,
                         location: formatLocation(user.address),
-                        stats: {
-                            tips: 0,
-                            visits: 0,
-                        },
-                        lastPost: {
-                            id: '',
-                            title: 'No posts yet',
-                            coverImage: '',
-                        },
+                        tipsCount: tipsCount,
                     });
                 }
             } catch (error: any) {
-                dialogService.error(error.message || 'Error loading user information');
+                dialogService.error(error.message || 'Erro ao carregar informações do usuário');
             } finally {
                 setIsLoading(false);
             }
@@ -89,8 +65,13 @@ const UserProfile: React.FC<UserProfileProps> = ({ userId }) => {
         fetchUser();
     }, [userId]);
 
+    // TODO: implementar número de dicas
+    const getTipsCount = (userId: string): number => {
+        return 0; // Placeholder
+    };
+
     const formatLocation = (address: any): string => {
-        if (!address) return '';
+        if (!address) return 'Localização desconhecida';
         const district = address.district || '';
         const city = address.city || '';
         const state = address.state || '';
@@ -98,82 +79,107 @@ const UserProfile: React.FC<UserProfileProps> = ({ userId }) => {
         if (district && (city || state)) {
             return `${district}, ${city || state}`;
         }
-        return district || city || state || '';
-    };
-
-    const handleViewPost = () => {
-        if (userData.lastPost.id) {
-            window.location.href = `/posts/${userData.lastPost.id}`;
-        }
+        return district || city || state || 'Localização desconhecida';
     };
 
     if (isLoading) {
         return (
-            <div className="container">
-                <div className="loading">Loading profile...</div>
+            <div className="profile-loading">
+                <div className="loading-container">
+                    <div className="loading-icon">
+                        <span className="material-symbols-outlined">person_search</span>
+                    </div>
+                    <div className="loading-text">LOCALIZANDO AGENTE</div>
+                    <div className="loading-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="container">
-            <div className="profile-card">
-                <div className="profile-header" style={userData.bannerImg ? { background: `url(${userData.bannerImg}) center/cover` } : {}}>
-                    <div className="main-profile">
-                        <div
-                            className="profile-image"
-                            style={userData.profilePic ? { background: `url(${userData.profilePic}) center/cover` } : {}}
-                        ></div>
-                        <div className="profile-names">
-                            <h1 className="username">
-                                {userData.firstName} {userData.lastName}
-                            </h1>
-                            <small className="page-title">({userData.nickname})</small>
+        <div className="profile-container">
+            <div className="profile-background" style={userData.bannerImg ? { backgroundImage: `url(${userData.bannerImg})` } : {}}></div>
+
+            <div className="profile-header">
+                <div className="profile-identity">
+                    <div className="profile-avatar" style={userData.profilePic ? { backgroundImage: `url(${userData.profilePic})` } : {}}>
+                        {!userData.profilePic && (userData.firstName[0] || '') + (userData.lastName[0] || '')}
+                        <div className="avatar-frame-top"></div>
+                        <div className="avatar-frame-bottom"></div>
+                        <div className="avatar-frame-left"></div>
+                        <div className="avatar-frame-right"></div>
+                    </div>
+
+                    <div className="profile-name-container">
+                        <div className="profile-codename">
+                            <div className="code-label">AGENTE</div>
+                            <h1 className="profile-name">{userData.nickname}</h1>
+                        </div>
+                        <div className="profile-full-name">
+                            {userData.firstName} {userData.lastName}
+                            <div className="name-underline"></div>
                         </div>
                     </div>
                 </div>
 
-                <div className="profile-body">
-                    <div className="profile-actions">
-                        <div className="infos-profile">
-                            <p>
-                                <i className="fa fa-map-marker-alt"></i> Localização: {userData.location}
-                            </p>
-                            <p>
-                                <i className="fa fa-phone"></i> Telefone: {userData.phoneNumber}
-                            </p>
-                            <p>
-                                <i className="fa fa-envelope"></i> Email: {userData.email}
-                            </p>
-                        </div>
+                <div className="profile-stats">
+                    <div className="stat-card">
+                        <div className="stat-value">{userData.tipsCount}</div>
+                        <div className="stat-label">DICAS</div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="profile-content">
+                <div className="profile-section info-section">
+                    <div className="section-title">
+                        <span className="material-symbols-outlined">info</span>
+                        INFORMAÇÕES DO AGENTE
+                        <div className="title-accent"></div>
                     </div>
 
-                    <div className="account-info">
-                        <div className="data">
-                            <div className="other-data">
-                                <section className="data-item">
-                                    <h3 className="value">{userData.stats.tips}</h3>
-                                    <small className="title">Dicas</small>
-                                </section>
-                                <section className="data-item">
-                                    <h3 className="value">{userData.stats.visits}</h3>
-                                    <small className="title">Visitas</small>
-                                </section>
+                    <div className="info-grid">
+                        <div className="info-item">
+                            <div className="info-label">
+                                <span className="material-symbols-outlined">mail</span>
+                                EMAIL
                             </div>
+                            <div className="info-value">{userData.email || 'Não informado'}</div>
                         </div>
 
-                        <div className="last-post">
-                            <div
-                                className="post-cover"
-                                style={userData.lastPost.coverImage ? { background: `url(${userData.lastPost.coverImage}) center/cover` } : {}}
-                            >
-                                <span className="last-badge">Última dica</span>
+                        <div className="info-item">
+                            <div className="info-label">
+                                <span className="material-symbols-outlined">call</span>
+                                TELEFONE
                             </div>
-                            <h3 className="post-title">{userData.lastPost.title}</h3>
-                            <button className="post-CTA" onClick={handleViewPost}>
-                                Ver
-                            </button>
+                            <div className="info-value">{userData.phoneNumber || 'Não informado'}</div>
                         </div>
+
+                        <div className="info-item">
+                            <div className="info-label">
+                                <span className="material-symbols-outlined">location_on</span>
+                                LOCALIZAÇÃO
+                            </div>
+                            <div className="info-value">{userData.location}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="profile-section activity-section">
+                    <div className="section-title">
+                        <span className="material-symbols-outlined">history</span>
+                        ATIVIDADE RECENTE
+                        <div className="title-accent"></div>
+                    </div>
+
+                    <div className="no-activity">
+                        <span className="material-symbols-outlined">search_off</span>
+                        <p>Nenhuma atividade recente encontrada</p>
+                        <div className="action-hint">As contribuições do agente serão exibidas aqui</div>
                     </div>
                 </div>
             </div>
