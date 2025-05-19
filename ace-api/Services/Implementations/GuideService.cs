@@ -56,8 +56,6 @@ public class GuideService : IGuideService
     {
         var guide = await _context.Guides
             .Include(g => g.User)
-            .Include(g => g.Comments)
-            .ThenInclude(c => c.User)
             .FirstOrDefaultAsync(g => g.GuideId == guideId);
 
         if (guide == null)
@@ -78,20 +76,7 @@ public class GuideService : IGuideService
                     UserId = guide.User.UserId,
                     Nickname = guide.User.Nickname
                 }
-                : null,
-            Comments = guide.Comments.Select(c => new CommentDto
-            {
-                CommentId = c.CommentId,
-                CommentText = c.CommentText,
-                CommentDate = c.CommentDate,
-                Author = c.User != null
-                    ? new UserSummaryDto
-                    {
-                        UserId = c.User.UserId,
-                        Nickname = c.User.Nickname
-                    }
-                    : null
-            }).ToList()
+                : null
         });
     }
 
@@ -126,8 +111,7 @@ public class GuideService : IGuideService
             {
                 UserId = user.UserId,
                 Nickname = user.Nickname
-            },
-            Comments = new List<CommentDto>()
+            }
         }, "Guia criado com sucesso");
     }
 
@@ -191,43 +175,5 @@ public class GuideService : IGuideService
         await _context.SaveChangesAsync();
 
         return ApiResponse<bool>.SuccessResponse(true, "Guia excluído com sucesso");
-    }
-
-    public async Task<ApiResponse<CommentDto>> AddCommentAsync(int userId, CommentCreateDto commentDto)
-    {
-        var guide = await _context.Guides.FindAsync(commentDto.GuideId);
-        if (guide == null)
-        {
-            return ApiResponse<CommentDto>.ErrorResponse("Guia não encontrado");
-        }
-
-        var user = await _context.Users.FindAsync(userId);
-        if (user == null)
-        {
-            return ApiResponse<CommentDto>.ErrorResponse("Usuário não encontrado");
-        }
-
-        var comment = new Comment
-        {
-            GuideId = commentDto.GuideId,
-            UserId = userId,
-            CommentText = commentDto.CommentText,
-            CommentDate = DateTime.UtcNow
-        };
-
-        _context.Comments.Add(comment);
-        await _context.SaveChangesAsync();
-
-        return ApiResponse<CommentDto>.SuccessResponse(new CommentDto
-        {
-            CommentId = comment.CommentId,
-            CommentText = comment.CommentText,
-            CommentDate = comment.CommentDate,
-            Author = new UserSummaryDto
-            {
-                UserId = user.UserId,
-                Nickname = user.Nickname
-            }
-        }, "Comentário adicionado com sucesso");
     }
 }

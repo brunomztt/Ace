@@ -1,4 +1,4 @@
-import { GuideDto, GuideCreateDto, CommentCreateDto, CommentDto } from '../models/Guide';
+import { GuideDto, GuideCreateDto } from '../models/Guide';
 import { ApiResponse } from '../models/ApiResponse';
 import api from './apiClient';
 
@@ -9,6 +9,7 @@ export const guideApi = {
         if (guideType) params.guideType = guideType;
         return api.get<ApiResponse<GuideDto[]>>('/guides', { params });
     },
+
     getGuideById: async (guideId: string): Promise<ApiResponse<GuideDto>> => {
         return api.get<ApiResponse<GuideDto>>(`/guides/${guideId}`);
     },
@@ -23,10 +24,6 @@ export const guideApi = {
 
     deleteGuide: async (guideId: string): Promise<ApiResponse<boolean>> => {
         return api.delete<ApiResponse<boolean>>(`/guides/${guideId}`);
-    },
-
-    addComment: async (commentData: CommentCreateDto): Promise<ApiResponse<CommentDto>> => {
-        return api.post<ApiResponse<CommentDto>>('/guides/comments', commentData);
     },
 };
 

@@ -11,8 +11,8 @@ public class UserDto
     public string? PhoneNumber { get; set; }
     public string? ProfilePic { get; set; }
     public string? BannerImg { get; set; }
-    public string password { get; set; } = null!;
     public bool IsEnabled { get; set; }
     public RoleDto? Role { get; set; }
     public AddressDto? Address { get; set; }
+    public List<CommentDto>? Comments { get; set; }
 }

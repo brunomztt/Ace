@@ -1153,3 +1153,188 @@
         }
     }
 }
+
+.weapon-comments-section {
+    margin-top: 40px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 35px;
+    position: relative;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+
+    &::before,
+    &::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border-color: $primary-color;
+        border-style: solid;
+        border-width: 0;
+    }
+
+    &::before {
+        top: 10px;
+        left: 10px;
+        border-top-width: 2px;
+        border-left-width: 2px;
+    }
+
+    &::after {
+        bottom: 10px;
+        right: 10px;
+        border-bottom-width: 2px;
+        border-right-width: 2px;
+    }
+
+    h2 {
+        font-family: $valorant-font;
+        font-size: 2.3rem;
+        margin-bottom: 30px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: $light-color;
+        position: relative;
+        display: inline-block;
+
+        &::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -10px;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, $primary-color, transparent);
+        }
+    }
+
+    .comments-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 0;
+
+        .loading-icon {
+            font-size: 36px;
+            color: rgba($primary-color, 0.7);
+            margin-bottom: 15px;
+            animation: pulse 2s infinite;
+        }
+
+        p {
+            font-family: $valorant-font;
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+    }
+
+    .no-comments {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px 20px;
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+
+        .material-symbols-outlined {
+            font-size: 48px;
+            color: rgba($primary-color, 0.6);
+            margin-bottom: 15px;
+        }
+
+        p {
+            font-family: $valorant-font;
+            font-size: 1.3rem;
+            color: $light-color;
+            margin-bottom: 10px;
+        }
+
+        .hint {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+    }
+
+    .comments-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 20px;
+
+        .comment-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-left: 3px solid $primary-color;
+            position: relative;
+
+            &::before,
+            &::after {
+                content: '';
+                position: absolute;
+                width: 10px;
+                height: 10px;
+                border-color: rgba($primary-color, 0.6);
+                border-style: solid;
+                border-width: 0;
+            }
+
+            &::before {
+                top: 5px;
+                left: 5px;
+                border-top-width: 1px;
+                border-left-width: 1px;
+            }
+
+            &::after {
+                bottom: 5px;
+                right: 5px;
+                border-bottom-width: 1px;
+                border-right-width: 1px;
+            }
+
+            .comment-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 12px;
+
+                .comment-author {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+
+                    .author-avatar {
+                        width: 32px;
+                        height: 32px;
+                        border-radius: 0;
+                        background-color: rgba($primary-color, 0.2);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: bold;
+                        font-size: 14px;
+                        color: $light-color;
+                        text-transform: uppercase;
+                    }
+
+                    .author-name {
+                        font-weight: 600;
+                        font-size: 16px;
+                        color: rgba($primary-color, 0.9);
+                    }
+                }
+
+                .comment-date {
+                    font-size: 14px;
+                    color: rgba(255, 255, 255, 0.5);
+                }
+            }
+
+            .comment-text {
+                font-size: 16px;
+                line-height: 1.6;
+                color: rgba(255, 255, 255, 0.9);
+            }
+        }
+    }
+}

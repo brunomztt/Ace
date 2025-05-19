@@ -1,12 +1,17 @@
 import { IGuide } from './Guide';
-import { IUser } from './User';
+import { IUser, UserDto } from './User';
 
-export interface IComment {
+export interface CommentDto {
     commentId: number;
-    guideId?: number;
-    userId?: number;
+    entityType: string;
+    entityId: number;
     commentText: string;
     commentDate: Date;
-    guide?: IGuide;
-    user?: IUser;
+    author?: UserDto;
+}
+
+export interface CommentCreateDto {
+    entityType: string;
+    entityId: number;
+    commentText: string;
 }

@@ -59,5 +59,4 @@ public class User
     [ForeignKey("AddressId")] public virtual Address? Address { get; set; }
 
     public virtual ICollection<Guide> Guides { get; set; } = new List<Guide>();
-    public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 }

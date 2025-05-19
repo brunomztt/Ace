@@ -1,4 +1,5 @@
 import { IAddress, AddressDto } from './Address';
+import { CommentDto } from './Comment';
 import { IRole, RoleDto } from './Role';
 
 export interface IUser {
@@ -67,6 +68,7 @@ export interface UserDto {
     role?: RoleDto;
     address?: AddressDto;
     password?: string;
+    comments?: CommentDto[];
 }
 
 export interface LoginResponseDto {

@@ -11,7 +11,6 @@ import authApi from './utils/authApi';
 import useSessionTimeout from './hooks/useSessionTimeout';
 import './App.scss';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useParams, Outlet } from 'react-router-dom';
-import HomePage from './components/HomePage/HomePage';
 import UserSettings from './components/UserSettings/UserSettings';
 import UserProfile from './components/UserProfile/UserProfile';
 import AdminPanel from './components/AdminPanel/AdminPanel';
@@ -46,13 +45,13 @@ const AppLayout: React.FC = () => {
 
     useEffect(() => {
         if (heroRef.current) {
-            if (location.pathname !== '/' && location.pathname !== '/home') {
+            if (location.pathname !== '/' || (animationsComplete && isLoggedIn)) {
                 heroRef.current.style.display = 'none';
             } else {
                 heroRef.current.style.display = 'block';
             }
         }
-    }, [location.pathname]);
+    }, [location.pathname, animationsComplete]);
 
     useEffect(() => {
         const checkLoginStatus = () => {
@@ -109,6 +108,9 @@ const AppLayout: React.FC = () => {
                     snap: { innerHTML: 1 },
                 });
             },
+            onComplete: () => {
+                setAnimationsComplete(true);
+            },
         });
 
         gsap.to(heroRef.current, {
@@ -145,9 +147,6 @@ const AppLayout: React.FC = () => {
                             stagger: -0.075,
                             ease: customEase,
                         });
-                    },
-                    onComplete: () => {
-                        setAnimationsComplete(true);
                     },
                 });
             },
@@ -274,8 +273,7 @@ const App: React.FC = () => {
             <DialogProvider>
                 <Routes>
                     <Route element={<AppLayout />}>
-                        <Route path="/" element={<HomePage />} />
-                        <Route path="/home" element={<HomePage />} />
+                        <Route path="/" element={<GuideListing />} />
                         <Route path="/login" element={<LoginForm />} />
                         <Route path="/user/edit/:userid" element={<UserSettingWrapper />} />
                         <Route path="/user/:userid" element={<UserProfileWrapper />} />

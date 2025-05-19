@@ -104,7 +104,26 @@ public class UserService : IUserService
             .Include(u => u.Address)
             .FirstOrDefaultAsync(u => u.UserId == userId);
 
-        return user == null ? ApiResponse<UserDto>.ErrorResponse("Usuário não encontrado") : ApiResponse<UserDto>.SuccessResponse(ToUserDto(user));
+        if (user == null)
+            return ApiResponse<UserDto>.ErrorResponse("Usuário não encontrado");
+        
+        var userComments = await _context.Comments
+            .Where(c => c.UserId == userId)
+            .OrderByDescending(c => c.CommentDate)
+            .Select(c => new CommentDto
+            {
+                CommentId = c.CommentId,
+                EntityType = c.EntityType,
+                EntityId = c.EntityId,
+                CommentText = c.CommentText,
+                CommentDate = c.CommentDate
+            })
+            .ToListAsync();
+
+        var userDto = ToUserDto(user);
+        userDto.Comments = userComments;
+
+        return ApiResponse<UserDto>.SuccessResponse(userDto);
     }
 
     public async Task<ApiResponse<List<UserDto>>> GetAllUsersAsync(string? searchTerm = null)
@@ -279,7 +298,8 @@ public class UserService : IUserService
                     HouseNumber = user.Address.HouseNumber,
                     Complement = user.Address.Complement
                 }
-                : null
+                : null,
+            Comments = new List<CommentDto>()
         };
     }
 }

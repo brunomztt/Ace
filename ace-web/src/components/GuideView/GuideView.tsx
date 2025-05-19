@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import guideApi from '../../utils/guideApi';
+import commentApi from '../../utils/commentApi';
 import { GuideDto } from '../../models/Guide';
+import { CommentDto } from '../../models/Comment';
 import { dialogService } from '../Dialog/dialogService';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import './GuideView.scss';
+import authApi from '../../utils/authApi';
+import CommentForm from '../CommentForm/CommentForm';
 
 interface GuideViewProps {
     guideId: string;
@@ -14,8 +18,16 @@ interface GuideViewProps {
 const GuideView: React.FC<GuideViewProps> = ({ guideId }) => {
     const navigate = useNavigate();
     const [guide, setGuide] = useState<GuideDto | null>(null);
+    const [comments, setComments] = useState<CommentDto[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isLoadingComments, setIsLoadingComments] = useState<boolean>(false);
     const [parsedContent, setParsedContent] = useState<string>('');
+    const [isModOrAdmin, setIsModOrAdmin] = useState<boolean>(false);
+
+    useEffect(() => {
+        const currentUser = authApi.getCurrentUser();
+        setIsModOrAdmin(currentUser?.roleName === 'Admin' || currentUser?.roleName === 'Moderator');
+    }, []);
 
     useEffect(() => {
         const fetchGuide = async () => {
@@ -35,6 +47,8 @@ const GuideView: React.FC<GuideViewProps> = ({ guideId }) => {
                     } else {
                         setParsedContent(DOMPurify.sanitize(rawMarkup));
                     }
+
+                    fetchComments();
                 } else {
                     throw new Error(response.message || 'Falha ao carregar guia');
                 }
@@ -43,6 +57,21 @@ const GuideView: React.FC<GuideViewProps> = ({ guideId }) => {
                 navigate('/guides');
             } finally {
                 setIsLoading(false);
+            }
+        };
+
+        const fetchComments = async () => {
+            try {
+                setIsLoadingComments(true);
+                const response = await commentApi.getCommentsByEntity('Guide', guideId);
+
+                if (response.success && response.data) {
+                    setComments(response.data);
+                }
+            } catch (error: any) {
+                console.error('Erro ao carregar comentários:', error);
+            } finally {
+                setIsLoadingComments(false);
             }
         };
 
@@ -75,6 +104,17 @@ const GuideView: React.FC<GuideViewProps> = ({ guideId }) => {
             .join('')
             .toUpperCase()
             .substring(0, 2);
+    };
+
+    const handleCommentAdded = async () => {
+        try {
+            const response = await commentApi.getCommentsByEntity('Guide', guideId);
+            if (response.success && response.data) {
+                setComments(response.data);
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar comentários:', error);
+        }
     };
 
     if (isLoading) {
@@ -132,12 +172,10 @@ const GuideView: React.FC<GuideViewProps> = ({ guideId }) => {
                             <span className="guide-date">{formatDate(guide.createdAt)}</span>
                         </div>
                     </div>
-                    {guide.comments && (
-                        <div className="comments-count">
-                            <i className="bx bx-comment"></i>
-                            <span>{guide.comments.length} COMENTÁRIOS</span>
-                        </div>
-                    )}
+                    <div className="comments-count">
+                        <i className="bx bx-comment"></i>
+                        <span>{comments.length} DICAS</span>
+                    </div>
                 </div>
             </div>
 
@@ -148,25 +186,48 @@ const GuideView: React.FC<GuideViewProps> = ({ guideId }) => {
                     </div>
                 </div>
 
-                {guide.comments && guide.comments.length > 0 && (
-                    <div className="guide-comments-section">
-                        <h2>COMENTÁRIOS</h2>
-                        <div className="comments-list">
-                            {guide.comments.map((comment) => (
-                                <div key={comment.commentId} className="comment-item">
-                                    <div className="comment-header">
-                                        <div className="comment-author">
-                                            <div className="author-avatar">{comment.author ? getInitials(comment.author.nickname) : 'AN'}</div>
-                                            <span className="author-name">{comment.author ? comment.author.nickname : 'ANÔNIMO'}</span>
-                                        </div>
-                                        <span className="comment-date">{formatDate(comment.commentDate)}</span>
-                                    </div>
-                                    <div className="comment-text">{comment.commentText}</div>
-                                </div>
-                            ))}
-                        </div>
+                <div className="guide-comments-section">
+                    <div className="section-heading">
+                        <h2>DICAS DA MODERAÇÃO</h2>
+                        <div className="section-heading-accent"></div>
                     </div>
-                )}
+
+                    {isModOrAdmin && (
+                        <CommentForm entityType="Guide" entityId={parseInt(guideId)} onCommentAdded={handleCommentAdded} darkMode={true} />
+                    )}
+
+                    {isLoadingComments ? (
+                        <div className="comments-loading">
+                            <div className="loading-icon">
+                                <span className="material-symbols-outlined">comment</span>
+                            </div>
+                            <div className="loading-text">Carregando dicas...</div>
+                        </div>
+                    ) : (
+                        <div className="comments-list">
+                            {comments.length === 0 ? (
+                                <div className="no-comments">
+                                    <span className="material-symbols-outlined">info</span>
+                                    <p>Nenhuma dica disponível para este guia.</p>
+                                    <div className="hint">Nossos moderadores ainda não adicionaram dicas para este guia.</div>
+                                </div>
+                            ) : (
+                                comments.map((comment) => (
+                                    <div key={comment.commentId} className="comment-item">
+                                        <div className="comment-header">
+                                            <div className="comment-author">
+                                                <div className="author-avatar">{comment.author ? getInitials(comment.author.nickname) : 'AN'}</div>
+                                                <span className="author-name">{comment.author ? comment.author.nickname : 'ANÔNIMO'}</span>
+                                            </div>
+                                            <span className="comment-date">{formatDate(comment.commentDate)}</span>
+                                        </div>
+                                        <div className="comment-text">{comment.commentText}</div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

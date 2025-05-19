@@ -51,7 +51,7 @@ const DESKTOP_WIDTH = 1024;
 const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState<boolean>(false);
-    const [activeButton, setActiveButton] = useState<NavigationButton>(NavigationButton.HOME);
+    const [activeButton, setActiveButton] = useState<NavigationButton>(NavigationButton.GUIDES);
     const [userData, setUserData] = useState<IUser | null>(null);
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
     const [profileImage, setProfileImage] = useState<string>(DEFAULT_PROFILE_IMAGE);
@@ -231,11 +231,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
                     <div className="inner">
                         <nav className="menu" ref={menuRef}>
                             <div className="menu-buttons">
-                                {renderNavigationButton(
-                                    NavigationButton.HOME,
-                                    BUTTON_ICONS[NavigationButton.HOME],
-                                    BUTTON_LABELS[NavigationButton.HOME]
-                                )}
                                 {renderNavigationButton(
                                     NavigationButton.GUIDES,
                                     BUTTON_ICONS[NavigationButton.GUIDES],

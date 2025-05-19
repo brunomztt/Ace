@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MapDto } from '../../models/Map';
+import { CommentDto } from '../../models/Comment';
 import mapApi from '../../utils/mapApi';
+import commentApi from '../../utils/commentApi';
+import authApi from '../../utils/authApi';
 import { dialogService } from '../Dialog/dialogService';
+import CommentForm from '../CommentForm/CommentForm';
 import './MapView.scss';
 
 interface MapViewProps {
@@ -12,7 +16,15 @@ interface MapViewProps {
 const MapView: React.FC<MapViewProps> = ({ mapId }) => {
     const navigate = useNavigate();
     const [map, setMap] = useState<MapDto | null>(null);
+    const [comments, setComments] = useState<CommentDto[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isLoadingComments, setIsLoadingComments] = useState<boolean>(false);
+    const [isModOrAdmin, setIsModOrAdmin] = useState<boolean>(false);
+
+    useEffect(() => {
+        const currentUser = authApi.getCurrentUser();
+        setIsModOrAdmin(currentUser?.roleName === 'Admin' || currentUser?.roleName === 'Moderator');
+    }, []);
 
     useEffect(() => {
         const fetchMapData = async () => {
@@ -24,6 +36,7 @@ const MapView: React.FC<MapViewProps> = ({ mapId }) => {
 
                 if (mapResponse.success && mapResponse.data) {
                     setMap(mapResponse.data);
+                    fetchComments();
                 } else {
                     throw new Error(mapResponse.message || 'Falha ao carregar dados do mapa');
                 }
@@ -35,8 +48,48 @@ const MapView: React.FC<MapViewProps> = ({ mapId }) => {
             }
         };
 
+        const fetchComments = async () => {
+            try {
+                setIsLoadingComments(true);
+                const response = await commentApi.getCommentsByEntity('Map', mapId);
+
+                if (response.success && response.data) {
+                    setComments(response.data);
+                }
+            } catch (error: any) {
+                console.error('Erro ao carregar comentários:', error);
+            } finally {
+                setIsLoadingComments(false);
+            }
+        };
+
         fetchMapData();
     }, [mapId, navigate]);
+
+    const formatDate = (date: Date) => {
+        const d = new Date(date);
+        return d.toLocaleDateString('pt-BR');
+    };
+
+    const getInitials = (name: string) => {
+        return name
+            .split(' ')
+            .map((n) => n[0])
+            .join('')
+            .toUpperCase()
+            .substring(0, 2);
+    };
+
+    const handleCommentAdded = async () => {
+        try {
+            const response = await commentApi.getCommentsByEntity('Map', mapId);
+            if (response.success && response.data) {
+                setComments(response.data);
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar comentários:', error);
+        }
+    };
 
     if (isLoading) {
         return (
@@ -125,6 +178,47 @@ const MapView: React.FC<MapViewProps> = ({ mapId }) => {
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <div className="map-comments-section">
+                    <div className="section-heading">
+                        <h2>DICAS DA MODERAÇÃO</h2>
+                        <div className="section-heading-accent"></div>
+                    </div>
+
+                    {isModOrAdmin && <CommentForm entityType="Map" entityId={parseInt(mapId)} onCommentAdded={handleCommentAdded} darkMode={true} />}
+
+                    {isLoadingComments ? (
+                        <div className="comments-loading">
+                            <div className="loading-icon">
+                                <span className="material-symbols-outlined">comment</span>
+                            </div>
+                            <div className="loading-text">Carregando dicas...</div>
+                        </div>
+                    ) : (
+                        <div className="comments-list">
+                            {comments.length === 0 ? (
+                                <div className="no-comments">
+                                    <span className="material-symbols-outlined">info</span>
+                                    <p>Nenhuma dica disponível para este mapa.</p>
+                                    <div className="hint">Nossos moderadores ainda não adicionaram dicas para este mapa.</div>
+                                </div>
+                            ) : (
+                                comments.map((comment) => (
+                                    <div key={comment.commentId} className="comment-item">
+                                        <div className="comment-header">
+                                            <div className="comment-author">
+                                                <div className="author-avatar">{comment.author ? getInitials(comment.author.nickname) : 'AN'}</div>
+                                                <span className="author-name">{comment.author ? comment.author.nickname : 'ANÔNIMO'}</span>
+                                            </div>
+                                            <span className="comment-date">{formatDate(comment.commentDate)}</span>
+                                        </div>
+                                        <div className="comment-text">{comment.commentText}</div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

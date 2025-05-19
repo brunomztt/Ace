@@ -9,5 +9,4 @@ public interface IGuideService
     Task<ApiResponse<GuideDto>> CreateGuideAsync(int userId, GuideCreateDto guideDto);
     Task<ApiResponse<GuideDto>> UpdateGuideAsync(int guideId, int userId, GuideCreateDto guideDto);
     Task<ApiResponse<bool>> DeleteGuideAsync(int guideId, int userId);
-    Task<ApiResponse<CommentDto>> AddCommentAsync(int userId, CommentCreateDto commentDto);
 }

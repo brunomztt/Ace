@@ -1,0 +1,112 @@
+@use '../../styles/variables' as *;
+
+.comment-form-container {
+    margin-top: 30px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba($primary-color, 0.2);
+    padding: 20px;
+
+    &.dark-mode {
+        background: rgba(0, 0, 0, 0.4);
+        border-color: rgba($primary-color, 0.3);
+    }
+
+    .form-title {
+        font-family: $valorant-font;
+        font-size: 18px;
+        color: $light-color;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        &::before {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 20px;
+            background-color: $primary-color;
+        }
+    }
+
+    .comment-textarea {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: $light-color;
+        padding: 15px;
+        font-family: $rajdhani-font;
+        font-size: 16px;
+        resize: vertical;
+        transition: border-color 0.3s;
+
+        &:focus {
+            outline: none;
+            border-color: rgba($primary-color, 0.6);
+        }
+
+        &::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        &:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+    }
+
+    .form-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+
+        .char-count {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .submit-button {
+            background-color: $primary-color;
+            color: $light-color;
+            border: none;
+            padding: 8px 20px;
+            font-family: $rajdhani-font;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+
+            &:hover:not(:disabled) {
+                transform: translateY(-2px);
+            }
+
+            &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+
+            .material-symbols-outlined {
+                font-size: 18px;
+            }
+
+            .loading-spinner {
+                width: 18px;
+                height: 18px;
+                border: 2px solid transparent;
+                border-top-color: $light-color;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+        }
+    }
+}

@@ -48,16 +48,13 @@ public class AceDbContext : DbContext
             .OnDelete(DeleteBehavior.SetNull);
 
         modelBuilder.Entity<Comment>()
-            .HasOne(c => c.Guide)
-            .WithMany(g => g.Comments)
-            .HasForeignKey(c => c.GuideId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        modelBuilder.Entity<Comment>()
             .HasOne(c => c.User)
-            .WithMany(u => u.Comments)
+            .WithMany()
             .HasForeignKey(c => c.UserId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Comment>()
+            .HasIndex(c => new { c.EntityType, c.EntityId });
 
         modelBuilder.Entity<AgentVideo>()
             .HasOne(av => av.Agent)

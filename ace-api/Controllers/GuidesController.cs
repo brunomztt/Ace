@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using ace_api.DTOs;
-using ace_api.Services;
 using ace_api.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +18,7 @@ public class GuidesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<List<GuideDto>>>> GetAllGuides([FromQuery] string? searchTerm = null, [FromQuery] string? guideType = null)
+    public async Task<ActionResult<ApiResponse<List<GuideDto>>>> GetAllGuides([FromQuery] string? searchTerm, [FromQuery] string? guideType)
     {
         var response = await _guideService.GetAllGuidesAsync(searchTerm, guideType);
         return Ok(response);
@@ -93,31 +92,6 @@ public class GuidesController : ControllerBase
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
         var response = await _guideService.DeleteGuideAsync(id, userId);
-
-        if (!response.Success)
-        {
-            return BadRequest(response);
-        }
-
-        return Ok(response);
-    }
-
-    [HttpPost("comments")]
-    [Authorize]
-    public async Task<ActionResult<ApiResponse<CommentDto>>> AddComment([FromBody] CommentCreateDto commentDto)
-    {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new ValidationErrorResponse
-            {
-                Errors = ModelState.ToDictionary(
-                    kvp => kvp.Key,
-                    kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToArray() ?? Array.Empty<string>())
-            });
-        }
-
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-        var response = await _guideService.AddCommentAsync(userId, commentDto);
 
         if (!response.Success)
         {

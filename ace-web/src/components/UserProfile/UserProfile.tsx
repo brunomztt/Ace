@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { userApi } from '../../utils/userApi';
 import { dialogService } from '../Dialog/dialogService';
 import { UserDto } from '../../models/User';
+import { CommentDto } from '../../models/Comment';
 import './UserProfile.scss';
 
 interface UserProfileProps {
@@ -10,6 +11,7 @@ interface UserProfileProps {
 
 const UserProfile: React.FC<UserProfileProps> = ({ userId }) => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [userComments, setUserComments] = useState<CommentDto[]>([]);
     const [userData, setUserData] = useState<{
         firstName: string;
         lastName: string;
@@ -39,10 +41,10 @@ const UserProfile: React.FC<UserProfileProps> = ({ userId }) => {
                 const response = await userApi.getUserById(userId);
                 if (response.success && response.data) {
                     const user: UserDto = response.data;
+                    console.log(user);
+                    const comments = user.comments || [];
 
-                    // TODO: implementar número de dicas
-                    const tipsCount = getTipsCount(userId);
-
+                    setUserComments(comments);
                     setUserData({
                         firstName: user.firstName || '',
                         lastName: user.lastName || '',
@@ -52,7 +54,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ userId }) => {
                         profilePic: user.profilePic || null,
                         bannerImg: user.bannerImg || null,
                         location: formatLocation(user.address),
-                        tipsCount: tipsCount,
+                        tipsCount: comments.length,
                     });
                 }
             } catch (error: any) {
@@ -65,11 +67,6 @@ const UserProfile: React.FC<UserProfileProps> = ({ userId }) => {
         fetchUser();
     }, [userId]);
 
-    // TODO: implementar número de dicas
-    const getTipsCount = (userId: string): number => {
-        return 0; // Placeholder
-    };
-
     const formatLocation = (address: any): string => {
         if (!address) return 'Localização desconhecida';
         const district = address.district || '';
@@ -80,6 +77,41 @@ const UserProfile: React.FC<UserProfileProps> = ({ userId }) => {
             return `${district}, ${city || state}`;
         }
         return district || city || state || 'Localização desconhecida';
+    };
+
+    const getEntityTypeIcon = (entityType: string) => {
+        switch (entityType) {
+            case 'Guide':
+                return 'book';
+            case 'Map':
+                return 'map';
+            case 'Weapon':
+                return 'local_fire_department';
+            case 'Agent':
+                return 'user';
+            default:
+                return 'message';
+        }
+    };
+
+    const formatDate = (date: Date) => {
+        const d = new Date(date);
+        return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    };
+
+    const getEntityTypeName = (entityType: string) => {
+        switch (entityType) {
+            case 'Guide':
+                return 'Guia';
+            case 'Map':
+                return 'Mapa';
+            case 'Weapon':
+                return 'Arma';
+            case 'Agent':
+                return 'Agente';
+            default:
+                return entityType;
+        }
     };
 
     if (isLoading) {
@@ -172,15 +204,32 @@ const UserProfile: React.FC<UserProfileProps> = ({ userId }) => {
                 <div className="profile-section activity-section">
                     <div className="section-title">
                         <span className="material-symbols-outlined">history</span>
-                        ATIVIDADE RECENTE
+                        DICAS RECENTES
                         <div className="title-accent"></div>
                     </div>
 
-                    <div className="no-activity">
-                        <span className="material-symbols-outlined">search_off</span>
-                        <p>Nenhuma atividade recente encontrada</p>
-                        <div className="action-hint">As contribuições do agente serão exibidas aqui</div>
-                    </div>
+                    {userComments.length === 0 ? (
+                        <div className="no-activity">
+                            <span className="material-symbols-outlined">search_off</span>
+                            <p>Nenhuma dica encontrada</p>
+                            <div className="action-hint">As dicas do usuário serão exibidas aqui</div>
+                        </div>
+                    ) : (
+                        <div className="recent-comments">
+                            {userComments.slice(0, 5).map((comment) => (
+                                <div key={comment.commentId} className="recent-comment-item">
+                                    <div className="comment-entity-type">
+                                        <span className="material-symbols-outlined">{getEntityTypeIcon(comment.entityType)}</span>
+                                        <div className="entity-badge">{getEntityTypeName(comment.entityType)}</div>
+                                    </div>
+                                    <div className="comment-content">
+                                        <div className="comment-text">{comment.commentText}</div>
+                                        <div className="comment-date">{formatDate(comment.commentDate)}</div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

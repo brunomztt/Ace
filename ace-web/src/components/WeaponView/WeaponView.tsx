@@ -2,9 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { WeaponDto } from '../../models/Weapon';
 import { SkinDto } from '../../models/Skin';
+import { CommentDto } from '../../models/Comment';
 import weaponApi from '../../utils/weaponApi';
 import skinApi from '../../utils/skinApi';
+import commentApi from '../../utils/commentApi';
+import authApi from '../../utils/authApi';
 import { dialogService } from '../Dialog/dialogService';
+import CommentForm from '../CommentForm/CommentForm';
 import './WeaponView.scss';
 
 interface WeaponViewProps {
@@ -15,9 +19,17 @@ const WeaponView: React.FC<WeaponViewProps> = ({ weaponId }) => {
     const navigate = useNavigate();
     const [weapon, setWeapon] = useState<WeaponDto | null>(null);
     const [skins, setSkins] = useState<SkinDto[]>([]);
+    const [comments, setComments] = useState<CommentDto[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isLoadingComments, setIsLoadingComments] = useState<boolean>(false);
     const [activeSkin, setActiveSkin] = useState<number>(0);
     const [activeStat, setActiveStat] = useState<'dano' | 'especificacoes'>('dano');
+    const [isModOrAdmin, setIsModOrAdmin] = useState<boolean>(false);
+
+    useEffect(() => {
+        const currentUser = authApi.getCurrentUser();
+        setIsModOrAdmin(currentUser?.roleName === 'Admin' || currentUser?.roleName === 'Moderator');
+    }, []);
 
     useEffect(() => {
         const fetchWeaponData = async () => {
@@ -30,21 +42,23 @@ const WeaponView: React.FC<WeaponViewProps> = ({ weaponId }) => {
 
                 if (weaponResponse.success && weaponResponse.data) {
                     setWeapon(weaponResponse.data);
+
+                    if (skinsResponse.success && skinsResponse.data) {
+                        const defaultSkin: SkinDto = {
+                            skinId: -1,
+                            skinName: `${weaponResponse.data?.weaponName} Padrão`,
+                            weaponId: parseInt(weaponId),
+                            skinImage: weaponResponse.data?.weaponImage,
+                            description: 'Skin padrão da arma, sem modificações visuais.',
+                            weapon: weaponResponse.data,
+                        };
+
+                        setSkins([defaultSkin, ...skinsResponse.data]);
+                    }
+
+                    fetchComments();
                 } else {
                     throw new Error(weaponResponse.message || 'Falha ao carregar dados da arma');
-                }
-
-                if (skinsResponse.success && skinsResponse.data) {
-                    const defaultSkin: SkinDto = {
-                        skinId: -1,
-                        skinName: `${weaponResponse.data?.weaponName} Padrão`,
-                        weaponId: parseInt(weaponId),
-                        skinImage: weaponResponse.data?.weaponImage,
-                        description: 'Skin padrão da arma, sem modificações visuais.',
-                        weapon: weaponResponse.data,
-                    };
-
-                    setSkins([defaultSkin, ...skinsResponse.data]);
                 }
             } catch (error: any) {
                 dialogService.error(error.message || 'Erro ao carregar arma');
@@ -54,8 +68,48 @@ const WeaponView: React.FC<WeaponViewProps> = ({ weaponId }) => {
             }
         };
 
+        const fetchComments = async () => {
+            try {
+                setIsLoadingComments(true);
+                const response = await commentApi.getCommentsByEntity('Weapon', weaponId);
+
+                if (response.success && response.data) {
+                    setComments(response.data);
+                }
+            } catch (error: any) {
+                console.error('Erro ao carregar comentários:', error);
+            } finally {
+                setIsLoadingComments(false);
+            }
+        };
+
         fetchWeaponData();
     }, [weaponId, navigate]);
+
+    const formatDate = (date: Date) => {
+        const d = new Date(date);
+        return d.toLocaleDateString('pt-BR');
+    };
+
+    const getInitials = (name: string) => {
+        return name
+            .split(' ')
+            .map((n) => n[0])
+            .join('')
+            .toUpperCase()
+            .substring(0, 2);
+    };
+
+    const handleCommentAdded = async () => {
+        try {
+            const response = await commentApi.getCommentsByEntity('Weapon', weaponId);
+            if (response.success && response.data) {
+                setComments(response.data);
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar comentários:', error);
+        }
+    };
 
     if (isLoading) {
         return (
@@ -257,6 +311,44 @@ const WeaponView: React.FC<WeaponViewProps> = ({ weaponId }) => {
                         </div>
                     </div>
                 )}
+
+                <div className="weapon-comments-section">
+                    <h2>DICAS DA MODERAÇÃO</h2>
+
+                    {isModOrAdmin && (
+                        <CommentForm entityType="Weapon" entityId={parseInt(weaponId)} onCommentAdded={handleCommentAdded} darkMode={true} />
+                    )}
+
+                    {isLoadingComments ? (
+                        <div className="comments-loading">
+                            <span className="material-symbols-outlined loading-icon">comment</span>
+                            <p>Carregando dicas...</p>
+                        </div>
+                    ) : (
+                        <div className="comments-list">
+                            {comments.length === 0 ? (
+                                <div className="no-comments">
+                                    <span className="material-symbols-outlined">info</span>
+                                    <p>Nenhuma dica disponível para esta arma.</p>
+                                    <div className="hint">Nossos moderadores ainda não adicionaram dicas para esta arma.</div>
+                                </div>
+                            ) : (
+                                comments.map((comment) => (
+                                    <div key={comment.commentId} className="comment-item">
+                                        <div className="comment-header">
+                                            <div className="comment-author">
+                                                <div className="author-avatar">{comment.author ? getInitials(comment.author.nickname) : 'AN'}</div>
+                                                <span className="author-name">{comment.author ? comment.author.nickname : 'ANÔNIMO'}</span>
+                                            </div>
+                                            <span className="comment-date">{formatDate(comment.commentDate)}</span>
+                                        </div>
+                                        <div className="comment-text">{comment.commentText}</div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    )}
+                </div>
 
                 <div className="weapon-category-info">
                     <h3>SOBRE {weapon.category?.categoryName}</h3>
