@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { GuideCreateDto, GuideType } from '../../models/Guide';
 import guideApi from '../../utils/guideApi';
 import { dialogService } from '../Dialog/dialogService';
+import authApi from '../../utils/authApi';
 import './GuideForm.scss';
 
 interface GuideFormProps {
@@ -18,6 +19,16 @@ const GuideForm: React.FC<GuideFormProps> = ({ guideId }) => {
         content: '',
         guideType: 'Other',
     });
+
+    useEffect(() => {
+        const user = authApi.getCurrentUser();
+        const isAuthorized = user?.roleName === 'Admin' || user?.roleName === 'Moderator';
+        
+        if (!isAuthorized) {
+            navigate('/');
+            dialogService.error('Acesso restrito a administradores');
+        }
+        }, [navigate]);
 
     useEffect(() => {
         if (guideId) {

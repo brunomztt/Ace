@@ -348,6 +348,11 @@ const WeaponView: React.FC<WeaponViewProps> = ({ weaponId }) => {
                             )}
                         </div>
                     )}
+
+
+                    {!isModOrAdmin && (
+                        <CommentForm entityType="Weapon" entityId={parseInt(weaponId)} onCommentAdded={handleCommentAdded} darkMode={true} />
+                    )}
                 </div>
 
                 <div className="weapon-category-info">

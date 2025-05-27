@@ -219,6 +219,10 @@ const MapView: React.FC<MapViewProps> = ({ mapId }) => {
                             )}
                         </div>
                     )}
+
+                    
+                    {!isModOrAdmin && <CommentForm entityType="Map" entityId={parseInt(mapId)} onCommentAdded={handleCommentAdded} darkMode={true} />}
+
                 </div>
             </div>
         </div>

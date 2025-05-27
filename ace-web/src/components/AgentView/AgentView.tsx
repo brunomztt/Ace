@@ -229,11 +229,13 @@ const AgentView: React.FC<AgentViewProps> = ({ agentId }) => {
                 )}
 
                 <div className="agent-comments-section">
-                    <h2>DICAS DA MODERAÇÃO</h2>
+                    <h2>DICAS DA MODERAÇÃO</h2> 
 
                     {isModOrAdmin && (
                         <CommentForm entityType="Agent" entityId={parseInt(agentId)} onCommentAdded={handleCommentAdded} darkMode={true} />
                     )}
+
+                    
 
                     {isLoadingComments ? (
                         <div className="comments-loading">
@@ -263,8 +265,16 @@ const AgentView: React.FC<AgentViewProps> = ({ agentId }) => {
                                 ))
                             )}
                         </div>
+
+                        
+                    )}
+
+
+                    {!isModOrAdmin && (
+                        <CommentForm entityType="Agent" entityId={parseInt(agentId)} onCommentAdded={handleCommentAdded} darkMode={true} />
                     )}
                 </div>
+                
             </div>
         </div>
     );

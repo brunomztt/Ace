@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { WeaponCreateDto, WeaponCategoryDto } from '../../models/Weapon';
 import weaponApi from '../../utils/weaponApi';
 import { dialogService } from '../Dialog/dialogService';
+import authApi from '../../utils/authApi';
 import './WeaponForm.scss';
 
 interface WeaponFormProps {
@@ -45,6 +46,16 @@ const WeaponForm: React.FC<WeaponFormProps> = ({ weaponId }) => {
             loadWeaponData(weaponId);
         }
     }, [weaponId]);
+
+    useEffect(() => {
+        const user = authApi.getCurrentUser();
+        const isAuthorized = user?.roleName === 'Admin' || user?.roleName === 'Moderator';
+        
+        if (!isAuthorized) {
+            navigate('/');
+            dialogService.error('Acesso restrito a administradores');
+        }
+        }, [navigate]);
 
     const loadCategories = async () => {
         try {

@@ -104,16 +104,15 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
         }
     }, []);
 
-    useEffect(() => {
+        useEffect(() => {
         const user = authApi.getCurrentUser();
+        console.log('Dados do usuário atual:', user); // <<< VERIFIQUE AQUI
         if (user) {
             setUserData(user);
             setIsAdmin(user.roleName === 'Admin');
-            if (user.profilePic) {
-                setProfileImage(user.profilePic);
-            }
+            setProfileImage(user.profilePic || DEFAULT_PROFILE_IMAGE);
         }
-    }, []);
+        }, []);
 
     useEffect(() => {
         const handleStorageChange = () => {

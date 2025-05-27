@@ -84,7 +84,7 @@ public class CommentService : ICommentService
                                   "VALUES (@entityType, @entityId, @userId, @commentText, @commentDate); " +
                                   "SELECT LAST_INSERT_ID();";
 
-            var entityTypeParam = command.CreateParameter();\
+            var entityTypeParam = command.CreateParameter();
             entityTypeParam.ParameterName = "@entityType";
             entityTypeParam.Value = commentDto.EntityType;
             command.Parameters.Add(entityTypeParam);

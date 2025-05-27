@@ -27,6 +27,8 @@ const GuideView: React.FC<GuideViewProps> = ({ guideId }) => {
     useEffect(() => {
         const currentUser = authApi.getCurrentUser();
         setIsModOrAdmin(currentUser?.roleName === 'Admin' || currentUser?.roleName === 'Moderator');
+
+        
     }, []);
 
     useEffect(() => {

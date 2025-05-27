@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MapCreateDto } from '../../models/Map';
 import mapApi from '../../utils/mapApi';
 import { dialogService } from '../Dialog/dialogService';
+import authApi from '../../utils/authApi';
 import './MapForm.scss';
 
 interface MapFormProps {
@@ -27,6 +28,16 @@ const MapForm: React.FC<MapFormProps> = ({ mapId }) => {
             loadMapData(mapId);
         }
     }, [mapId]);
+
+    useEffect(() => {
+        const user = authApi.getCurrentUser();
+        const isAuthorized = user?.roleName === 'Admin' || user?.roleName === 'Moderator';
+        
+        if (!isAuthorized) {
+            navigate('/');
+            dialogService.error('Acesso restrito a administradores');
+        }
+        }, [navigate]);
 
     const loadMapData = async (id: string) => {
         setIsLoading(true);

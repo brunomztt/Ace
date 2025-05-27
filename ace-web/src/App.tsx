@@ -10,7 +10,7 @@ import Sidebar from './components/Sidebar/Sidebar';
 import authApi from './utils/authApi';
 import useSessionTimeout from './hooks/useSessionTimeout';
 import './App.scss';
-import { BrowserRouter as Router, Routes, Route, useNavigate, useParams, Outlet } from 'react-router-dom';
+import { MemoryRouter as Router, Routes, Route, useNavigate, useParams, Outlet } from 'react-router-dom';
 import UserSettings from './components/UserSettings/UserSettings';
 import UserProfile from './components/UserProfile/UserProfile';
 import AdminPanel from './components/AdminPanel/AdminPanel';

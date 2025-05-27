@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AgentCreateDto, AgentVideoDto } from '../../models/Agent';
 import agentApi from '../../utils/agentApi';
 import { dialogService } from '../Dialog/dialogService';
+import authApi from '../../utils/authApi';
 import './AgentForm.scss';
 
 interface AgentFormProps {
@@ -37,6 +38,16 @@ const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
             loadAgentData(agentId);
         }
     }, [agentId]);
+
+    useEffect(() => {
+        const user = authApi.getCurrentUser();
+        const isAuthorized = user?.roleName === 'Admin' || user?.roleName === 'Moderator';
+        
+        if (!isAuthorized) {
+            navigate('/');
+            dialogService.error('Acesso restrito a administradores');
+        }
+        }, [navigate]);
 
     const loadAgentData = async (id: string) => {
         setIsLoading(true);
