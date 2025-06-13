@@ -3,12 +3,22 @@ import { useNavigate } from 'react-router-dom';
 import mapApi from '../../utils/mapApi';
 import { MapDto } from '../../models/Map';
 import './MapListing.scss';
+import authApi from '../../utils/authApi';
+import { dialogService } from '../Dialog/dialogService';
 
 const MapListing: React.FC = () => {
     const [maps, setMaps] = useState<MapDto[]>([]);
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const currentUser = authApi.getCurrentUser();
+        if (!currentUser) {
+            navigate('/');
+            dialogService.error('Acesso restrito a usuários autenticados');
+        }
+    }, [navigate]);
 
     useEffect(() => {
         const fetchData = async () => {

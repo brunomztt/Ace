@@ -14,7 +14,7 @@ import { AgentDto } from '../../models/Agent';
 import { GuideDto } from '../../models/Guide';
 import { MapDto } from '../../models/Map';
 import { SkinDto } from '../../models/Skin';
-import { WeaponCategoryDto, WeaponDto } from '../../models/Weapon';
+import { WeaponDto } from '../../models/Weapon';
 
 type Tab = 'users' | 'agents' | 'weapons' | 'guides' | 'maps' | 'skins';
 

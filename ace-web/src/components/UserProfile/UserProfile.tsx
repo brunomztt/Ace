@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { userApi } from '../../utils/userApi';
+import commentApi from '../../utils/commentApi';
+import authApi from '../../utils/authApi';
 import { dialogService } from '../Dialog/dialogService';
 import { UserDto } from '../../models/User';
 import { CommentDto } from '../../models/Comment';
 import './UserProfile.scss';
+import { useNavigate } from 'react-router-dom';
 
 interface UserProfileProps {
     userId: string;
@@ -33,6 +36,18 @@ const UserProfile: React.FC<UserProfileProps> = ({ userId }) => {
         location: '',
         tipsCount: 0,
     });
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const currentUser = authApi.getCurrentUser();
+        if (!currentUser) {
+            navigate('/');
+            dialogService.error('Acesso restrito a usuários autenticados');
+        }
+    }, [navigate]);
+
+    const currentUser = authApi.getCurrentUser();
+    const isOwnProfile = currentUser?.userId.toString() === userId;
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -42,9 +57,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ userId }) => {
                 if (response.success && response.data) {
                     const user: UserDto = response.data;
                     console.log(user);
-                    const comments = user.comments || [];
 
-                    setUserComments(comments);
                     setUserData({
                         firstName: user.firstName || '',
                         lastName: user.lastName || '',
@@ -54,8 +67,15 @@ const UserProfile: React.FC<UserProfileProps> = ({ userId }) => {
                         profilePic: user.profilePic || null,
                         bannerImg: user.bannerImg || null,
                         location: formatLocation(user.address),
-                        tipsCount: comments.length,
+                        tipsCount: 0,
                     });
+                }
+
+                const commentsResponse = await commentApi.getUserComments(userId);
+                if (commentsResponse.success && commentsResponse.data) {
+                    setUserComments(commentsResponse.data);
+                    const approvedCount = commentsResponse.data.filter((c: CommentDto) => c.status === 'approved').length;
+                    setUserData((prev) => ({ ...prev, tipsCount: approvedCount }));
                 }
             } catch (error: any) {
                 dialogService.error(error.message || 'Erro ao carregar informações do usuário');
@@ -88,7 +108,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ userId }) => {
             case 'Weapon':
                 return 'local_fire_department';
             case 'Agent':
-                return 'user';
+                return 'groups';
             default:
                 return 'message';
         }
@@ -112,6 +132,16 @@ const UserProfile: React.FC<UserProfileProps> = ({ userId }) => {
             default:
                 return entityType;
         }
+    };
+
+    const getCommentStatusBadge = (comment: CommentDto) => {
+        if (comment.status === 'pending') {
+            return <span className="status-badge pending">Aguardando aprovação</span>;
+        }
+        if (comment.status === 'rejected' && isOwnProfile) {
+            return <span className="status-badge rejected">Rejeitado</span>;
+        }
+        return null;
     };
 
     if (isLoading) {
@@ -161,8 +191,14 @@ const UserProfile: React.FC<UserProfileProps> = ({ userId }) => {
                 <div className="profile-stats">
                     <div className="stat-card">
                         <div className="stat-value">{userData.tipsCount}</div>
-                        <div className="stat-label">DICAS</div>
+                        <div className="stat-label">DICAS APROVADAS</div>
                     </div>
+                    {isOwnProfile && userComments.length > userData.tipsCount && (
+                        <div className="stat-card">
+                            <div className="stat-value">{userComments.length}</div>
+                            <div className="stat-label">TOTAL DE DICAS</div>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -217,14 +253,21 @@ const UserProfile: React.FC<UserProfileProps> = ({ userId }) => {
                     ) : (
                         <div className="recent-comments">
                             {userComments.slice(0, 5).map((comment) => (
-                                <div key={comment.commentId} className="recent-comment-item">
+                                <div key={comment.commentId} className={`recent-comment-item ${comment.status}`}>
                                     <div className="comment-entity-type">
                                         <span className="material-symbols-outlined">{getEntityTypeIcon(comment.entityType)}</span>
                                         <div className="entity-badge">{getEntityTypeName(comment.entityType)}</div>
+                                        {getCommentStatusBadge(comment)}
                                     </div>
                                     <div className="comment-content">
                                         <div className="comment-text">{comment.commentText}</div>
                                         <div className="comment-date">{formatDate(comment.commentDate)}</div>
+                                        {comment.status === 'rejected' && comment.rejectedReason && isOwnProfile && (
+                                            <div className="rejection-reason">
+                                                <span className="material-symbols-outlined">info</span>
+                                                Motivo: {comment.rejectedReason}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ))}

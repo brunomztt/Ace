@@ -15,10 +15,11 @@ enum NavigationButton {
     WEAPONS = 2,
     MAPS = 3,
     GUIDES = 4,
-    ADMIN_PANEL = 5,
-    PROFILE = 6,
-    SETTINGS = 7,
-    LOGOUT = 8,
+    COMMENT_MODERATION = 5,
+    ADMIN_PANEL = 6,
+    PROFILE = 7,
+    SETTINGS = 8,
+    LOGOUT = 9,
 }
 
 const BUTTON_LABELS = {
@@ -27,6 +28,7 @@ const BUTTON_LABELS = {
     [NavigationButton.WEAPONS]: 'Armas',
     [NavigationButton.MAPS]: 'Mapas',
     [NavigationButton.GUIDES]: 'Guias',
+    [NavigationButton.COMMENT_MODERATION]: 'Dicas',
     [NavigationButton.ADMIN_PANEL]: 'Painel Admin',
     [NavigationButton.PROFILE]: 'Perfil',
     [NavigationButton.SETTINGS]: 'Configurações',
@@ -39,6 +41,7 @@ const BUTTON_ICONS = {
     [NavigationButton.WEAPONS]: 'local_fire_department',
     [NavigationButton.MAPS]: 'map',
     [NavigationButton.GUIDES]: 'book',
+    [NavigationButton.COMMENT_MODERATION]: 'rate_review',
     [NavigationButton.ADMIN_PANEL]: 'admin_panel_settings',
     [NavigationButton.PROFILE]: '', // Profile uses pfp
     [NavigationButton.SETTINGS]: 'settings',
@@ -54,6 +57,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
     const [activeButton, setActiveButton] = useState<NavigationButton>(NavigationButton.GUIDES);
     const [userData, setUserData] = useState<IUser | null>(null);
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
+    const [isModerator, setIsModerator] = useState<boolean>(false);
     const [profileImage, setProfileImage] = useState<string>(DEFAULT_PROFILE_IMAGE);
     const [isDesktop, setIsDesktop] = useState<boolean>(window.innerWidth >= DESKTOP_WIDTH);
 
@@ -104,15 +108,16 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
         }
     }, []);
 
-        useEffect(() => {
+    useEffect(() => {
         const user = authApi.getCurrentUser();
-        console.log('Dados do usuário atual:', user); // <<< VERIFIQUE AQUI
+        console.log('Dados do usuário atual:', user);
         if (user) {
             setUserData(user);
             setIsAdmin(user.roleName === 'Admin');
+            setIsModerator(user.roleName === 'Moderator' || user.roleName === 'Admin');
             setProfileImage(user.profilePic || DEFAULT_PROFILE_IMAGE);
         }
-        }, []);
+    }, []);
 
     useEffect(() => {
         const handleStorageChange = () => {
@@ -121,6 +126,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
                 setProfileImage(user.profilePic || DEFAULT_PROFILE_IMAGE);
                 setUserData(user);
                 setIsAdmin(user.roleName === 'Admin');
+                setIsModerator(user.roleName === 'Moderator' || user.roleName === 'Admin');
             }
         };
 
@@ -175,6 +181,9 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
                 break;
             case NavigationButton.MAPS:
                 navigate('/map/list');
+                break;
+            case NavigationButton.COMMENT_MODERATION:
+                navigate('/moderation');
                 break;
             case NavigationButton.ADMIN_PANEL:
                 navigate(`/admin`);
@@ -250,6 +259,12 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
                                     BUTTON_ICONS[NavigationButton.MAPS],
                                     BUTTON_LABELS[NavigationButton.MAPS]
                                 )}
+                                {isModerator &&
+                                    renderNavigationButton(
+                                        NavigationButton.COMMENT_MODERATION,
+                                        BUTTON_ICONS[NavigationButton.COMMENT_MODERATION],
+                                        BUTTON_LABELS[NavigationButton.COMMENT_MODERATION]
+                                    )}
                                 {isAdmin &&
                                     renderNavigationButton(
                                         NavigationButton.ADMIN_PANEL,

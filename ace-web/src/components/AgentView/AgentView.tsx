@@ -8,6 +8,7 @@ import authApi from '../../utils/authApi';
 import { dialogService } from '../Dialog/dialogService';
 import CommentForm from '../CommentForm/CommentForm';
 import './AgentView.scss';
+import CommentItem from '../CommentItem/CommentItem';
 
 interface AgentViewProps {
     agentId: string;
@@ -25,8 +26,13 @@ const AgentView: React.FC<AgentViewProps> = ({ agentId }) => {
 
     useEffect(() => {
         const currentUser = authApi.getCurrentUser();
+        if (!currentUser) {
+            navigate('/');
+            dialogService.error('Acesso restrito a usuários autenticados');
+            return;
+        }
         setIsModOrAdmin(currentUser?.roleName === 'Admin' || currentUser?.roleName === 'Moderator');
-    }, []);
+    }, [navigate]);
 
     useEffect(() => {
         const fetchAgent = async () => {
@@ -229,18 +235,16 @@ const AgentView: React.FC<AgentViewProps> = ({ agentId }) => {
                 )}
 
                 <div className="agent-comments-section">
-                    <h2>DICAS DA MODERAÇÃO</h2> 
+                    <h2>DICAS VERIFICADAS</h2>
 
-                    {isModOrAdmin && (
-                        <CommentForm entityType="Agent" entityId={parseInt(agentId)} onCommentAdded={handleCommentAdded} darkMode={true} />
-                    )}
-
-                    
+                    <CommentForm entityType="Agent" entityId={parseInt(agentId)} onCommentAdded={handleCommentAdded} />
 
                     {isLoadingComments ? (
                         <div className="comments-loading">
-                            <span className="material-symbols-outlined loading-icon">comment</span>
-                            <p>Carregando dicas...</p>
+                            <div className="loading-icon">
+                                <span className="material-symbols-outlined">comment</span>
+                            </div>
+                            <div className="loading-text">Carregando dicas...</div>
                         </div>
                     ) : (
                         <div className="comments-list">
@@ -248,33 +252,16 @@ const AgentView: React.FC<AgentViewProps> = ({ agentId }) => {
                                 <div className="no-comments">
                                     <span className="material-symbols-outlined">info</span>
                                     <p>Nenhuma dica disponível para este agente.</p>
-                                    <div className="hint">Nossos moderadores ainda não adicionaram dicas para este agente.</div>
+                                    <div className="hint">{'Seja o primeiro a adicionar uma dica!'}</div>
                                 </div>
                             ) : (
                                 comments.map((comment) => (
-                                    <div key={comment.commentId} className="comment-item">
-                                        <div className="comment-header">
-                                            <div className="comment-author">
-                                                <div className="author-avatar">{comment.author ? getInitials(comment.author.nickname) : 'AN'}</div>
-                                                <span className="author-name">{comment.author ? comment.author.nickname : 'ANÔNIMO'}</span>
-                                            </div>
-                                            <span className="comment-date">{formatDate(comment.commentDate)}</span>
-                                        </div>
-                                        <div className="comment-text">{comment.commentText}</div>
-                                    </div>
+                                    <CommentItem key={comment.commentId} comment={comment} onCommentUpdated={handleCommentAdded} />
                                 ))
                             )}
                         </div>
-
-                        
-                    )}
-
-
-                    {!isModOrAdmin && (
-                        <CommentForm entityType="Agent" entityId={parseInt(agentId)} onCommentAdded={handleCommentAdded} darkMode={true} />
                     )}
                 </div>
-                
             </div>
         </div>
     );

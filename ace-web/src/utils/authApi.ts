@@ -41,6 +41,10 @@ export const authApi = {
         return !!localStorage.getItem('token');
     },
 
+    getAuthToken: () => {
+        return localStorage.getItem('token');
+    },
+
     updateUserData: (userData: Partial<UserDto>) => {
         const currentUserStr = localStorage.getItem('user');
         if (currentUserStr) {

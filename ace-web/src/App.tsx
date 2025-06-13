@@ -10,7 +10,7 @@ import Sidebar from './components/Sidebar/Sidebar';
 import authApi from './utils/authApi';
 import useSessionTimeout from './hooks/useSessionTimeout';
 import './App.scss';
-import { MemoryRouter as Router, Routes, Route, useNavigate, useParams, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useParams, Outlet } from 'react-router-dom';
 import UserSettings from './components/UserSettings/UserSettings';
 import UserProfile from './components/UserProfile/UserProfile';
 import AdminPanel from './components/AdminPanel/AdminPanel';
@@ -27,6 +27,7 @@ import AgentView from './components/AgentView/AgentView';
 import WeaponView from './components/WeaponView/WeaponView';
 import MapView from './components/MapView/MapView';
 import GuideView from './components/GuideView/GuideView';
+import CommentModeration from './components/CommentModeration/CommentModeration';
 
 gsap.registerPlugin(CustomEase);
 
@@ -296,6 +297,7 @@ const App: React.FC = () => {
                         <Route path="/guide/edit/:guideId" element={<GuideEditWrapper />} />
                         <Route path="/skin" element={<SkinForm />} />
                         <Route path="/skin/edit/:skinId" element={<SkinEditWrapper />} />
+                        <Route path="/moderation" element={<CommentModeration />} />
                     </Route>
                 </Routes>
             </DialogProvider>

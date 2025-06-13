@@ -25,6 +25,4 @@ public class Guide
     [Column("created_at")] public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     [ForeignKey("UserId")] public virtual User? User { get; set; }
-
-    public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 }

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import weaponApi from '../../utils/weaponApi';
 import { WeaponDto, WeaponCategoryDto } from '../../models/Weapon';
 import './WeaponListing.scss';
+import authApi from '../../utils/authApi';
+import { dialogService } from '../Dialog/dialogService';
 
 const WeaponListing: React.FC = () => {
     const [weapons, setWeapons] = useState<WeaponDto[]>([]);
@@ -11,6 +13,14 @@ const WeaponListing: React.FC = () => {
     const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const currentUser = authApi.getCurrentUser();
+        if (!currentUser) {
+            navigate('/');
+            dialogService.error('Acesso restrito a usuários autenticados');
+        }
+    }, [navigate]);
 
     useEffect(() => {
         const fetchData = async () => {

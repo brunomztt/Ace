@@ -1,5 +1,4 @@
 import { IUser } from './User';
-import { IComment } from './Comment';
 
 export type GuideType = 'Agent' | 'Map' | 'Weapon' | 'Other';
 
@@ -11,7 +10,6 @@ export interface IGuide {
     guideType: GuideType;
     createdAt: Date;
     user?: IUser;
-    comments?: IComment[];
 }
 
 export interface UserSummaryDto {

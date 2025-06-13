@@ -8,6 +8,7 @@ import authApi from '../../utils/authApi';
 import { dialogService } from '../Dialog/dialogService';
 import CommentForm from '../CommentForm/CommentForm';
 import './MapView.scss';
+import CommentItem from '../CommentItem/CommentItem';
 
 interface MapViewProps {
     mapId: string;
@@ -23,6 +24,11 @@ const MapView: React.FC<MapViewProps> = ({ mapId }) => {
 
     useEffect(() => {
         const currentUser = authApi.getCurrentUser();
+        if (!currentUser) {
+            navigate('/');
+            dialogService.error('Acesso restrito a usuários autenticados');
+            return;
+        }
         setIsModOrAdmin(currentUser?.roleName === 'Admin' || currentUser?.roleName === 'Moderator');
     }, []);
 
@@ -182,11 +188,11 @@ const MapView: React.FC<MapViewProps> = ({ mapId }) => {
 
                 <div className="map-comments-section">
                     <div className="section-heading">
-                        <h2>DICAS DA MODERAÇÃO</h2>
+                        <h2>DICAS VERIFICADAS</h2>
                         <div className="section-heading-accent"></div>
                     </div>
 
-                    {isModOrAdmin && <CommentForm entityType="Map" entityId={parseInt(mapId)} onCommentAdded={handleCommentAdded} darkMode={true} />}
+                    <CommentForm entityType="Map" entityId={parseInt(mapId)} onCommentAdded={handleCommentAdded} />
 
                     {isLoadingComments ? (
                         <div className="comments-loading">
@@ -201,28 +207,15 @@ const MapView: React.FC<MapViewProps> = ({ mapId }) => {
                                 <div className="no-comments">
                                     <span className="material-symbols-outlined">info</span>
                                     <p>Nenhuma dica disponível para este mapa.</p>
-                                    <div className="hint">Nossos moderadores ainda não adicionaram dicas para este mapa.</div>
+                                    <div className="hint">{'Seja o primeiro a adicionar uma dica!'}</div>
                                 </div>
                             ) : (
                                 comments.map((comment) => (
-                                    <div key={comment.commentId} className="comment-item">
-                                        <div className="comment-header">
-                                            <div className="comment-author">
-                                                <div className="author-avatar">{comment.author ? getInitials(comment.author.nickname) : 'AN'}</div>
-                                                <span className="author-name">{comment.author ? comment.author.nickname : 'ANÔNIMO'}</span>
-                                            </div>
-                                            <span className="comment-date">{formatDate(comment.commentDate)}</span>
-                                        </div>
-                                        <div className="comment-text">{comment.commentText}</div>
-                                    </div>
+                                    <CommentItem key={comment.commentId} comment={comment} onCommentUpdated={handleCommentAdded} />
                                 ))
                             )}
                         </div>
                     )}
-
-                    
-                    {!isModOrAdmin && <CommentForm entityType="Map" entityId={parseInt(mapId)} onCommentAdded={handleCommentAdded} darkMode={true} />}
-
                 </div>
             </div>
         </div>

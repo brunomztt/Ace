@@ -18,5 +18,20 @@ public class Comment
 
     [Column("comment_date")] public DateTime CommentDate { get; set; } = DateTime.UtcNow;
 
+    [Column("status")] 
+    [Required] 
+    [StringLength(20)] 
+    public string Status { get; set; } = "approved";
+
+    [Column("rejected_reason")] 
+    [StringLength(255)] 
+    public string? RejectedReason { get; set; }
+
+    [Column("reviewed_by")] public int? ReviewedBy { get; set; }
+
+    [Column("reviewed_at")] public DateTime? ReviewedAt { get; set; }
+
     [ForeignKey("UserId")] public virtual User? User { get; set; }
+
+    [ForeignKey("ReviewedBy")] public virtual User? Reviewer { get; set; }
 }

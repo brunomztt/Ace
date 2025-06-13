@@ -1,6 +1,5 @@
 using ace_api.Data;
 using ace_api.DTOs;
-using ace_api.Models;
 using ace_api.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,7 +14,7 @@ public class CommentService : ICommentService
         _context = context;
     }
 
-    public async Task<ApiResponse<List<CommentDto>>> GetCommentsByEntityAsync(string entityType, int entityId)
+    public async Task<ApiResponse<List<CommentDto>>> GetCommentsByEntityAsync(string entityType, int entityId, int? userId = null, string? userRole = null)
     {
         var entityExists = false;
 
@@ -42,9 +41,25 @@ public class CommentService : ICommentService
             return ApiResponse<List<CommentDto>>.ErrorResponse($"{entityType} não encontrado");
         }
 
-        var comments = await _context.Comments
+        var query = _context.Comments
             .Include(c => c.User)
-            .Where(c => c.EntityType == entityType && c.EntityId == entityId)
+            .Include(c => c.Reviewer)
+            .Where(c => c.EntityType == entityType && c.EntityId == entityId);
+
+        if (userRole is "Admin" or "Moderator")
+        {
+            // Moderadores e admins veem todos os comentários
+        }
+        else if (userId.HasValue)
+        {
+            query = query.Where(c => c.Status == "approved" || c.UserId == userId);
+        }
+        else
+        {
+            query = query.Where(c => c.Status == "approved");
+        }
+
+        var comments = await query
             .OrderByDescending(c => c.CommentDate)
             .Select(c => new CommentDto
             {
@@ -53,11 +68,65 @@ public class CommentService : ICommentService
                 EntityId = c.EntityId,
                 CommentText = c.CommentText,
                 CommentDate = c.CommentDate,
+                Status = c.Status,
+                RejectedReason = c.RejectedReason,
+                ReviewedAt = c.ReviewedAt,
                 Author = c.User != null
                     ? new UserSummaryDto
                     {
                         UserId = c.User.UserId,
                         Nickname = c.User.Nickname
+                    }
+                    : null,
+                Reviewer = c.Reviewer != null
+                    ? new UserSummaryDto
+                    {
+                        UserId = c.Reviewer.UserId,
+                        Nickname = c.Reviewer.Nickname
+                    }
+                    : null
+            })
+            .ToListAsync();
+
+        return ApiResponse<List<CommentDto>>.SuccessResponse(comments);
+    }
+
+    public async Task<ApiResponse<List<CommentDto>>> GetUserCommentsAsync(int userId, int? requestingUserId = null, string? requestingUserRole = null)
+    {
+        var query = _context.Comments
+            .Include(c => c.User)
+            .Include(c => c.Reviewer)
+            .Where(c => c.UserId == userId);
+
+        if (requestingUserId != userId && requestingUserRole != "Admin" && requestingUserRole != "Moderator")
+        {
+            query = query.Where(c => c.Status == "approved");
+        }
+
+        var comments = await query
+            .OrderByDescending(c => c.CommentDate)
+            .Select(c => new CommentDto
+            {
+                CommentId = c.CommentId,
+                EntityType = c.EntityType,
+                EntityId = c.EntityId,
+                CommentText = c.CommentText,
+                CommentDate = c.CommentDate,
+                Status = c.Status,
+                RejectedReason = c.RejectedReason,
+                ReviewedAt = c.ReviewedAt,
+                Author = c.User != null
+                    ? new UserSummaryDto
+                    {
+                        UserId = c.User.UserId,
+                        Nickname = c.User.Nickname
+                    }
+                    : null,
+                Reviewer = c.Reviewer != null
+                    ? new UserSummaryDto
+                    {
+                        UserId = c.Reviewer.UserId,
+                        Nickname = c.Reviewer.Nickname
                     }
                     : null
             })
@@ -68,20 +137,26 @@ public class CommentService : ICommentService
 
     public async Task<ApiResponse<CommentDto>> AddCommentAsync(int userId, CommentCreateDto commentDto)
     {
-        var user = await _context.Users.FindAsync(userId);
+        var user = await _context.Users
+            .Include(u => u.Role)
+            .FirstOrDefaultAsync(u => u.UserId == userId);
+            
         if (user == null)
         {
             return ApiResponse<CommentDto>.ErrorResponse("Usuário não encontrado");
         }
 
-        // Inserção SQL direta para evitar problemas com o Entity Framework
+        var initialStatus = (user.Role?.RoleName == "Admin" || user.Role?.RoleName == "Moderator") 
+            ? "approved" 
+            : "pending";
+
         var commentDate = DateTime.UtcNow;
         var commentId = 0;
 
         await using (var command = _context.Database.GetDbConnection().CreateCommand())
         {
-            command.CommandText = "INSERT INTO comment (entity_type, entity_id, user_id, comment_text, comment_date) " +
-                                  "VALUES (@entityType, @entityId, @userId, @commentText, @commentDate); " +
+            command.CommandText = "INSERT INTO comment (entity_type, entity_id, user_id, comment_text, comment_date, status) " +
+                                  "VALUES (@entityType, @entityId, @userId, @commentText, @commentDate, @status); " +
                                   "SELECT LAST_INSERT_ID();";
 
             var entityTypeParam = command.CreateParameter();
@@ -109,6 +184,11 @@ public class CommentService : ICommentService
             commentDateParam.Value = commentDate;
             command.Parameters.Add(commentDateParam);
 
+            var statusParam = command.CreateParameter();
+            statusParam.ParameterName = "@status";
+            statusParam.Value = initialStatus;
+            command.Parameters.Add(statusParam);
+
             await _context.Database.OpenConnectionAsync();
             try
             {
@@ -121,6 +201,10 @@ public class CommentService : ICommentService
             }
         }
 
+        var message = initialStatus == "pending" 
+            ? "Comentário enviado para aprovação" 
+            : "Comentário adicionado com sucesso";
+
         return ApiResponse<CommentDto>.SuccessResponse(new CommentDto
         {
             CommentId = commentId,
@@ -128,12 +212,13 @@ public class CommentService : ICommentService
             EntityId = commentDto.EntityId,
             CommentText = commentDto.CommentText,
             CommentDate = commentDate,
+            Status = initialStatus,
             Author = new UserSummaryDto
             {
                 UserId = user.UserId,
                 Nickname = user.Nickname
             }
-        }, "Comentário adicionado com sucesso");
+        }, message);
     }
 
     public async Task<ApiResponse<bool>> DeleteCommentAsync(int commentId, int userId)
@@ -157,5 +242,84 @@ public class CommentService : ICommentService
         await _context.SaveChangesAsync();
 
         return ApiResponse<bool>.SuccessResponse(true, "Comentário excluído com sucesso");
+    }
+
+    public async Task<ApiResponse<CommentDto>> ReviewCommentAsync(int commentId, int reviewerId, CommentReviewDto reviewDto)
+    {
+        var comment = await _context.Comments
+            .Include(c => c.User)
+            .FirstOrDefaultAsync(c => c.CommentId == commentId);
+            
+        if (comment == null)
+        {
+            return ApiResponse<CommentDto>.ErrorResponse("Comentário não encontrado");
+        }
+
+        if (comment.Status != "pending")
+        {
+            return ApiResponse<CommentDto>.ErrorResponse("Este comentário já foi revisado");
+        }
+
+        comment.Status = reviewDto.Approve ? "approved" : "rejected";
+        comment.RejectedReason = reviewDto.Approve ? null : reviewDto.RejectedReason;
+        comment.ReviewedBy = reviewerId;
+        comment.ReviewedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        var reviewer = await _context.Users.FindAsync(reviewerId);
+
+        return ApiResponse<CommentDto>.SuccessResponse(new CommentDto
+        {
+            CommentId = comment.CommentId,
+            EntityType = comment.EntityType,
+            EntityId = comment.EntityId,
+            CommentText = comment.CommentText,
+            CommentDate = comment.CommentDate,
+            Status = comment.Status,
+            RejectedReason = comment.RejectedReason,
+            ReviewedAt = comment.ReviewedAt,
+            Author = comment.User != null
+                ? new UserSummaryDto
+                {
+                    UserId = comment.User.UserId,
+                    Nickname = comment.User.Nickname
+                }
+                : null,
+            Reviewer = reviewer != null
+                ? new UserSummaryDto
+                {
+                    UserId = reviewer.UserId,
+                    Nickname = reviewer.Nickname
+                }
+                : null
+        }, reviewDto.Approve ? "Comentário aprovado" : "Comentário rejeitado");
+    }
+
+    public async Task<ApiResponse<List<CommentDto>>> GetPendingCommentsAsync()
+    {
+        var comments = await _context.Comments
+            .Include(c => c.User)
+            .Where(c => c.Status == "pending")
+            .OrderBy(c => c.CommentDate)
+            .Select(c => new CommentDto
+            {
+                CommentId = c.CommentId,
+                EntityType = c.EntityType,
+                EntityId = c.EntityId,
+                CommentText = c.CommentText,
+                CommentDate = c.CommentDate,
+                Status = c.Status,
+                Author = c.User != null
+                    ? new UserSummaryDto
+                    {
+                        UserId = c.User.UserId,
+                        Nickname = c.User.Nickname
+                    }
+                    : null
+            })
+            .ToListAsync();
+
+        return ApiResponse<List<CommentDto>>.SuccessResponse(comments);
     }
 }

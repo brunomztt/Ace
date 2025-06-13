@@ -154,4 +154,11 @@ CREATE TABLE comment (
   CONSTRAINT comment_ibfk_1 FOREIGN KEY (user_id) REFERENCES user (user_id)
 );
 
--- Inserções de dados estão em db_backup.sql
+ALTER TABLE comment 
+ADD COLUMN `status` ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'approved' AFTER comment_date,
+ADD COLUMN rejected_reason VARCHAR(255) DEFAULT NULL AFTER status,
+ADD COLUMN reviewed_by INT DEFAULT NULL AFTER rejected_reason,
+ADD COLUMN reviewed_at TIMESTAMP NULL DEFAULT NULL AFTER reviewed_by,
+ADD CONSTRAINT comment_ibfk_2 FOREIGN KEY (reviewed_by) REFERENCES user (user_id);
+
+UPDATE comment SET `status` = 'approved';

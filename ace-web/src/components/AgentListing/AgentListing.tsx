@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import agentApi from '../../utils/agentApi';
 import { AgentDto } from '../../models/Agent';
 import './AgentListing.scss';
+import authApi from '../../utils/authApi';
+import { dialogService } from '../Dialog/dialogService';
 
 const AgentListing: React.FC = () => {
     const [agents, setAgents] = useState<AgentDto[]>([]);
@@ -10,6 +12,14 @@ const AgentListing: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState<string>('');
     const carouselRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const currentUser = authApi.getCurrentUser();
+        if (!currentUser) {
+            navigate('/');
+            dialogService.error('Acesso restrito a usuários autenticados');
+        }
+    }, [navigate]);
 
     useEffect(() => {
         const fetchAgents = async () => {

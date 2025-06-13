@@ -3,16 +3,14 @@ import { CommentCreateDto } from '../../models/Comment';
 import commentApi from '../../utils/commentApi';
 import { dialogService } from '../Dialog/dialogService';
 import './CommentForm.scss';
-import authApi from '../../utils/authApi';
 
 interface CommentFormProps {
     entityType: string;
     entityId: number;
     onCommentAdded: () => void;
-    darkMode?: boolean;
 }
 
-const CommentForm: React.FC<CommentFormProps> = ({ entityType, entityId, onCommentAdded, darkMode = false }) => {
+const CommentForm: React.FC<CommentFormProps> = ({ entityType, entityId, onCommentAdded }) => {
     const [commentText, setCommentText] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
@@ -50,7 +48,7 @@ const CommentForm: React.FC<CommentFormProps> = ({ entityType, entityId, onComme
     };
 
     return (
-        <div className={`comment-form-container ${darkMode ? 'dark-mode' : ''}`}>
+        <div className={`comment-form-container dark-mode`}>
             <h3 className="form-title">ADICIONAR DICA</h3>
             <form onSubmit={handleSubmit}>
                 <textarea

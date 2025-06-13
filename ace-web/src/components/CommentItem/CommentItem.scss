@@ -1,0 +1,255 @@
+@use '../../styles/variables' as *;
+
+.comment-item {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    border-left: 3px solid $primary-color;
+    position: relative;
+    transition: all 0.3s ease;
+
+    &.pending {
+        border-left-color: #ffa500;
+        background: rgba(255, 165, 0, 0.05);
+    }
+
+    &.rejected {
+        border-left-color: #dc3545;
+        background: rgba(220, 53, 69, 0.05);
+    }
+
+    &::before,
+    &::after {
+        content: '';
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-color: rgba($primary-color, 0.6);
+        border-style: solid;
+        border-width: 0;
+    }
+
+    &::before {
+        top: 5px;
+        left: 5px;
+        border-top-width: 1px;
+        border-left-width: 1px;
+    }
+
+    &::after {
+        bottom: 5px;
+        right: 5px;
+        border-bottom-width: 1px;
+        border-right-width: 1px;
+    }
+
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+
+        .comment-author {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            .author-avatar {
+                width: 32px;
+                height: 32px;
+                border-radius: 0;
+                background-color: rgba($primary-color, 0.2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                font-size: 14px;
+                color: $light-color;
+                text-transform: uppercase;
+            }
+
+            .author-name {
+                font-weight: 600;
+                font-size: 16px;
+                color: rgba($primary-color, 0.9);
+            }
+
+            .status-badge {
+                padding: 2px 8px;
+                font-size: 12px;
+                font-weight: bold;
+                text-transform: uppercase;
+
+                &.pending {
+                    background: rgba(255, 165, 0, 0.2);
+                    color: #ffa500;
+                    border: 1px solid #ffa500;
+                }
+
+                &.rejected {
+                    background: rgba(220, 53, 69, 0.2);
+                    color: #dc3545;
+                    border: 1px solid #dc3545;
+                }
+            }
+        }
+
+        .comment-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            .comment-date {
+                font-size: 14px;
+                color: rgba(255, 255, 255, 0.5);
+            }
+
+            .delete-button {
+                background: none;
+                border: none;
+                color: rgba(255, 255, 255, 0.5);
+                cursor: pointer;
+                padding: 4px;
+                transition: color 0.2s;
+
+                &:hover {
+                    color: #dc3545;
+                }
+
+                .material-symbols-outlined {
+                    font-size: 20px;
+                }
+            }
+        }
+    }
+
+    .comment-text {
+        font-size: 16px;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .rejection-reason {
+        margin-top: 10px;
+        padding: 10px;
+        background: rgba(220, 53, 69, 0.1);
+        border: 1px solid rgba(220, 53, 69, 0.3);
+        color: #ff6b6b;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+
+        .material-symbols-outlined {
+            font-size: 18px;
+        }
+    }
+
+    .moderation-actions {
+        margin-top: 15px;
+        display: flex;
+        gap: 10px;
+
+        button {
+            padding: 6px 16px;
+            border: none;
+            font-family: $rajdhani-font;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+
+            .material-symbols-outlined {
+                font-size: 18px;
+            }
+
+            &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+
+            &.approve-button {
+                background: #28a745;
+                color: white;
+
+                &:hover:not(:disabled) {
+                    background: #218838;
+                    transform: translateY(-1px);
+                }
+            }
+
+            &.reject-button {
+                background: #dc3545;
+                color: white;
+
+                &:hover:not(:disabled) {
+                    background: #c82333;
+                    transform: translateY(-1px);
+                }
+            }
+        }
+    }
+
+    .reject-reason-form {
+        margin-top: 15px;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 15px;
+        border: 1px solid rgba(220, 53, 69, 0.3);
+
+        textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: $light-color;
+            padding: 10px;
+            font-family: $rajdhani-font;
+            font-size: 14px;
+            resize: none;
+
+            &:focus {
+                outline: none;
+                border-color: rgba($primary-color, 0.6);
+            }
+        }
+
+        .reject-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+
+            button {
+                padding: 6px 16px;
+                border: none;
+                font-family: $rajdhani-font;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.2s;
+
+                &:first-child {
+                    background: #6c757d;
+                    color: white;
+
+                    &:hover {
+                        background: #5a6268;
+                    }
+                }
+
+                &:last-child {
+                    background: #dc3545;
+                    color: white;
+
+                    &:hover:not(:disabled) {
+                        background: #c82333;
+                    }
+
+                    &:disabled {
+                        opacity: 0.6;
+                        cursor: not-allowed;
+                    }
+                }
+            }
+        }
+    }
+}

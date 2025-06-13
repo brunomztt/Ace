@@ -49,13 +49,19 @@ const WeaponForm: React.FC<WeaponFormProps> = ({ weaponId }) => {
 
     useEffect(() => {
         const user = authApi.getCurrentUser();
+        if (!user) {
+            navigate('/');
+            dialogService.error('Acesso restrito a usuários autenticados');
+            return;
+        }
+
         const isAuthorized = user?.roleName === 'Admin' || user?.roleName === 'Moderator';
-        
+
         if (!isAuthorized) {
             navigate('/');
             dialogService.error('Acesso restrito a administradores');
         }
-        }, [navigate]);
+    }, [navigate]);
 
     const loadCategories = async () => {
         try {

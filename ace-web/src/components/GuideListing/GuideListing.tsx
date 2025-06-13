@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import guideApi from '../../utils/guideApi';
 import { GuideDto, GuideType } from '../../models/Guide';
 import './GuideListing.scss';
+import authApi from '../../utils/authApi';
+import { dialogService } from '../Dialog/dialogService';
 
 const GuideListing: React.FC = () => {
     const [guides, setGuides] = useState<GuideDto[]>([]);
@@ -10,6 +12,14 @@ const GuideListing: React.FC = () => {
     const [selectedType, setSelectedType] = useState<string>('All');
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const currentUser = authApi.getCurrentUser();
+        if (!currentUser) {
+            navigate('/');
+            dialogService.error('Acesso restrito a usuários autenticados');
+        }
+    }, [navigate]);
 
     useEffect(() => {
         const fetchData = async () => {

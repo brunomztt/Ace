@@ -6,6 +6,7 @@ import skinApi from '../../utils/skinApi';
 import weaponApi from '../../utils/weaponApi';
 import { dialogService } from '../Dialog/dialogService';
 import './SkinForm.scss';
+import authApi from '../../utils/authApi';
 
 interface SkinFormProps {
     skinId?: string;
@@ -23,6 +24,14 @@ const SkinForm: React.FC<SkinFormProps> = ({ skinId }) => {
         description: '',
         skinImage: undefined,
     });
+
+    useEffect(() => {
+        const currentUser = authApi.getCurrentUser();
+        if (!currentUser) {
+            navigate('/');
+            dialogService.error('Acesso restrito a usuários autenticados');
+        }
+    }, [navigate]);
 
     useEffect(() => {
         fetchWeapons();

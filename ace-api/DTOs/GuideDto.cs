@@ -8,5 +8,4 @@ public class GuideDto
     public string GuideType { get; set; } = null!;
     public DateTime CreatedAt { get; set; }
     public UserSummaryDto? Author { get; set; }
-    public List<CommentDto>? Comments { get; set; }
 }
