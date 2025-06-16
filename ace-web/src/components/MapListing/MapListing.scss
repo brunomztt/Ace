@@ -1,4 +1,4 @@
-@use '../../styles/variables' as *;
+@use '../../styles/variables' as *;More actions
 
 .mapListingContainer {
     width: 100%;
@@ -247,8 +247,8 @@
 
 .searchContainer {
     position: absolute;
-    top: 20px;
-    right: 40px;
+    top: -15px;
+    right: 35px;
     z-index: 10;
 
     @media (max-width: $tablet) {

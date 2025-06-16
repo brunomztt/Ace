@@ -64,7 +64,7 @@
     width: 100%;
     min-height: 100vh;
     padding: 60px 40px 40px 260px;
-    background-color: #0f1923;
+    background: $darkdg-bg;
     color: $light-color;
     display: flex;
     flex-direction: column;
@@ -161,7 +161,7 @@
 
     .agent-profile {
         display: flex;
-        background: rgba(15, 25, 35, 0.8);
+        background: rgb(15, 15, 15);
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 0;
@@ -665,7 +665,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #0f1923;
+    background: $darkdg-bg;
     position: relative;
     overflow: hidden;
 
@@ -768,7 +768,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #0f1923;
+    background: $darkdg-bg;
     position: relative;
     overflow: hidden;
 
